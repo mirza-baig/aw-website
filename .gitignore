@@ -1,0 +1,59 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# testing
+/coverage
+/test-results
+
+# next.js
+/.next*/
+/out/
+next-env.d.ts
+
+# graphql code generation
+/.generated
+*.graphql.d.ts
+*.graphqls.d.ts
+
+# misc
+.DS_Store
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+*.log*
+
+# sitecore
+scjssconfig.json
+*.deploysecret.config
+
+# vercel
+.vercel
+
+# sitecore temp files
+.sitecore/*
+!.sitecore/.gitkeep
+# except for component-map
+# !.sitecore/component-map.ts
+# !.sitecore/import-map.ts
+
+# sonarqube
+.sonar/
+.scannerwork/
+.sonar_lock
+combined.log
+error.log
+
+# storybook
+storybook-static/
+*storybook.log
+
+# typescript
+*.tsbuildinfo
+
+# visual studio
+.vs/

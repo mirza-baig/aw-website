@@ -1,0 +1,40 @@
+parameters:
+  vercelProdUrl: ''
+
+steps:
+  - task: Cache@2
+    inputs:
+      key: 'npm | "$(Agent.OS)" | package-lock.json'
+      restoreKeys: |
+        npm | "$(Agent.OS)"
+      path: $(npm_config_cache)
+    displayName: Cache npm
+
+  - task: NodeTool@0
+    displayName: Install Node
+    inputs:
+      versionSource: 'fromFile'
+      versionFilePath: '$(Build.SourcesDirectory)/.nvmrc'
+
+  - task: PowerShell@2
+    displayName: Install Vercel CLI
+    inputs:
+      targetType: inline
+      script: |
+        npm i -g vercel
+
+  - task: PowerShell@2
+    displayName: Promote to Production
+    inputs:
+      targetType: inline
+      script: |
+        Write-Host "Promoting deployment $(Vercel.DeployUrl) to production..."
+        vercel promote $(Vercel.DeployUrl) --yes --scope $(Vercel.Scope) --token $(Keys.Vercel.token)
+
+### Pause until domains get configured
+# Perform Health Check - frontend
+# - task: PowerShell@2
+#   displayName: Perform Health Check
+#   inputs:
+#     filePath: ./azure-pipelines/deploy/SiteHealthCheck.ps1
+#     arguments: -Url https://${{ parameters.vercelProdUrl }}/

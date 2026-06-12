@@ -1,0 +1,12 @@
+# Our Checks
+echo "Running pre-commit checks 🔎"
+
+# Run prettier and lintng
+case `uname` in
+  *CYGWIN*|*MINGW*|*MSYS*)
+    npm.cmd run pre-commit
+  ;;
+  *)
+    npm run pre-commit
+  ;;
+esac

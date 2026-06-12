@@ -1,0 +1,32 @@
+.react-tabs {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.react-tabs__tab {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.react-tabs__tab--disabled {
+  cursor: default;
+}
+
+.react-tabs__tab-panel {
+  display: none;
+}
+
+.react-tabs__tab-panel--selected {
+  display: block;
+}
+
+.react-tabs .slick-track {
+  display: flex;
+}
+
+  .react-tabs .slick-track:before, .slick-track:after {
+    content: none;
+  }
+
+  .react-tabs .slick-track .slick-slide > div {
+    height: 100%;
+  }

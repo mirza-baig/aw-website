@@ -1,0 +1,88 @@
+.sliderWrapper :global(.before-after-slider .before-after-slider__delimiter) {
+  width: 4px;
+}
+
+.sliderWrapper :global(.before-after-slider-range) {
+  width: 100%;
+  max-width: 265px;
+  height: 1px;
+  background-color: var(--color-gray);
+  transition: 0.3s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.sliderWrapper :global(.before-after-slider-range::-webkit-slider-thumb) {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 48px;
+  height: 24px;
+  border-radius: 100px;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+.sliderWrapper :global(.before-after-slider-range::-moz-range-thumb) {
+  width: 48px;
+  height: 24px;
+  border-radius: 100px;
+  background-color: var(--color-primary);
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+.sliderWrapper :global(.aw .before-after-slider-range::-webkit-slider-thumb) {
+  background-image: url('/before-after-slider-arrow-aw.svg');
+  background-color: var(--color-primary);
+}
+
+.sliderWrapper :global(.rba .before-after-slider-range::-webkit-slider-thumb) {
+  background-image: url('/before-after-slider-arrow-rba.svg');
+  background-color: var(--color-black);
+}
+
+.sliderWrapper :global(.before-after-slider__first-photo-container) {
+  position: relative;
+}
+
+.sliderWrapper :global(.aw .before-after-slider__first-photo-container:after) {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 100%;
+}
+
+.sliderWrapper :global(.rba .before-after-slider__first-photo-container:after) {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.25rem;
+}
+
+.sliderWrapper :global(.aw .before-after-slider__second-photo-container:after) {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 100%;
+}
+
+.sliderWrapper :global(.rba .before-after-slider__second-photo-container:after) {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.25rem;
+}

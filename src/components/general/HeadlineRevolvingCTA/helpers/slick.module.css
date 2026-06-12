@@ -1,0 +1,550 @@
+/* Slider */
+.sliderWrapper :global(.slick-slider) {
+  position: relative;
+
+  display: block;
+  box-sizing: border-box;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -webkit-touch-callout: none;
+  -khtml-user-select: none;
+  -ms-touch-action: pan-y;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sliderWrapper :global(.slick-list) {
+  position: relative;
+
+  display: block;
+  overflow: hidden;
+
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Component specific overrides: ButtonCard component
+Reason: added bottom padding to handle scale and drop-shadow issue with slicks overflow hidden property for buttonCard component inside slider
+ */
+ .sliderWrapper :global(.slick-list:has(div[data-component='card/buttoncard'])){
+ padding-bottom: 36px;
+ margin-bottom: -30px;
+}
+
+
+.sliderWrapper :global(.slick-list:focus) {
+  outline: none;
+}
+
+.sliderWrapper :global(.slick-list.dragging) {
+  cursor: pointer;
+  cursor: hand;
+}
+
+.sliderWrapper :global(.slick-track:before) {
+  display: table;
+
+  content: '';
+}
+
+.sliderWrapper :global(.slick-track:after) {
+  display: table;
+
+  content: '';
+   clear: both;
+}
+
+.sliderWrapper :global(.slick-loading .slick-track) {
+  visibility: hidden;
+}
+
+.sliderWrapper :global(.slick-slide) {
+  display: none;
+  float: left;
+
+  height: 100%;
+  min-height: 1px;
+}
+
+.sliderWrapper :global(.slick-slide > div) {
+  height: 100%;
+  width: 100%;
+}
+
+.sliderWrapper :global([dir='rtl'] .slick-slide) {
+  float: right;
+}
+
+.sliderWrapper :global(.slick-slide img) {
+  display: block;
+}
+
+.sliderWrapper :global(.slick-slide.slick-loading img) {
+  display: none;
+}
+
+.sliderWrapper :global(.slick-slide.dragging img) {
+  pointer-events: none;
+}
+
+.sliderWrapper :global(.slick-initialized .slick-slide) {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.sliderWrapper :global(.slick-vertical .slick-slide) {
+  display: block;
+
+  height: auto;
+
+  border: 1px solid transparent;
+}
+
+.sliderWrapper :global(.slick-arrow.slick-hidden) {
+  display: none;
+}
+
+/* To prevent flickering effect on initial slide change */
+.sliderWrapper :global(.slick-slider .slick-track) {
+-webkit-transform: translate3d(0, 0, 0);
+-moz-transform: translate3d(0, 0, 0);
+-ms-transform: translate3d(0, 0, 0);
+-o-transform: translate3d(0, 0, 0);
+transform: translate3d(0, 0, 0);
+transition-delay: 10ms;
+}
+
+.sliderWrapper :global(.slick-slider .slick-list) {
+-webkit-transform: translate3d(0, 0, 0);
+-moz-transform: translate3d(0, 0, 0);
+-ms-transform: translate3d(0, 0, 0);
+-o-transform: translate3d(0, 0, 0);
+transform: translate3d(0, 0, 0);
+transition-delay: 10ms;
+}
+
+.sliderWrapper :global(.slick-loading .slick-slide) {
+  visibility: hidden;
+}
+
+.sliderWrapper :global(.slick-track) {
+  position: relative;
+  display: block;
+  top: 0;
+  left: 0;
+  height: auto !important;
+}
+
+.sliderWrapper :global(.fadeInUp) {
+  animation-name: fadeInUp;
+  animation-duration: 1.6s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 100%, 0);
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.sliderWrapper :global(.icon) {
+  appearance: none;
+  width: 42px;
+  height: 42px;
+  margin: 0 0 0 16px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  color: var(--color-black);
+  cursor: pointer;
+  opacity: 0;
+  -webkit-transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sliderWrapper :global(.slick-active.slick-current .icon) {
+  position: relative;
+  opacity: 1;
+}
+
+.sliderWrapper :global(.icon)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.sliderWrapper :global(.icon)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.sliderWrapper :global(.slick-active.slick-current .icon)::before {
+  border: 4px solid transparent;
+  -webkit-animation: encircle-before linear 0.4s forwards 0.2s;
+  animation: encircle-before linear 0.4s forwards 0.2s;
+}
+
+@keyframes encircle-before {
+  0% {
+    border: 4px solid transparent;
+  }
+  20% {
+    border-top-color: #f26924;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+  }
+  50% {
+    border-top-color: #f26924;
+    border-right-color: #f26924;
+    border-bottom-color: transparent;
+  }
+  75% {
+    border-top-color: #f26924;
+    border-right-color: #f26924;
+    border-bottom-color: #f26924;
+  }
+  100% {
+    border-top-color: #f26924;
+    border-right-color: #f26924;
+    border-bottom-color: #f26924;
+  }
+}
+
+.sliderWrapper :global(.slick-active.slick-current .icon)::after {
+  border: 0 solid transparent;
+  -webkit-animation: encircle-after linear 0.4s forwards 0.2s;
+  animation: encircle-after linear 0.4s forwards 0.2s;
+}
+
+@keyframes encircle-after {
+  0% {
+    border: 4px solid transparent;
+    border-top: 4px solid;
+    border-top-color: #f26924;
+    border-right-width: 4px;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+  100% {
+    border-top: 4px solid;
+    border-top-color: #f26924;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    -webkit-transform: rotate(315deg);
+    transform: rotate(315deg);
+    -webkit-transition: border-left-width linear, -webkit-transform linear;
+    transition: border-left-width linear, -webkit-transform linear;
+    transition: transform linear, border-left-width linear;
+    transition: transform linear, border-left-width linear, -webkit-transform linear;
+  }
+}
+
+.sliderWrapper :global(.title) {
+  color: var(--color-light-gray);
+  -webkit-animation-duration: 1.4s;
+  animation-duration: 1.4s;
+}
+
+.sliderWrapper :global(.slick-active.slick-current .title) {
+  color: var(--color-primary);
+  -webkit-animation-duration: 1.4s;
+  animation-duration: 1.4s;
+}
+
+.sliderWrapper :global(.slider-wrapper:hover .slick-active .icon) {
+  opacity: 0;
+}
+
+.sliderWrapper :global(.slider-wrapper:hover .slick-active .title) {
+  color: var(--color-light-gray);
+}
+
+.sliderWrapper :global(.slick-slide:hover .icon) {
+  background: var(--color-primary);
+  color: #fff;
+  opacity: 1 !important;
+}
+
+.sliderWrapper :global(.slick-active:hover .icon) {
+  background: var(--color-primary);
+  color: #fff;
+  opacity: 1 !important;
+}
+
+.sliderWrapper :global(.slick-slide:hover .title) {
+  color: var(--color-primary) !important;
+}
+
+.sliderWrapper :global(.slick-active:hover .title) {
+  color: var(--color-primary) !important;
+}
+
+@media only screen and (min-width: 960px) {
+  .sliderWrapper :global(.setgap) {
+    padding: 58px 0 138px 0 !important;
+  }
+}
+
+.sliderWrapper :global(.slick-prev:hover) {
+  background: transparent;
+}
+
+.sliderWrapper :global(.slick-prev:focus) {
+  background: transparent;
+}
+
+.sliderWrapper :global(.slick-next:hover) {
+  background: transparent;
+}
+
+.sliderWrapper :global(.slick-next:focus) {
+  background: transparent;
+}
+
+.sliderWrapper :global(.slick-prev:hover:before) {
+  opacity: 1;
+}
+
+.sliderWrapper :global(.slick-prev:focus:before) {
+  opacity: 1;
+}
+
+.sliderWrapper :global(.slick-next:hover:before) {
+  opacity: 1;
+}
+
+.sliderWrapper :global(.slick-next:focus:before) {
+  opacity: 1;
+}
+
+.sliderWrapper :global(.slick-prev.slick-disabled:before) {
+  opacity: 0.25;
+}
+
+.sliderWrapper :global(.slick-next.slick-disabled:before) {
+  opacity: 0.25;
+}
+
+.sliderWrapper :global(.slick-prev:before) {
+  font-family: 'slick', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+
+  opacity: 0.75;
+  color: white;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sliderWrapper :global(.slick-next:before) {
+  font-family: 'slick', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+
+  opacity: 0.75;
+  color: white;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sliderWrapper :global([dir='rtl'] .slick-prev) {
+  right: -25px;
+  left: auto;
+}
+
+.sliderWrapper :global([dir='rtl'] .slick-next) {
+  right: auto;
+  left: -25px;
+}
+
+/* Dots */
+.sliderWrapper :global(.slick-dotted.slick-slider) {
+  margin-bottom: 30px;
+}
+
+.sliderWrapper :global(.slick-dots) {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  margin: 16px 0;
+  list-style: none;
+  text-align: center;
+}
+
+.sliderWrapper :global(.slick-dots li) {
+  position: relative;
+
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 6px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sliderWrapper :global(.slick-dots li button) {
+  font-size: 0;
+  line-height: 0;
+  display: block;
+  width: 8px;
+  height: 8px;
+  padding: 5px;
+  cursor: pointer;
+
+  color: transparent;
+  border: 0;
+  outline: none;
+  background: transparent;
+}
+
+.sliderWrapper :global(.slick-dots li button:hover) {
+  outline: none;
+}
+
+.sliderWrapper :global(.slick-dots li button:focus) {
+  outline: none;
+}
+
+.sliderWrapper :global(.slick-dots li button:hover:before) {
+  opacity: 1;
+}
+
+.sliderWrapper :global(.slick-dots li button:focus:before) {
+  opacity: 1;
+}
+
+.sliderWrapper :global(.slick-dots li button:before) {
+  font-family: 'slick', sans-serif;
+  font-size: 30px;
+  line-height: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 8px;
+  height: 8px;
+
+  content: '•';
+  text-align: center;
+
+  opacity: 1;
+  color: #d9d9d9;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sliderWrapper :global(.slick-dots li.slick-active button:before) {
+  opacity: 1;
+  color: #000000;
+}
+
+.sliderWrapper :global(.slick-disabled) {
+  display: none !important;
+}
+
+/* slider stylings for aw and rba themes */
+.sliderWrapper :global(.theme-black li button:before) {
+  color: #686869;
+}
+
+/* Styling for dots */
+.sliderWrapper :global(.theme-black li.slick-active button:before) {
+  color: #ffffff;
+}
+
+/* Styling for custom paging numbers */
+.sliderWrapper :global(.theme-black li) {
+  color: #ffffff;
+}
+
+.sliderWrapper :global(.slick-prev) {
+  font-size: 0;
+  line-height: 0;
+  position: absolute;
+  display: block;
+  padding: 0;
+  cursor: pointer;
+  color: transparent;
+  border: none;
+  background: transparent;
+  z-index: 9;
+  left: -16px;
+
+  bottom: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+
+.sliderWrapper :global(.slick-next) {
+  font-size: 0;
+  line-height: 0;
+  position: absolute;
+  display: block;
+  padding: 0;
+  cursor: pointer;
+  color: transparent;
+  border: none;
+  background: transparent;
+  z-index: 9;
+
+  bottom: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+
+   right: -16px;
+}
+
+@media only screen and (max-width: 672px) {
+  .sliderWrapper :global(.slick-next) {
+    right: -20px;
+    padding-right: 0;
+  }
+
+  .sliderWrapper :global(.slick-prev) {
+    left: -20px;
+    padding-left: 0;
+  }
+}

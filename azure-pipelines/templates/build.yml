@@ -1,0 +1,117 @@
+steps:
+  - checkout: self
+    fetchDepth: variables['fetchDepth']
+  - checkout: xmcloud
+    persistCredentials: true
+
+  - task: PowerShell@2
+    displayName: Switch XM Cloud Branch
+    condition: and(succeeded(), ne(variables['Xmc.Branch'], 'main'))
+    inputs:
+      targetType: inline
+      script: |
+        git fetch --all
+        git switch $(Xmc.Branch)
+      workingDirectory: $(Build.SourcesDirectory)/xmcloud
+
+  - task: SonarQubePrepare@7
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'true'))
+    inputs:
+      SonarQube: 'SonarQube'
+      scannerMode: 'CLI'
+      configMode: 'file'
+      cliProjectVersion: $(Build.BuildNumber)
+      configFile: $(Build.SourcesDirectory)/aw-website/sonar-project.properties
+      extraProperties: |
+        sonar.projectBaseDir=$(Build.SourcesDirectory)/aw-website
+
+  - task: Cache@2
+    inputs:
+      key: 'npm | "$(Agent.OS)" | $(Build.SourcesDirectory)/aw-website/package-lock.json | $(Build.SourcesDirectory)/xmcloud/package-lock.json'
+      restoreKeys: |
+        npm | "$(Agent.OS)"
+      path: $(npm_config_cache)
+    displayName: Cache npm
+
+  - task: Cache@2
+    displayName: 'Cache .next/cache'
+    inputs:
+      key: 'next | "$(Agent.OS)" | $(Build.SourcesDirectory)/aw-website/package-lock.json'
+      path: '$(Build.SourcesDirectory)/aw-website/.next/cache'
+
+  - task: NodeTool@0
+    displayName: Install Node
+    inputs:
+      versionSource: 'fromFile'
+      versionFilePath: '$(Build.SourcesDirectory)/aw-website/.nvmrc'
+
+  - task: PowerShell@2
+    displayName: Install Vercel CLI
+    inputs:
+      targetType: inline
+      script: |
+        npm i -g vercel
+
+  - task: PowerShell@2
+    displayName: Restore NPM packages (xmcloud)
+    inputs:
+      targetType: inline
+      script: |
+        npm install --ci
+      workingDirectory: $(Build.SourcesDirectory)/xmcloud
+
+  - task: PowerShell@2
+    displayName: Restore DotNet CLI tools (xmcloud)
+    inputs:
+      targetType: inline
+      script: |
+        dotnet tool restore
+      workingDirectory: $(Build.SourcesDirectory)/xmcloud
+
+  - task: PowerShell@2
+    displayName: Restore NPM packages
+    inputs:
+      targetType: inline
+      script: |
+        npm install --ci
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PowerShell@2
+    displayName: Run build
+    env:
+      GENERATE_STATIC_PATHS: false
+    inputs:
+      targetType: inline
+      script: |
+        npm run build
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PowerShell@2
+    displayName: Run tests
+    inputs:
+      targetType: inline
+      script: |
+        npm run test:ci
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PublishTestResults@2
+    displayName: Publish test results
+    inputs:
+      testResultsFiles: $(Build.SourcesDirectory)/aw-website/test-results/junit.xml
+      testRunTitle: Front End Tests
+      condition: succeededOrFailed()
+
+  - task: PublishCodeCoverageResults@2
+    displayName: Publish code coverage results
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: $(Build.SourcesDirectory)/aw-website/coverage/cobertura-coverage.xml
+      condition: succeededOrFailed()
+
+  - task: SonarQubeAnalyze@7
+    condition: and(succeededOrFailed(), eq(variables['RunSonarQube'], 'true'))
+
+  - task: SonarQubePublish@7
+    inputs:
+      pollingTimeoutSec: '300'
+    condition: and(succeededOrFailed(), eq(variables['RunSonarQube'], 'true'))

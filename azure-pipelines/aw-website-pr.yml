@@ -1,0 +1,223 @@
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)-pr
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+  - repository: xmcloud
+    type: git
+    name: xmcloud
+
+variables:
+  - group: Keys - Vercel
+  - name: Vercel.Scope
+    value: andersen-corporation
+  - name: Vercel.SetAliases
+    value: ${{ true }}
+  - name: Vercel.SkipDomain
+    value: ${{ false }}
+  - name: npm_config_cache
+    value: $(Pipeline.Workspace)/.npm
+  - name: AW_XM_CLOUD_REPO_PATH
+    value: $(Build.SourcesDirectory)/xmcloud
+  - name: SITECORE_EDGE_CONTEXT_ID
+    value:
+  - name: fetchDepth
+    value: 0
+
+stages:
+  - stage: GetParameters
+    jobs:
+      - job: GetParameters
+        displayName: 'Get PR Parameters'
+        steps:
+          - task: PowerShell@2
+            name: GetParameters
+            displayName: Get PR Parameters
+            inputs:
+              targetType: inline
+              script: |
+                # Call the Azure DevOps Services Rest API.
+                $url = "https://dev.azure.com/andersencorp/EnterpriseWeb/_apis/git/repositories/$(Build.Repository.ID)/pullRequests/$(System.PullRequest.PullRequestId)?api-version=7.0"
+
+                $headers = @{
+                  Authorization = "Bearer $(System.AccessToken)"
+                }
+                $pullRequestInfo = Invoke-RestMethod -Uri $url -Method 'GET' -ContentType 'application/json' -Headers $headers
+
+                # Get PR title and description from the json response.
+                $json = $($pullRequestInfo | ConvertTo-Json -Depth 100 | ConvertFrom-Json)
+                Write-Host "##[group]PR JSON"
+                Write-Host $json
+                Write-Host "##[endgroup]"
+
+                $title = $json.title
+                Write-Host "PR Title: $title"
+
+                if ($title -notmatch '^(EW|AWEB)-\d+:.*') {
+                  Write-Host "##vso[task.logissue type=error;]Incorrectly formatted PR title, expected format 'EW-XYZ:...' or 'AWEB-XYZ:...', found '$title'"
+                  Write-Host "##vso[task.complete result=Failed;]"
+                  exit 1
+                }
+
+                $match = Select-String -Pattern '(EW|AWEB)-\d+' -InputObject $title
+
+                $jiraId = $match.Matches.Value.ToLower()
+                $urlPrefix = $jiraId
+                Write-Host "Jira Id: $jiraId"
+                Write-Host "##vso[task.setvariable variable=jiraId;isOutput=true]$jiraId"
+
+                # Default to UAT environment
+                $environment = "uat"
+
+                if ($title -match '\[sc=.+?\]') {
+                  $match = Select-String -Pattern '\[sc=(.+?)\]' -InputObject $title
+                  $directive = $match.Matches.Groups[1].Value.ToLower()
+                  $value = $match.Matches.Groups[1].Value.ToLower()
+
+                  Write-Host "Sitecore Environment Directive: $value"
+
+                  if ($value -ne 'dev') {
+                    Write-Host "##vso[task.logissue type=error;]Invalid Sitecore environment, expected 'dev', found '$value'"
+                    Write-Host "##vso[task.complete result=Failed;]"
+                    exit 1
+                  }
+
+                  $environment = $value
+                }
+                Write-Host "##vso[task.setvariable variable=Vercel.Environment;isOutput=true]$environment"
+
+                if ($title -match '\[debug=.+?\]') {
+                  $match = Select-String -Pattern '\[debug=(.+?)\]' -InputObject $title
+                  $directive = $match.Matches.Groups[1].Value.ToLower()
+                  $value = $match.Matches.Groups[1].Value.ToLower()
+
+                  Write-Host "Debug Directive: $value"
+                  Write-Host "##vso[task.setvariable variable=Directive.Debug;isOutput=true]$value"
+                }
+
+                if ($title -match '\[url=.+?\]') {
+                  $match = Select-String -Pattern '\[url=(.+?)\]' -InputObject $title
+                  $directive = $match.Matches.Groups[1].Value.ToLower()
+                  $value = $match.Matches.Groups[1].Value.ToLower()
+
+                  Write-Host "Url Directive: $value"
+                  Write-Host "##vso[task.setvariable variable=Directives.Url;isOutput=true]$value"
+
+                  Write-Host "Overriding URL prefix for deployment alias..."
+                  $urlPrefix = $value
+                }
+
+                if ($title -match '\[xmcbranch=.+?\]') {
+                  $match = Select-String -Pattern '\[xmcbranch=(.+?)\]' -InputObject $title
+                  $directive = $match.Matches.Groups[1].Value.ToLower()
+                  $value = $match.Matches.Groups[1].Value
+
+                  Write-Host "XMC Branch Directive: $value"
+                  Write-Host "##vso[task.setvariable variable=Directive.Xmc.Branch;isOutput=true]$value"
+                } else {
+                  Write-Host "Defaulting XMC Branch Directive to 'main'"
+                  Write-Host "##vso[task.setvariable variable=Directive.Xmc.Branch;isOutput=true]main"
+                }
+
+                if (($jiraId -eq 'ew-0') -and ($urlPrefix -eq 'ew-0')) {
+                  Write-Host "##vso[task.logissue type=error;]EW-0 PRs must include a Url directive: [url=prefix]"
+                  Write-Host "##vso[task.complete result=Failed;]"
+                  exit 1
+                }
+
+                # $urlPreview = "pr-$(Build.SourceBranchName).preview.$environment"
+                # $urlWww = "pr-$(Build.SourceBranchName).www.$environment"
+                $urlPreview = "$urlPrefix.preview.$environment"
+                $urlWww = "$urlPrefix.www.$environment"
+                Write-Host "URL Preview Prefix: $urlPreview"
+                Write-Host "URL WWW Prefix: $urlWww"
+                Write-Host "##vso[task.setvariable variable=Url.Preview;isOutput=true]$urlPreview"
+                Write-Host "##vso[task.setvariable variable=Url.Www;isOutput=true]$urlWww"
+
+  - stage: Build
+    dependsOn: GetParameters
+    variables:
+    # - ${{ if eq($[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ], 'dev') }}:
+    #   - group: EdgeContext - Dev - Preview
+    # - ${{ if eq($[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ], 'uat') }}:
+      - group: EdgeContext - UAT - Preview
+      - name: Xmc.Branch
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Xmc.Branch'] ]
+      - name: RunSonarQube
+        value: true
+    jobs:
+      - job: Build
+        displayName: 'Build and Test'
+        steps:
+          - template: templates\build.yml
+
+  - stage: VercelDeployPreview
+    dependsOn:
+      - GetParameters
+      - Build
+    displayName: 'Vercel Deploy Preview'
+    variables:
+    # - ${{ if eq($[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ], 'dev') }}:
+    #   - group: EdgeContext - Dev - Preview
+    # - ${{ if eq($[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ], 'uat') }}:
+      - group: EdgeContext - UAT - Preview
+      - name: Vercel.Environment
+        value: 'preview'
+      - name: Sitecore.Environment
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ]
+      - name: urlPrefix
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Url.Preview'] ]
+      - name: Directive.Debug
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Debug'] ]
+      - name: Vercel.Project
+        value: 'aw-website-preview'
+      - name: Xmc.Branch
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Xmc.Branch'] ]
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel Preview
+        environment: AW-Website-Preview
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: VercelDeployWWW
+    dependsOn:
+      - GetParameters
+      - Build
+    displayName: 'Vercel Deploy WWW'
+    variables:
+    # - ${{ if eq($[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ], 'dev') }}:
+    #   - group: EdgeContext - Dev - WWW
+    # - ${{ if eq($[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ], 'uat') }}:
+      - group: EdgeContext - UAT - WWW
+      - name: Vercel.Environment
+        value: 'preview'
+      - name: Sitecore.Environment
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ]
+      - name: urlPrefix
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Url.Www'] ]
+      - name: Directive.Sitecore
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Sitecore'] ]
+      - name: Directive.Debug
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Debug'] ]
+      - name: Vercel.Project
+        value: 'aw-website-www'
+      - name: Xmc.Branch
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Xmc.Branch'] ]
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel WWW
+        environment: aw-website-preview
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml

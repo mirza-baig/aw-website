@@ -1,0 +1,20 @@
+export type ResultsData = {
+  storeId: string;
+  name: string;
+  affiliateBusinessName: string;
+  phoneNumber: string;
+  headlineText: string;
+  subHeadlineText: string;
+  offerDetails: string;
+  legalDisclaimer: string;
+  offerStartDate: string;
+  offerEndDate: string;
+  showroomAddress: string;
+  city: string;
+  state: string;
+  zip: string;
+  reviewRating: string;
+  reviewTotal: string;
+  ppcTrackingPhoneNumber: string;
+  ctaUrl: string;
+};

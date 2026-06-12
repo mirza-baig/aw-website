@@ -1,0 +1,226 @@
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
+
+trigger:
+- release/*
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+  - repository: xmcloud
+    type: git
+    name: xmcloud
+
+variables:
+  - group: Keys - MetaLocator
+  - group: Keys - Vercel
+  - name: Directive.Debug
+    value: ''
+  - name: Vercel.Environment
+    value: production
+  - name: Vercel.Scope
+    value: andersen-corporation
+  - name: Vercel.SetAliases
+    value: ${{ false }}
+  - name: Vercel.SkipDomain
+    value: ${{ false }}
+  - name: npm_config_cache
+    value: $(Pipeline.Workspace)/.npm
+  - name: vercelEnvironment
+    value: production
+  - name: AW_XM_CLOUD_REPO_PATH
+    value: $(Build.SourcesDirectory)/xmcloud
+  - name: SITECORE_EDGE_CONTEXT_ID
+    value:
+  - name: Xmc.Branch
+    value: main
+  - name: fetchDepth
+    value: 1
+
+stages:
+  - stage: Queue
+    jobs:
+      - deployment: Queue
+        environment: aw-website-release-queue
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Starting pipeline execution."
+
+  - stage: Build
+    dependsOn: Queue
+    variables:
+      - group: EdgeContext - UAT - Preview
+    jobs:
+      - job: Build
+        displayName: 'Build and Test'
+        steps:
+          - template: templates\build.yml
+
+  - stage: DeployUatPreview
+    dependsOn: Build
+    displayName: 'Deploy UAT Preview'
+    variables:
+      - group: EdgeContext - UAT - Preview
+      - name: urlPrefix
+        value: 'preview.uat'
+      - name: Vercel.Environment
+        value: uat
+      - name: Vercel.Project
+        value: 'aw-website-preview'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel Preview
+        environment: aw-website-uat
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: DeployUatWWW
+    dependsOn: Build
+    displayName: 'Deploy UAT WWW'
+    variables:
+      - group: EdgeContext - UAT - WWW
+      - name: urlPrefix
+        value: 'www.uat'
+      - name: Vercel.Environment
+        value: uat
+      - name: Vercel.Project
+        value: 'aw-website-www'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel WWW
+        environment: aw-website-uat
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: DeployStagingPreview
+    dependsOn:
+      - DeployUatPreview
+      - DeployUatWWW
+    displayName: 'Deploy Staging Preview'
+    variables:
+      - group: EdgeContext - Prod - Preview
+      - name: urlPrefix
+        value: 'preview.stage'
+      - name: Vercel.SetAliases
+        value: ${{ true }}
+      - name: Vercel.SkipDomain
+        value: ${{ true }}
+      - name: Vercel.Project
+        value: 'aw-website-preview'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel Preview
+        environment: aw-website-staging
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: DeployStagingWWW
+    dependsOn:
+      - DeployUatPreview
+      - DeployUatWWW
+    displayName: 'Deploy Staging WWW'
+    variables:
+      - group: EdgeContext - Prod - WWW
+      - name: urlPrefix
+        value: 'www.stage'
+      - name: Vercel.SetAliases
+        value: ${{ true }}
+      - name: Vercel.SkipDomain
+        value: ${{ true }}
+      - name: Vercel.Project
+        value: 'aw-website-www'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel WWW
+        environment: aw-website-staging
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: PromoteProductionPreview
+    dependsOn: DeployStagingPreview
+    displayName: 'Promote Preview to Production'
+    variables:
+      - name: Vercel.DeployUrl
+        value: $[ stageDependencies.DeployStagingPreview.DeployVercel.outputs['DeployVercel.DeployVercel.deployUrl'] ]
+    jobs:
+      - deployment: PromoteVercel
+        displayName: Promote Preview to Production
+        environment: aw-website-production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+                - checkout: self
+                - template: templates\promote.yml
+                  parameters:
+                    vercelProdUrl: 'aw-website-preview.vercel.app'
+
+  - stage: PromoteProductionWWW
+    dependsOn: DeployStagingWWW
+    displayName: 'Promote WWW to Production'
+    variables:
+      - name: Vercel.DeployUrl
+        value: $[ stageDependencies.DeployStagingWWW.DeployVercel.outputs['DeployVercel.DeployVercel.deployUrl'] ]
+    jobs:
+      - deployment: PromoteVercel
+        displayName: Promote WWW to Production
+        environment: aw-website-production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+                - checkout: self
+                - template: templates\promote.yml
+                  parameters:
+                    vercelProdUrl: 'aw-website-www.vercel.app'
+
+  - stage: MetaLocatorSync
+    dependsOn:
+      - PromoteProductionPreview
+      - PromoteProductionWWW
+    displayName: 'MetaLocator Sync'
+    condition: succeeded()
+    jobs:
+    - job: MetaLocatorSync
+      displayName: 'Trigger MetaLocator Sync'
+      steps:
+        - checkout: none
+        - bash: |
+            set -euo pipefail
+
+            echo "Calling MetaLocator sync job..."
+            http_status=$(curl --silent --show-error --output response.json --write-out "%{http_code}" \
+              --request POST \
+              --header "x-api-key: $(Keys.MetaLocator)" \
+              --header "Accept: application/json" \
+              "https://api.metalocator.com/api/v1/jobs/16")
+
+            echo "MetaLocator response status: ${http_status}"
+            cat response.json
+
+            if [ "${http_status}" -lt 200 ] || [ "${http_status}" -ge 300 ]; then
+              echo "MetaLocator sync failed."
+              exit 1
+            fi
+          displayName: 'Call MetaLocator API'

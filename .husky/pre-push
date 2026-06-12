@@ -1,0 +1,40 @@
+# Git LFS Hook
+command -v git-lfs >/dev/null 2>&1 || { echo >&2 "\nThis repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting '.git/hooks/pre-push'.\n"; exit 2; }
+git lfs pre-push "$@"
+
+# Our Checks
+echo "Running pre-push checks 🔎"
+
+# Ensure that our branch name is in the correct format
+
+# Set the Jira project prefix
+ewprojectname="EW"
+awebprojectname="AWEB"
+
+# Get the current branch and apply it to a variable
+currentbranch=`git branch | grep \* | cut -d ' ' -f2`
+# Test current branch name
+if [[ "$currentbranch" =~ ^(release|hotfix|feature|bug)/($ewprojectname|$awebprojectname)-[0-9]+-[a-z0-9-]+ ]]
+then
+  echo "Branch name is properly formatted"
+  echo " "
+else
+  echo "Your branch name should be in the following format:"
+  echo "  feature/$ewprojectname-001-hello-world"
+  echo "  feature/$awebprojectname-001-hello-world"
+  echo " "
+  echo "Further documentation on proper branch naming can be found here:"
+  echo "https://andersenwindows.atlassian.net/wiki/spaces/EW/pages/2822012929/Branching+Standards#Branch-naming"
+  echo " "
+  exit 1
+fi
+
+# Run unit tests
+case `uname` in
+  *CYGWIN*|*MINGW*|*MSYS*)
+    npm.cmd run pre-push
+  ;;
+  *)
+    npm run pre-push
+  ;;
+esac

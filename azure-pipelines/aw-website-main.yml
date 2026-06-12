@@ -1,0 +1,100 @@
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)-alpha
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+  - repository: xmcloud
+    type: git
+    name: xmcloud
+
+variables:
+  - group: Keys - Vercel
+  - name: Directive.Debug
+    value: ''
+  - name: Vercel.Environment
+    value: dev
+  - name: Vercel.Scope
+    value: andersen-corporation
+  - name: Vercel.SetAliases
+    value: ${{ false }}
+  - name: Vercel.SkipDomain
+    value: ${{ false }}
+  - name: npm_config_cache
+    value: $(Pipeline.Workspace)/.npm
+  - name: AW_XM_CLOUD_REPO_PATH
+    value: $(Build.SourcesDirectory)/xmcloud
+  - name: Xmc.Branch
+    value: main
+  - name: fetchDepth
+    value: 0
+
+stages:
+  - stage: Queue
+    jobs:
+      - deployment: Queue
+        environment: aw-website-main-queue
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Starting pipeline execution."
+
+  - stage: Build
+    variables:
+      - group: EdgeContext - Dev - Preview
+      - name: RunSonarQube
+        value: true
+    dependsOn:
+      - Queue
+    jobs:
+      - job: Build
+        displayName: 'Build and Test'
+        steps:
+          - template: templates\build.yml
+
+  - stage: VercelDeployPreview
+    dependsOn:
+      - Build
+    displayName: 'Vercel Deploy Preview'
+    variables:
+      - group: EdgeContext - Dev - Preview
+      - name: urlPrefix
+        value: 'preview.dev'
+      - name: Vercel.Project
+        value: 'aw-website-preview'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel Preview
+        environment: AW-Website-Preview
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: VercelDeployWWW
+    dependsOn:
+      - Build
+    displayName: 'Vercel Deploy WWW'
+    variables:
+      - group: EdgeContext - Dev - WWW
+      - name: urlPrefix
+        value: 'www.dev'
+      - name: Vercel.Project
+        value: 'aw-website-www'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel WWW
+        environment: aw-website-preview
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml

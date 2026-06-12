@@ -1,0 +1,12 @@
+# Our Checks
+echo "Running commit-msg checks 🔎"
+
+# Validate commit message is in the correct format
+case `uname` in
+  *CYGWIN*|*MINGW*|*MSYS*)
+    npx.cmd commitlint --edit
+  ;;
+  *)
+    npx commitlint --edit
+  ;;
+esac

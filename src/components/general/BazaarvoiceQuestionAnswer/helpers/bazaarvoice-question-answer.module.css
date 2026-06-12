@@ -1,0 +1,335 @@
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-action-bar button,
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared button.bv-ask-question:hover,
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared button.bv-ask-question:focus
+{
+  font-weight: 600 !important;
+  font-family: var(--font-sans) !important;
+  font-size: 1rem !important;
+  line-height: 18px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-action-bar button::after
+{
+  margin-left: 10px !important;
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13" fill="none"><path d="M8 1.5L13 6.5L8 11.5" stroke="%23001722" stroke-width="2"/><path d="M13 6.5H0" stroke="%23001722" stroke-width="2"/></svg>') !important;
+  vertical-align: middle !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item
+{
+  border-top: 1px solid var(--color-gray) !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-header
+{
+  padding-top: 18px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list
+{
+  margin-bottom: 24px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-focusable[tabindex="-1"]
+{
+  font-weight: 600 !important;
+  font-size: 20px !important;
+  line-height: 25px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-pagination-pages-current
+{
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-control-bar
+{
+  background-color: var(--color-light-gray) !important;
+  margin-bottom: 20px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-target .bv-dropdown-label
+{
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-target button
+{
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-author
+{
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  line-height: 1rem !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-datetime-stamp
+{
+  font-weight: 400 !important;
+  font-size: 0.875rem !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-datetime-dot
+{
+  display: none !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-datetime-stamp:before
+{
+  content: "| " !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-core-float .bv-content-data-summary
+{
+  padding-right: 0 !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-data-count
+{
+  position: relative !important;
+  outline: none !important;
+  right: auto !important;
+  top: auto !important;
+  text-align: left !important;
+  padding: 8px 0 0 0 !important;
+  border-radius: 0 !important;
+  border-top: solid 1px var(--color-gray) !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-question .bv-outline-grayed .bv-content-title
+{
+  color: var(--color-black) !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 25px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-data-count .bv-content-data-label
+{
+  color: var(--color-black) !important;
+  display: inline !important;
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-title-container
+{
+  margin-bottom: 8px !important;
+  margin-top: 6px !important;
+  float: none !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-title
+{
+  font-size: 20px !important;
+  font-weight: 450 !important;
+  line-height: 20px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list .bv-content-item
+{
+  background-color: var(--color-light-gray) !important;
+  margin-left: 0px !important;
+  padding-left: 30px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared p
+{
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  font-family: var(--font-serif) !important;
+  line-height: 22px !important;
+  margin-bottom: 0 !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data
+{
+  margin-bottom: 0 !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-product-questions
+{
+  margin-bottom: 20px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-feedback-vote-request p
+{
+  font-size: 1.125rem !important;
+  font-weight: 450 !important;
+  font-family: var(--font-sans) !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-feedback-vote .bv-content-feedback-btn-container *,
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-feedback-vote.bv-content-feedback-vote-active button.bv-content-report-btn
+{
+  background-color: var(--color-white) !important;
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-btn
+{
+  margin-right: 8px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-feedback-vote .bv-content-feedback-btn-container, .bv-cv2-cleanslate .bv-shared .bv-content-item:hover .bv-content-feedback-vote .bv-content-feedback-btn-container
+{
+  margin-right: 0 !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-btn:first-child
+{
+  margin-right: 8px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-submission .bv-fieldsets fieldset:not(.bv-fieldset-rating).bv-error
+{
+  padding-top: 10px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-submission .bv-fieldsets .bv-fieldset.bv-fieldset-questionsummary .bv-sublabel
+{
+  font-family: var(--font-serif) !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-pagination
+{
+  background-color: white !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-pagination .bv-content-btn-pages
+{
+  background-color: white !important;
+  color: black !important;
+  border: solid black 4px !important;
+  border-radius: 65px !important;
+}
+
+[data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-pagination .bv-content-btn-pages:hover
+{
+  background-color: black !important;
+  color: white !important;
+  border: solid black 4px !important;
+  border-radius: 65px !important;
+}
+
+@media screen and (max-width: 450px)
+{
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-feedback-vote .bv-content-feedback-vote-request
+  {
+    margin: 0 !important;
+    float: left !important;
+  }
+}
+
+@media screen and (max-width: 480px)
+{
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-control-bar-count
+  {
+    text-align: left !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-action-bar
+  {
+    padding-bottom: 10px !important;
+  }
+}
+
+@media screen and (max-width: 680px)
+{
+  [data-component="general/bazaarvoicequestionanswer"] .bv-mbox .bv-mbox-content-container .bv-submission .bv-submission-section .bv-fieldsets.bv-input-fieldsets .bv-fieldset-small
+  {
+    width: 100% !important;
+  }
+}
+
+@media only screen and (min-width: 959px) {
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-header
+  {
+    padding-top: 20px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-pagination-pages-current
+  {
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list
+  {
+    margin-bottom: 36px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-focusable[tabindex="-1"]
+  {
+    font-size: 1.5rem !important;
+    line-height: 30px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-author
+  {
+    font-size: 1.125rem !important;
+    line-height: 1.125rem !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-title
+  {
+    font-size: 1.5rem !important;
+    line-height: 30px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-core-float .bv-content-data-summary
+  {
+    padding-right: 90px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-question .bv-content-data-summary .bv-content-data-count
+  {
+    display: block !important;
+    border-left: solid 1px var(--color-gray) !important;
+    border-top: none !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    text-align: center !important;
+    padding: 4px 10px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-question .bv-outline-grayed .bv-content-title
+  {
+    color: var(--color-black) !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    line-height: 30px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-data-count .bv-content-data-label
+  {
+    color: var(--color-black) !important;
+    display: block !important; /* 400 14 22 */
+    font-weight: 400 !important;
+    font-size: 0.875rem !important;
+    line-height: 22px !important;
+  }
+
+  [data-component="general/bazaarvoicequestionanswer"] .bv-cv2-cleanslate .bv-shared .bv-content-title-container
+  {
+    margin-bottom: 0 !important;
+    float: left !important;
+  }
+}

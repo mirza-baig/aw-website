@@ -1,0 +1,144 @@
+name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)-alpha
+
+trigger:
+  branches:
+    include:
+    - '*'
+    exclude:
+    - main
+    - release/*
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+  - repository: xmcloud
+    type: git
+    name: xmcloud
+
+variables:
+  - group: Keys - Vercel
+  - name: Vercel.Scope
+    value: andersen-corporation
+  - name: Vercel.SetAliases
+    value: ${{ true }}
+  - name: Vercel.SkipDomain
+    value: ${{ false }}
+  - name: npm_config_cache
+    value: $(Pipeline.Workspace)/.npm
+  - name: AW_XM_CLOUD_REPO_PATH
+    value: $(Build.SourcesDirectory)/xmcloud
+
+stages:
+  - stage: GetParameters
+    jobs:
+      - job: GetParameters
+        displayName: 'Get Parameters'
+        steps:
+          - task: PowerShell@2
+            name: GetParameters
+            displayName: Get Parameters
+            inputs:
+              targetType: inline
+              script: |
+                $title = '$(Build.SourceVersionMessage)'
+                Write-Host "Commit Message: $title"
+
+                # Default to UAT environment
+                $environment = "uat"
+
+                if ($title -match '\[sc=.+?\]') {
+                  $match = Select-String -Pattern '\[sc=(.+?)\]' -InputObject $title
+                  $directive = $match.Matches.Groups[1].Value.ToLower()
+                  $value = $match.Matches.Groups[1].Value.ToLower()
+
+                  Write-Host "Sitecore Environment Directive: $value"
+
+                  if ($value -ne 'dev') {
+                    Write-Host "##vso[task.logissue type=error;]Invalid Sitecore environment, expected 'dev', found '$value'"
+                    Write-Host "##vso[task.complete result=Failed;]"
+                    exit 1
+                  }
+
+                  $environment = $value
+                }
+                Write-Host "##vso[task.setvariable variable=Vercel.Environment;isOutput=true]$environment"
+
+                if ($title -match '\[debug=.+?\]') {
+                  $match = Select-String -Pattern '\[debug=(.+?)\]' -InputObject $title
+                  $directive = $match.Matches.Groups[1].Value.ToLower()
+                  $value = $match.Matches.Groups[1].Value.ToLower()
+
+                  Write-Host "Debug Directive: $value"
+                  Write-Host "##vso[task.setvariable variable=Directive.Debug;isOutput=true]$value"
+                }
+
+                $urlPreview = "$(Build.SourceBranchName).preview.$($environment)"
+                $urlWww = "$(Build.SourceBranchName).www.$($environment)"
+                Write-Host "URL Preview Prefix: $urlPreview"
+                Write-Host "URL WWW Prefix: $urlWww"
+                Write-Host "##vso[task.setvariable variable=Url.Preview;isOutput=true]$urlPreview"
+                Write-Host "##vso[task.setvariable variable=Url.Www;isOutput=true]$urlWww"
+
+  - stage: Build
+    dependsOn: GetParameters
+    jobs:
+      - job: Build
+        displayName: 'Build and Test'
+        steps:
+          - template: templates\build.yml
+
+  - stage: VercelDeployPreview
+    dependsOn:
+      - GetParameters
+      - Build
+    displayName: 'Vercel Deploy Preview'
+    variables:
+      - name: Vercel.Environment
+        value: 'preview'
+      - name: Sitecore.Environment
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ]
+      - name: urlPrefix
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Url.Preview'] ]
+      - name: Directive.Debug
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Debug'] ]
+      - name: Vercel.Project
+        value: 'aw-website-preview'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel Preview
+        environment: AW-Website-Preview
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml
+
+  - stage: VercelDeployWWW
+    dependsOn:
+      - GetParameters
+      - Build
+    displayName: 'Vercel Deploy WWW'
+    variables:
+      - name: Vercel.Environment
+        value: 'preview'
+      - name: Sitecore.Environment
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Vercel.Environment'] ]
+      - name: urlPrefix
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Url.Www'] ]
+      - name: Directive.Debug
+        value: $[ stageDependencies.GetParameters.GetParameters.outputs['GetParameters.Directive.Debug'] ]
+      - name: Vercel.Project
+        value: 'aw-website-www'
+    jobs:
+      - deployment: DeployVercel
+        displayName: Deploy to Vercel WWW
+        environment: aw-website-preview
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates\deploy.yml

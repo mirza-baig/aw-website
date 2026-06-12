@@ -1,0 +1,12 @@
+deployments:
+  environmentMapping:
+    development:
+      - "aw-website-main-queue"
+      - "aw-website-preview"
+    uat:
+      - "aw-website-release-queue`"
+      - "aw-website-uat"
+    staging:
+      - "aw-website-staging"
+    production:
+      - "aw-website-production"

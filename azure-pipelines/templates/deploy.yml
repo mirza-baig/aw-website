@@ -1,0 +1,197 @@
+steps:
+  - checkout: self
+  - checkout: xmcloud
+    persistCredentials: true
+
+  - task: PowerShell@2
+    displayName: Switch XM Cloud Branch
+    condition: and(succeeded(), ne(variables['Xmc.Branch'], 'main'))
+    inputs:
+      targetType: inline
+      script: |
+        git fetch --all
+        git switch $(Xmc.Branch)
+      workingDirectory: $(Build.SourcesDirectory)/xmcloud
+
+  - task: Cache@2
+    inputs:
+      key: 'npm | "$(Agent.OS)" | $(Build.SourcesDirectory)/aw-website/package-lock.json | $(Build.SourcesDirectory)/xmcloud/package-lock.json'
+      restoreKeys: |
+        npm | "$(Agent.OS)"
+      path: $(npm_config_cache)
+    displayName: Cache npm
+
+  - task: NodeTool@0
+    displayName: Install Node
+    inputs:
+      versionSource: 'fromFile'
+      versionFilePath: '$(Build.SourcesDirectory)/aw-website/.nvmrc'
+
+  - task: PowerShell@2
+    displayName: Install Vercel CLI
+    inputs:
+      targetType: inline
+      script: |
+        npm i -g vercel@latest
+
+  - task: PowerShell@2
+    displayName: Restore NPM packages (xmcloud)
+    inputs:
+      targetType: inline
+      script: |
+        npm install --ci
+      workingDirectory: $(Build.SourcesDirectory)/xmcloud
+
+  - task: PowerShell@2
+    displayName: Restore DotNet CLI tools (xmcloud)
+    inputs:
+      targetType: inline
+      script: |
+        dotnet tool restore
+      workingDirectory: $(Build.SourcesDirectory)/xmcloud
+
+  - task: PowerShell@2
+    displayName: Restore NPM packages
+    inputs:
+      targetType: inline
+      script: |
+        npm install --ci
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PowerShell@2
+    displayName: Run sitecore-tools build
+    inputs:
+      targetType: inline
+      script: |
+        npm run sitecore-tools:build
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PowerShell@2
+    displayName: Link to Vercel project
+    inputs:
+      targetType: inline
+      script: |
+        vercel link --project $(Vercel.Project) --scope andersen-corporation --yes --token $(Keys.Vercel.token)
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PowerShell@2
+    displayName: Deploy to Vercel
+    name: DeployVercel
+    inputs:
+      targetType: inline
+      script: |
+        Write-Host "Performing deployment to '$(Vercel.Environment)'..."
+        $parameters = New-Object System.Collections.Generic.List[System.String]
+
+        if ($$(Vercel.SkipDomain) -eq $true) {
+          Write-Host "Skipping domain..."
+          $parameters.Add("--skip-domain")
+        }
+
+        if (('$(Vercel.Environment)' -eq 'preview') -and ('$(Sitecore.Environment)' -eq 'dev')) {
+          Write-Host "Updating to point at Sitecore 'dev' environment..."
+          $parameters.Add("--build-env")
+          $parameters.Add("SITECORE_EDITING_SECRET=6hMyUZoJ65l63t6TRp7Kob")
+
+          $parameters.Add("--env")
+          $parameters.Add("SITECORE_EDITING_SECRET=6hMyUZoJ65l63t6TRp7Kob")
+
+          $parameters.Add("--build-env")
+          $parameters.Add("NEXT_PUBLIC_AW_ENVIRONMENT=development")
+
+          $parameters.Add("--env")
+          $parameters.Add("NEXT_PUBLIC_AW_ENVIRONMENT=development")
+
+            $parameters.Add("--build-env")
+            $parameters.Add("NEXT_PUBLIC_PERSONALIZE_SCOPE=development")
+
+            $parameters.Add("--env")
+            $parameters.Add("NEXT_PUBLIC_PERSONALIZE_SCOPE=development")
+
+          if ('$(Vercel.Project)' -eq 'aw-website-preview') {
+            Write-Host "Updating to point at Sitecore 'dev' preview environment..."
+            $parameters.Add("--build-env")
+            $parameters.Add("SITECORE_EDGE_CONTEXT_ID=3SlAYlHMmdnuLz3SEY6wTl")
+
+            $parameters.Add("--env")
+            $parameters.Add("SITECORE_EDGE_CONTEXT_ID=3SlAYlHMmdnuLz3SEY6wTl")
+
+            $parameters.Add("--build-env")
+            $parameters.Add("NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID=3SlAYlHMmdnuLz3SEY6wTl")
+
+            $parameters.Add("--env")
+            $parameters.Add("NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID=3SlAYlHMmdnuLz3SEY6wTl")
+          } else {
+            Write-Host "Updating to point at Sitecore 'dev' www environment..."
+            $parameters.Add("--build-env")
+            $parameters.Add("SITECORE_EDGE_CONTEXT_ID=6mWEV7FCOGIx3999Z8v4va")
+
+            $parameters.Add("--env")
+            $parameters.Add("SITECORE_EDGE_CONTEXT_ID=6mWEV7FCOGIx3999Z8v4va")
+
+            $parameters.Add("--build-env")
+            $parameters.Add("NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID=6mWEV7FCOGIx3999Z8v4va")
+
+            $parameters.Add("--env")
+            $parameters.Add("NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID=6mWEV7FCOGIx3999Z8v4va")
+          }
+        }
+
+        #Apply Debug Override
+        if ('$(Directive.Debug)' -ne '') {
+          Write-Host "Updating to set DEBUG environment variable..."
+          $parameters.Add("--build-env")
+          $parameters.Add("DEBUG=$(Directive.Debug)")
+
+          $parameters.Add("--env")
+          $parameters.Add("DEBUG=$(Directive.Debug)")
+        } else {
+          $parameters.Add("--build-env")
+          $parameters.Add("DEBUG=")
+        }
+
+        Write-Host "Command: vercel deploy --target=$(Vercel.Environment) --scope $(Vercel.Scope) --token $(Keys.Vercel.token) --logs $parameters"
+
+        $deployUrl = vercel deploy --target=$(Vercel.Environment) --scope $(Vercel.Scope) --token $(Keys.Vercel.token) --logs @parameters
+        Write-Host "Deployment Url: $deployUrl"
+        Write-Host "##vso[task.setvariable variable=deployUrl;isOutput=true]$deployUrl"
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+  - task: PowerShell@2
+    displayName: Set Alias URLs
+    condition: and(succeeded(), eq(variables['Vercel.SetAliases'], true))
+    inputs:
+      targetType: inline
+      script: |
+        Write-Host "Deploy Url: $(DeployVercel.deployUrl)"
+        Write-Host "Setting Alias URLs for: $(Vercel.Project)"
+        Write-Host "urlPrefix value: $(urlPrefix)"
+
+        $sites = @("andersenhomedepot.com", "andersenluminaire.com", "andersenwindows.com", "heritagewindows.com", "stormdoors.com", "sandbox.andersenwindows.com")
+
+        foreach($site in $sites) {
+          # Common Name limit is 64 characters
+          $alias = "$(urlPrefix).xmc.$site"
+          if ($alias.Length -gt 64) {
+            Write-Host "Trimming urlPrefix to stay in 64 character common name limit..."
+            $parts = $alias.Split(".", 2)
+            $prefixLengthMax = 64 - $parts[1].Length - 1 # extra 1 accounts for the period
+            $prefix = $parts[0].Substring(0, $prefixLengthMax)
+            while ([System.Text.RegularExpressions.RegEx]::IsMatch($prefix, "[^0-9A-Za-z]$")) {
+              $prefix = $prefix.Substring(0, $prefix.Length - 1)
+            }
+            $alias = "$prefix.$($parts[1])"
+          }
+          Write-Host "Applying alias: $alias"
+          vercel alias $(DeployVercel.deployUrl) $alias --scope $(Vercel.Scope) --token $(Keys.Vercel.token)
+        }
+      workingDirectory: $(Build.SourcesDirectory)/aw-website
+
+### Pause until domains get configured
+# Perform Health Check - frontend
+# - task: PowerShell@2
+#   displayName: Perform Health Check
+#   inputs:
+#     filePath: ./azure-pipelines/deploy/SiteHealthCheck.ps1
+#     arguments: -Url https://${{ parameters.vercelAliasUrl }}/
+

@@ -1,0 +1,195 @@
+/* Per-theme override (if needed) */
+@layer theme {
+  .aw {
+    --color-theme-body: var(--color-dark-gray);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-white);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-border: var(--color-primary);
+    --color-theme-btn-border-hover: var(--color-primary);
+    --color-theme-btn-secondary-bg: var(--color-white);
+    --color-theme-btn-secondary-bg-hover: var(--color-secondary);
+    --color-theme-btn-secondary-text: var(--color-black);
+    --color-theme-btn-secondary-text-hover: var(--color-white);
+    --color-theme-btn-secondary-border: var(--color-black);
+    --color-theme-btn-secondary-border-hover: var(--color-black);
+  }
+  .rba {
+    --color-theme-body: var(--color-dark-gray);
+    --color-theme-btn-bg: var(--color-secondary);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-white);
+    --color-theme-btn-text-hover: var(--color-secondary);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-border: var(--color-primary);
+    --color-theme-btn-border-hover: var(--color-primary);
+    --color-theme-btn-icon: var(--color-primary);
+    --color-theme-btn-icon-hover: var(--color-primary);
+    --color-theme-btn-primary-icon: var(--color-primary);
+    --color-theme-btn-primary-icon-hover: var(--color-secondary);
+    --color-theme-btn-secondary-bg: var(--color-white);
+    --color-theme-btn-secondary-bg-hover: var(--color-secondary);
+    --color-theme-btn-secondary-text: var(--color-black);
+    --color-theme-btn-secondary-text-hover: var(--color-white);
+    --color-theme-btn-secondary-border: var(--color-black);
+    --color-theme-btn-secondary-border-hover: var(--color-black);
+  }
+
+  .aw .theme-black {
+    --color-theme-bg: var(--color-secondary);
+    --color-theme-text: var(--color-white);
+    --color-theme-body: var(--color-white);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-white);
+    --color-theme-btn-decoration: var(--color-white);
+    --color-theme-btn-border: var(--color-primary);
+    --color-theme-btn-border-hover: var(--color-secondary);
+  }
+
+  .rba .theme-black {
+    --color-theme-bg: var(--color-secondary);
+    --color-theme-text: var(--color-white);
+    --color-theme-body: var(--color-white);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-secondary);
+    --color-theme-btn-decoration: var(--color-white);
+    --color-theme-btn-border: var(--color-secondary);
+    --color-theme-btn-border-hover: var(--color-secondary);
+    --color-theme-btn-secondary-bg: var(--color-secondary);
+    --color-theme-btn-secondary-bg-hover: var(--color-white);
+    --color-theme-btn-secondary-text: var(--color-white);
+    --color-theme-btn-secondary-text-hover: var(--color-black);
+    --color-theme-btn-secondary-border: var(--color-white);
+    --color-theme-btn-secondary-border-hover: var(--color-white);
+  }
+
+  .aw .theme-gray {
+    --color-theme-bg: var(--color-light-gray);
+    --color-theme-text: var(--color-secondary);
+    --color-theme-body: var(--color-dark-gray);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-white);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-border: var(--color-primary);
+    --color-theme-btn-border-hover: var(--color-primary);
+    --color-theme-btn-secondary-bg: var(--color-white);
+    --color-theme-btn-secondary-bg-hover: var(--color-black);
+    --color-theme-btn-secondary-text: var(--color-black);
+    --color-theme-btn-secondary-text-hover: var(--color-white);
+    --color-theme-btn-secondary-border: var(--color-white);
+    --color-theme-btn-secondary-border-hover: var(--color-black);
+  }
+
+  .rba .theme-gray {
+    --color-theme-bg: var(--color-light-gray);
+    --color-theme-text: var(--color-secondary);
+    --color-theme-body: var(--color-dark-gray);
+    --color-theme-btn-bg: var(--color-secondary);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-white);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-text-hover: var(--color-secondary);
+    --color-theme-btn-border: var(--color-primary);
+    --color-theme-btn-border-hover: var(--color-primary);
+  }
+
+  .aw .theme-primary {
+    --color-theme-bg: var(--color-primary);
+    --color-theme-text: var(--color-white);
+    --color-theme-body: var(--color-white);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-secondary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-text-hover: var(--color-white);
+    --color-theme-btn-border: var(--color-white);
+    --color-theme-btn-border-hover: var(--color-secondary);
+    --color-theme-btn-secondary-bg: var(--color-black);
+    --color-theme-btn-secondary-bg-hover: var(--color-white);
+    --color-theme-btn-secondary-text: var(--color-white);
+    --color-theme-btn-secondary-text-hover: var(--color-black);
+    --color-theme-btn-secondary-border: var(--color-black);
+    --color-theme-btn-secondary-border-hover: var(--color-white);
+  }
+
+  .rba .theme-primary {
+    --color-theme-bg: var(--color-primary);
+    --color-theme-text: var(--color-black);
+    --color-theme-body: var(--color-white);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-secondary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-white);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-border: var(--color-secondary);
+    --color-theme-btn-border-hover: var(--color-secondary);
+    --color-theme-btn-icon: var(--color-secondary);
+    --color-theme-btn-icon-hover: var(--color-secondary);
+    --color-theme-btn-primary-icon: var(--color-primary);
+    --color-theme-btn-primary-icon-hover: var(--color-primary);
+  }
+
+  .aw .theme-secondary {
+    --color-theme-bg: var(--color-black);
+    --color-theme-text: var(--color-white);
+    --color-theme-body: var(--color-white);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-white);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-border: var(--color-white);
+    --color-theme-btn-border-hover: var(--color-primary);
+    --color-theme-btn-secondary-bg: var(--color-white);
+    --color-theme-btn-secondary-border: var(--color-white);
+    --color-theme-btn-secondary-bg-hover: var(--color-black);
+    --color-theme-btn-secondary-text: var(--color-black);
+    --color-theme-btn-secondary-text-hover: var(--color-white);
+    --color-theme-btn-secondary-border: var(--color-black);
+    --color-theme-btn-secondary-border-hover: var(--color-black);
+  }
+
+  .rba .theme-secondary {
+    --color-theme-bg: var(--color-secondary);
+    --color-theme-text: var(--color-white);
+    --color-theme-body: var(--color-white);
+    --color-theme-btn-bg: var(--color-white);
+    --color-theme-btn-bg-hover: var(--color-primary);
+    --color-theme-btn-text: var(--color-secondary);
+    --color-theme-btn-text-hover: var(--color-secondary);
+    --color-theme-btn-decoration: var(--color-black);
+    --color-theme-btn-border: var(--color-secondary);
+    --color-theme-btn-border-hover: var(--color-secondary);
+    --color-theme-btn-secondary-bg: var(--color-secondary);
+    --color-theme-btn-secondary-bg-hover: var(--color-white);
+    --color-theme-btn-secondary-text: var(--color-white);
+    --color-theme-btn-secondary-text-hover: var(--color-black);
+    --color-theme-btn-secondary-border: var(--color-white);
+    --color-theme-btn-secondary-border-hover: var(--color-white);
+  }
+
+  .rba .theme-white {
+    --color-theme-bg: var(--color-white);
+    --color-theme-text: var(--color-secondary);
+    --color-theme-body: var(--color-dark-gray);
+  }
+
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-640px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}

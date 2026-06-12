@@ -1,0 +1,145 @@
+.table-comparison table {
+  border: 1px solid #8f8c8b;
+  width: 100%;
+}
+
+.table-comparison th, .table-comparison td {
+  border: 1px solid #8f8c8b;
+  text-align: center;
+  padding: 5px;
+}
+
+.table-comparison th {
+  font-weight: bold;
+}
+
+.table-comparison thead th {
+  background-color: #f7f7f7;
+  color: black;
+}
+
+.table-comparison tbody th {
+  background-color: #231F20;
+  color: white;
+}
+
+  .table-comparison tbody th .value {
+    font-size: 10px;
+  }
+
+@media (max-width: 640px) {
+  .table-comparison.table-responsive.table-vertical tbody td,
+  .table-comparison.table-responsive.table-vertical tbody th, .table-comparison.table-responsive.table-vertical-alternate tbody td,
+  .table-comparison.table-responsive.table-vertical-alternate tbody th {
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+  }
+
+  .table-comparison.table-responsive.table-vertical tbody tr:first-child th:first-child, .table-comparison.table-responsive.table-vertical-alternate tbody tr:first-child th:first-child {
+    border-top: 0;
+  }
+
+  .table-comparison.table-responsive.table-vertical tbody td, .table-comparison.table-responsive.table-vertical-alternate tbody td {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+  }
+
+    .table-comparison.table-responsive.table-vertical tbody td:before, .table-comparison.table-responsive.table-vertical-alternate tbody td:before {
+      background-color: #f7f7f7;
+      border-bottom: 1px solid #b9b9b9;
+      padding-top: 5px;
+      margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 640px) {
+  .table-comparison.table-responsive.table-vertical.table-responsive.table-vertical-alternate tbody tr th, .table-comparison.table-responsive.table-vertical-alternate.table-responsive.table-vertical-alternate tbody tr th {
+    background-color: #231F20;
+    color: white;
+    border-right: 1px solid #8f8c8b;
+  }
+
+  .table-comparison.table-responsive.table-vertical.table-responsive.table-vertical-alternate tbody tr:first-child td:nth-child(2), .table-comparison.table-responsive.table-vertical-alternate.table-responsive.table-vertical-alternate tbody tr:first-child td:nth-child(2) {
+    border-top: 0;
+  }
+}
+
+.table-responsive {
+  min-height: .01%;
+  overflow-x: auto;
+}
+
+  .table-responsive tr a {
+    display: inline-block;
+  }
+
+@media (max-width: 640px) {
+  .table-responsive {
+    width: 100%;
+    overflow-y: hidden;
+  }
+}
+
+@media (max-width: 640px) {
+  .table-responsive.table-vertical table {
+    width: 100%;
+  }
+
+  .table-responsive.table-vertical thead {
+    display: none;
+  }
+
+  .table-responsive.table-vertical tbody tr:nth-of-type(2n+1) {
+    background-color: inherit;
+  }
+
+  .table-responsive.table-vertical tr td:first-child {
+    background: #b9b9b9;
+    font-weight: bold;
+  }
+
+  .table-responsive.table-vertical tbody td,
+  .table-responsive.table-vertical tbody th {
+    display: block;
+    text-align: center;
+  }
+
+    .table-responsive.table-vertical tbody td:before {
+      content: attr(data-th);
+      display: block;
+      text-align: center;
+    }
+}
+
+@media (max-width: 640px) {
+  .table-responsive.table-vertical-alternate table {
+    width: 100%;
+  }
+
+  .table-responsive.table-vertical-alternate thead {
+    display: none;
+  }
+
+  .table-responsive.table-vertical-alternate tbody tr:nth-of-type(2n+1) {
+    background-color: inherit;
+  }
+
+  .table-responsive.table-vertical-alternate tr th,
+  .table-responsive.table-vertical-alternate tr td:first-child {
+    background: #b9b9b9;
+    font-weight: bold;
+  }
+
+  .table-responsive.table-vertical-alternate tbody td {
+    display: block;
+    text-align: center;
+  }
+
+    .table-responsive.table-vertical-alternate tbody td:before {
+      content: attr(data-th);
+      display: block;
+      text-align: center;
+    }
+}

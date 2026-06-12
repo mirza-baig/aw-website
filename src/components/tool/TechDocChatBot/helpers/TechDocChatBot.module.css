@@ -1,0 +1,1585 @@
+/* TechDocChatBot Module CSS - Complete isolation from global styles */
+
+/* Root container - minimal reset, preserve positioning */
+.chatbotRoot {
+  /* Don't use all:unset on root - it breaks fixed positioning */
+  display: contents !important;
+}
+
+/* Reset children but preserve essential layout properties */
+.chatbotRoot *,
+.chatbotRoot *::before,
+.chatbotRoot *::after {
+  box-sizing: border-box !important;
+  /* Per Figma specs: Open Sans Regular */
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  /* Reset common inherited styles */
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 100% !important;
+  vertical-align: baseline !important;
+  line-height: 1.5 !important;
+}
+
+/* Floating Button */
+.floatingButton {
+  position: fixed !important;
+  bottom: 16px !important;
+  right: 5px !important;
+  z-index: 2147483647 !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background-color: #ED6833 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  transition: transform 0.2s ease !important;
+  cursor: pointer !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.floatingButton:hover {
+  transform: scale(1.1) !important;
+}
+
+.floatingButton:active {
+  transform: scale(0.95) !important;
+}
+
+@media (min-width: 640px) {
+  .floatingButton {
+    bottom: 24px !important;
+    right: 5px !important;
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+.buttonIcon {
+  width: 38px !important;
+  height: 38px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .buttonIcon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
+/* Minimized Header */
+.minimizedHeader {
+  position: fixed !important;
+  bottom: 16px !important;
+  right: 5px !important;
+  z-index: 2147483647 !important;
+  width: 256px !important;
+  border-radius: 16px 16px 0 0 !important;
+  background-color: #ED6833 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  cursor: pointer !important;
+  padding: 12px !important;
+  transition: box-shadow 0.3s ease !important;
+}
+
+.minimizedHeader:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+@media (min-width: 640px) {
+  .minimizedHeader {
+    bottom: 24px !important;
+    right: 5px !important;
+    width: 280px !important;
+    padding: 16px !important;
+  }
+}
+
+.minimizedContent {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  color: white !important;
+}
+
+.minimizedLeft {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+}
+
+.minimizedIconWrapper {
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+@media (min-width: 640px) {
+  .minimizedIconWrapper {
+    width: 48px !important;
+    height: 48px !important;
+  }
+}
+
+.minimizedIcon {
+  width: 28px !important;
+  height: 28px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .minimizedIcon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+.minimizedTitle {
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: white !important;
+}
+
+@media (min-width: 640px) {
+  .minimizedTitle {
+    font-size: 16px !important;
+  }
+}
+
+.expandIcon {
+  flex-shrink: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  stroke: white !important;
+}
+
+/* Main Chat Container */
+.chatbotContainer {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  /* Per Figma specs: Open Sans Regular */
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  color: #1F2937 !important;
+}
+
+/* Header - Per Figma: 64px height */
+.chatHeader {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  color: #FFFFFF !important;
+  flex-shrink: 0 !important;
+  padding: 12px 16px !important;
+  background-color: #ED6833 !important;
+  min-height: 56px !important;
+  height: 56px !important;
+}
+
+@media (min-width: 640px) {
+  .chatHeader {
+    padding: 12px 16px !important;
+    min-height: 64px !important;
+    height: 64px !important;
+  }
+}
+
+.headerLeft {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+@media (min-width: 640px) {
+  .headerLeft {
+    gap: 12px !important;
+  }
+}
+
+.headerIconWrapper {
+  width: 44px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+@media (min-width: 640px) {
+  .headerIconWrapper {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+.headerIcon {
+  width: 44px !important;
+  height: 44px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .headerIcon {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+.headerTitle {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: #FFFFFF !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (min-width: 640px) {
+  .headerTitle {
+    font-size: 18px !important;
+  }
+}
+
+.headerRight {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+@media (min-width: 640px) {
+  .headerRight {
+    gap: 12px !important;
+  }
+}
+
+/* Header buttons - Per Figma: 24x24px icons */
+.headerButton {
+  display: flex !important;
+  width: 32px !important;
+  height: 32px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: opacity 0.3s ease !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  margin: 0 !important;
+  color: #FFFFFF !important;
+}
+
+.headerButton:hover {
+  opacity: 0.8 !important;
+}
+
+.headerButton:active {
+  opacity: 0.6 !important;
+}
+
+@media (min-width: 640px) {
+  .headerButton {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* Per Figma specs: Minimize/Exit Icon Size = 24x24px */
+.headerButtonIcon {
+  width: 20px !important;
+  height: 20px !important;
+  fill: currentColor !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .headerButtonIcon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* Disclaimer */
+.disclaimer {
+  background-color: #FFFFFF !important;
+  padding: 8px 12px !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  color: #6B7280 !important;
+  border-bottom: 1px solid #E5E7EB !important;
+  flex-shrink: 0 !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .disclaimer {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+  }
+}
+
+.disclaimerLink {
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  color: #6B7280 !important;
+  font-size: inherit !important;
+}
+
+.disclaimerLink:hover {
+  color: #1F2937 !important;
+}
+
+/* Messages Area - Per Figma: 32px horizontal padding at desktop */
+.messagesArea {
+  min-height: 0 !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 12px !important;
+  background-color: #FFFFFF !important;
+  scroll-behavior: smooth !important;
+  overscroll-behavior: contain !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .messagesArea {
+    /* Per Figma: 32px from container edge to message bubble */
+    padding: 16px 32px !important;
+  }
+}
+
+.messagesArea::-webkit-scrollbar {
+  width: 12px !important;
+}
+
+.messagesArea::-webkit-scrollbar-track {
+  background: #FFFFFF !important;
+}
+
+.messagesArea::-webkit-scrollbar-thumb {
+  background: #8B8B8B !important;
+  border-radius: 6px !important;
+  border: 3px solid #FFFFFF !important;
+}
+
+.messagesArea::-webkit-scrollbar-thumb:hover {
+  background: #6B6B6B !important;
+}
+
+/* Message Container - Per Figma: 40px vertical spacing between messages */
+.messageContainer {
+  margin-bottom: 12px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .messageContainer {
+    /* Per Figma: 40px vertical spacing */
+    margin-bottom: 40px !important;
+  }
+}
+
+.messageRow {
+  display: flex !important;
+}
+
+.messageRowUser {
+  justify-content: flex-end !important;
+}
+
+.messageRowBot {
+  justify-content: flex-start !important;
+}
+
+/* Message content - Per Figma: 32px near-side, 72px far-side margins
+   480px container - 32px padding each side = 416px content area
+   376px max bubble width = 480 - 32 - 72 */
+.messageContent {
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 90% !important;
+}
+
+@media (min-width: 640px) {
+  .messageContent {
+    /* Per Figma: 376px max width for 72px opposite-side margin */
+    max-width: 376px !important;
+  }
+}
+
+.messageBubble {
+  border-radius: 16px !important;
+  padding: 8px 12px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .messageBubble {
+    padding: 12px 16px !important;
+  }
+}
+
+.messageBubbleUser {
+  background-color: #FEF3EE !important;
+  border: 1px solid #ED6833 !important;
+}
+
+.messageBubbleBot {
+  background-color: #F8F6F4 !important;
+}
+
+/* Message text - Per Figma: 20px margin, proper text wrapping */
+.messageText {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #1F2937 !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .messageText {
+    font-size: 16px !important;
+  }
+}
+
+.messageText a {
+  font-weight: 600 !important;
+  color: #ED6833 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ED6833 !important;
+  text-underline-offset: 2px !important;
+}
+
+.messageText a:hover {
+  opacity: 0.8 !important;
+}
+
+/* Document link styling - matches Figma design with orange text and download icon */
+.messageText a.document-link,
+.messageText .download-link,
+.messageText a[download],
+.messageText a[href*="download"] {
+  display: inline !important;
+  color: #ED6833 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+
+.messageText a.document-link:hover,
+.messageText .download-link:hover,
+.messageText a[download]:hover,
+.messageText a[href*="download"]:hover {
+  opacity: 0.8 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ED6833 !important;
+}
+
+/* SVG icons within message text - orange color per Figma Icon CTA-1.svg */
+.messageText svg {
+  stroke: #ED6833 !important;
+  fill: none !important;
+  width: 12px !important;
+  height: 14px !important;
+  vertical-align: middle !important;
+  display: inline-block !important;
+  margin-left: 6px !important;
+}
+
+.messageText svg path {
+  stroke: #ED6833 !important;
+}
+
+.timestamp {
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+  color: #6B7280 !important;
+  margin-top: 4px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .timestamp {
+    font-size: 11px !important;
+  }
+}
+
+.timestampUser {
+  text-align: right !important;
+}
+
+.timestampBot {
+  text-align: left !important;
+}
+
+/* Feedback Section */
+.feedbackSection {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-top: 6px !important;
+  align-self: flex-start !important;
+}
+
+@media (min-width: 640px) {
+  .feedbackSection {
+    gap: 8px !important;
+  }
+}
+
+.feedbackLabel {
+  font-size: 11px !important;
+  color: #6B7280 !important;
+}
+
+@media (min-width: 640px) {
+  .feedbackLabel {
+    font-size: 12px !important;
+  }
+}
+
+.feedbackButton {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 6px !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+@media (min-width: 640px) {
+  .feedbackButton {
+    min-width: auto !important;
+    min-height: auto !important;
+    padding: 4px !important;
+  }
+}
+
+.feedbackButton:hover {
+  background-color: #E5E7EB !important;
+}
+
+.feedbackButton:active {
+  background-color: #D1D5DB !important;
+}
+
+.feedbackButtonActive {
+  background-color: #E5E7EB !important;
+}
+
+.feedbackButtonDisabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Feedback icons - Per Figma thumb icons (22x22 scaled down) */
+.feedbackIcon {
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+}
+
+.feedbackPending {
+  font-size: 11px !important;
+  color: #6B7280 !important;
+  margin-left: 4px !important;
+}
+
+.feedbackAck {
+  font-size: 12px !important;
+  color: #ED6833 !important;
+  margin-left: 0 !important;
+}
+
+/* Action Buttons Container */
+.actionButtonsContainer {
+  padding: 12px !important;
+  background-color: #FFFFFF !important;
+  border-top: 1px solid #E5E7EB !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .actionButtonsContainer {
+    padding: 16px !important;
+  }
+}
+
+.actionButtonsRow {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+@media (min-width: 640px) {
+  .actionButtonsRow {
+    flex-direction: row !important;
+  }
+}
+
+.actionButton {
+  flex: 1 !important;
+  min-height: 44px !important;
+  padding: 8px 12px !important;
+  border-radius: 9999px !important;
+  background-color: #F8F6F4 !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #1F2937 !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  transition: background-color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 640px) {
+  .actionButton {
+    min-height: auto !important;
+    font-size: 14px !important;
+  }
+}
+
+.actionButton:hover {
+  background-color: #F3F4F6 !important;
+}
+
+.actionButton:active {
+  background-color: #E5E7EB !important;
+}
+
+/* Input Area - Per Figma: 20px margin for text wrap */
+.inputArea {
+  padding: 8px 16px !important;
+  background-color: #FFFFFF !important;
+  border-top: 1px solid #E5E7EB !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .inputArea {
+    padding: 12px 20px !important;
+  }
+}
+
+.inputWrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border-radius: 9999px !important;
+  padding: 10px 16px !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #D1D5DB !important;
+}
+
+@media (min-width: 640px) {
+  .inputWrapper {
+    gap: 12px !important;
+    padding: 12px 20px !important;
+  }
+}
+
+.chatInput {
+  flex: 1 !important;
+  min-width: 0 !important;
+  background-color: transparent !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #1F2937 !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: auto !important;
+}
+
+@media (min-width: 640px) {
+  .chatInput {
+    font-size: 16px !important;
+  }
+}
+
+.chatInput::placeholder {
+  color: #9CA3AF !important;
+}
+
+.chatInput:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.chatInput:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.charCounter {
+  font-size: 12px !important;
+  line-height: 1 !important;
+  color: #6B7280 !important;
+  flex-shrink: 0 !important;
+}
+
+.sendButton {
+  flex-shrink: 0 !important;
+  padding: 4px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: opacity 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.sendButton:hover:not(:disabled) {
+  opacity: 0.8 !important;
+}
+
+.sendButton:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Send button icon - triangle per Figma design */
+.sendButtonIcon {
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important;
+  transition: stroke 0.2s ease !important;
+}
+
+@media (min-width: 640px) {
+  .sendButtonIcon {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+/* Support Footer */
+.supportFooter {
+  padding: 0 12px 12px !important;
+  background-color: #FFFFFF !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .supportFooter {
+    padding: 0 16px 16px !important;
+  }
+}
+
+.supportFooterText {
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  color: #6B7280 !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .supportFooterText {
+    font-size: 12px !important;
+  }
+}
+
+.supportLink {
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ED6833 !important;
+  text-underline-offset: 2px !important;
+  color: #6B7280 !important;
+  font-size: inherit !important;
+  cursor: pointer !important;
+}
+
+.supportLink:hover {
+  color: #1F2937 !important;
+}
+
+.safeAreaBottom {
+  padding-bottom: env(safe-area-inset-bottom) !important;
+}
+
+/* Thinking Dots - Pulsing animation per Figma specs (Elements_ Typing dots.svg) */
+.thinkingStatus {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.thinkingStatusText {
+  font-size: 13px !important;
+  color: #6B7280 !important;
+}
+
+.thinkingDots {
+  display: flex !important;
+  gap: 3px !important;
+  align-items: center !important;
+  padding: 6px 0 !important;
+  height: 16px !important;
+}
+
+.thinkingDot {
+  width: 5px !important;
+  height: 5px !important;
+  background-color: #8B8B8B !important;
+  border-radius: 50% !important;
+  animation: thinkingPulse 1.4s infinite ease-in-out !important;
+  display: block !important;
+}
+
+.thinkingDot:nth-child(1) {
+  animation-delay: 0s !important;
+}
+
+.thinkingDot:nth-child(2) {
+  animation-delay: 0.2s !important;
+}
+
+.thinkingDot:nth-child(3) {
+  animation-delay: 0.4s !important;
+}
+
+.thinkingDot:nth-child(4) {
+  animation-delay: 0.6s !important;
+}
+
+/* Pulse animation - dots fade in and out with wave effect */
+/* NOTE: !important is invalid inside @keyframes - do not use */
+@keyframes thinkingPulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  /* Bumped z-index to max to ensure it sits above everything */
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  padding: 16px !important;
+}
+
+/* Exit Confirmation Modal - Per Figma Design */
+.exitConfirmContent {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 340px !important;
+  background-color: #FFFFFF !important;
+  border-radius: 12px !important;
+  padding: 48px 24px 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  text-align: center !important;
+}
+
+.exitConfirmCloseButton {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  color: #1F2937 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.exitConfirmCloseButton svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.exitConfirmCloseButton:hover {
+  color: #4B5563 !important;
+}
+
+.exitConfirmText {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #1F2937 !important;
+  line-height: 1.4 !important;
+  margin: 0 0 24px 0 !important;
+}
+
+.exitConfirmActions {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 16px !important;
+}
+
+.exitConfirmYes {
+  min-width: 80px !important;
+  padding: 10px 24px !important;
+  border-radius: 9999px !important;
+  border: 2px solid #ED6833 !important;
+  background-color: transparent !important;
+  color: #ED6833 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.exitConfirmYes:hover {
+  background-color: rgba(237, 104, 51, 0.1) !important;
+}
+
+.exitConfirmNo {
+  min-width: 80px !important;
+  padding: 10px 24px !important;
+  border-radius: 9999px !important;
+  border: 2px solid #1F2937 !important;
+  background-color: transparent !important;
+  color: #1F2937 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.exitConfirmNo:hover {
+  background-color: rgba(31, 41, 55, 0.1) !important;
+}
+
+.modalContent {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 650px !important; /* Wider modal */
+  background-color: #FFFFFF !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  margin: 0 auto !important;
+  display: block !important;
+
+  /* NEW: Restrict height and make the white box scrollable */
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+}
+
+@media (min-width: 640px) {
+  .modalContent {
+    padding: 20px !important;
+    margin: 0 !important;
+  }
+}
+
+.modalTitle {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #1F2937 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .modalTitle {
+    font-size: 16px !important;
+  }
+}
+
+.modalText {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: #4B5563 !important;
+  margin-bottom: 12px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .modalText {
+    font-size: 13px !important;
+  }
+}
+
+.modalTextarea {
+  width: 100% !important;
+  height: 96px !important;
+  padding: 8px 12px !important;
+  border: 1px solid #D1D5DB !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #1F2937 !important;
+  background-color: #FFFFFF !important;
+  resize: vertical !important;
+  outline: none !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .modalTextarea {
+    height: 112px !important;
+  }
+}
+
+.modalTextarea:focus {
+  border-color: #ED6833 !important;
+  box-shadow: 0 0 0 1px #ED6833 !important;
+}
+
+.modalTextarea::placeholder {
+  color: #9CA3AF !important;
+}
+
+.modalActions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+@media (min-width: 640px) {
+  .modalActions {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+}
+
+.modalButtonSecondary {
+  min-height: 44px !important;
+  padding: 8px 16px !important;
+  border-radius: 9999px !important;
+  border: 1px solid #9CA3AF !important;
+  background-color: transparent !important;
+  color: #4B5563 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 640px) {
+  .modalButtonSecondary {
+    min-height: auto !important;
+    font-size: 14px !important;
+  }
+}
+
+.modalButtonSecondary:hover {
+  background-color: #F3F4F6 !important;
+}
+
+.modalButtonSecondary:active {
+  background-color: #E5E7EB !important;
+}
+
+.modalButtonPrimary {
+  min-height: 44px !important;
+  padding: 8px 16px !important;
+  border-radius: 9999px !important;
+  border: none !important;
+  background-color: #ED6833 !important;
+  color: #FFFFFF !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 640px) {
+  .modalButtonPrimary {
+    min-height: auto !important;
+    font-size: 14px !important;
+  }
+}
+
+.modalButtonPrimary:hover {
+  opacity: 0.9 !important;
+}
+
+.modalButtonPrimary:active {
+  opacity: 0.8 !important;
+}
+
+/* Close Confirm Modal */
+.closeConfirmOverlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  padding: 16px !important;
+}
+
+.closeConfirmContent {
+  width: 100% !important;
+  max-width: 384px !important;
+  background-color: #FFFFFF !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  margin: 0 16px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .closeConfirmContent {
+    padding: 24px !important;
+    margin: 0 !important;
+  }
+}
+
+.closeConfirmTitle {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #1F2937 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .closeConfirmTitle {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+  }
+}
+
+.closeConfirmText {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #6B7280 !important;
+  margin-bottom: 20px !important;
+  display: block !important;
+}
+
+@media (min-width: 640px) {
+  .closeConfirmText {
+    font-size: 16px !important;
+    margin-bottom: 24px !important;
+  }
+}
+
+.closeConfirmActions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+@media (min-width: 640px) {
+  .closeConfirmActions {
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+}
+
+.closeConfirmButtonNo {
+  flex: 1 !important;
+  min-height: 44px !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background-color: #E5E7EB !important;
+  color: #1F2937 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  order: 2 !important;
+}
+
+@media (min-width: 640px) {
+  .closeConfirmButtonNo {
+    min-height: auto !important;
+    order: 1 !important;
+  }
+}
+
+.closeConfirmButtonNo:hover {
+  background-color: #D1D5DB !important;
+}
+
+.closeConfirmButtonNo:active {
+  background-color: #9CA3AF !important;
+}
+
+.closeConfirmButtonYes {
+  flex: 1 !important;
+  min-height: 44px !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background-color: #ED6833 !important;
+  color: #FFFFFF !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  order: 1 !important;
+}
+
+@media (min-width: 640px) {
+  .closeConfirmButtonYes {
+    min-height: auto !important;
+    order: 2 !important;
+  }
+}
+
+.closeConfirmButtonYes:hover {
+  opacity: 0.9 !important;
+}
+
+.closeConfirmButtonYes:active {
+  opacity: 0.8 !important;
+}
+
+/* More Info Modal */
+.moreInfoOverlay {
+  position: fixed !important;
+  z-index: 10001 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  padding: 16px !important;
+}
+
+.moreInfoContent {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 384px !important;
+  background-color: #FFFFFF !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  display: block !important;
+}
+
+.moreInfoCloseButton {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #000000 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.moreInfoCloseButton:hover {
+  opacity: 0.7 !important;
+}
+
+.moreInfoCloseIcon {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: #FFFFFF !important;
+  display: block !important;
+}
+
+.moreInfoTitle {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1F2937 !important;
+  margin-bottom: 12px !important;
+  padding-right: 24px !important;
+  display: block !important;
+}
+
+.moreInfoText {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #4B5563 !important;
+  margin-bottom: 12px !important;
+  display: block !important;
+}
+
+.moreInfoLink {
+  font-size: 14px !important;
+  color: #2563EB !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  display: inline !important;
+}
+
+.moreInfoLink:hover {
+  color: #1E40AF !important;
+}
+
+/* Source Documents */
+.sourcesContainer {
+  margin-top: 16px !important;
+  display: block !important;
+}
+
+.sourcesScroll {
+  display: flex !important;
+  gap: 12px !important;
+  overflow-x: auto !important;
+  padding-bottom: 8px !important;
+}
+
+.sourceCard {
+  width: 160px !important;
+  flex-shrink: 0 !important;
+  padding: 12px !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  background-color: #FFFFFF !important;
+  cursor: pointer !important;
+  transition: box-shadow 0.2s ease !important;
+  text-decoration: none !important;
+  display: block !important;
+}
+
+.sourceCard:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.sourceCardContent {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-align: center !important;
+}
+
+.sourceIconWrapper {
+  position: relative !important;
+  display: block !important;
+}
+
+.sourceIcon {
+  width: 40px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+.sourceDownloadBadge {
+  position: absolute !important;
+  bottom: -4px !important;
+  right: -4px !important;
+  width: 20px !important;
+  height: 20px !important;
+  background-color: #ED6833 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.sourceCard:hover .sourceDownloadBadge {
+  opacity: 1 !important;
+}
+
+.sourceDownloadIcon {
+  width: 12px !important;
+  height: 12px !important;
+  stroke: #FFFFFF !important;
+  display: block !important;
+}
+
+.sourceFileName {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #1F2937 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  transition: color 0.2s ease !important;
+}
+
+.sourceCard:hover .sourceFileName {
+  color: #ED6833 !important;
+}
+
+.sourcePageNumbers {
+  font-size: 11px !important;
+  color: #6B7280 !important;
+}
+
+.sourcesNavArrow {
+  width: 40px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.sourcesNavButton {
+  width: 32px !important;
+  height: 32px !important;
+  background-color: #F3F4F6 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.sourcesNavIcon {
+  width: 16px !important;
+  height: 16px !important;
+  stroke: #6B7280 !important;
+  display: block !important;
+}
+
+/* Hidden utility */
+.hidden {
+  display: none !important;
+}
+
+.ratingStars {
+  display: flex !important;
+  gap: 4px !important;
+}
+
+.starButton {
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  width: 24px !important;
+  padding: 0 !important;
+}
+
+.betaField {
+  margin-bottom: 24px !important; /* Increased spacing between questions */
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.betaField label {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important; /* Slightly more space between label and box */
+  color: #1F2937 !important;
+}
+
+/* Make textareas inside beta fields 50% taller (96px * 1.5 = 144px) */
+.betaField .modalTextarea {
+  height: 144px !important;
+}
+
+.feedbackAck {
+  font-size: 12px !important;
+  color: #ED6833 !important;
+  margin-left: 0 !important;
+  /* Prepare for fade */
+  opacity: 1 !important;
+  transition: opacity 0.5s ease-in-out !important;
+}
+
+/* New class for the fade out */
+.fadingOut {
+  opacity: 0 !important;
+}
+
+/* Ensure read-only stars look fully opaque even though button is disabled */
+.starButton:disabled {
+  opacity: 1 !important;
+  cursor: default !important;
+}
+
+/* Container for each dynamic question */
+.betaField {
+  margin-bottom: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Question Text / Label */
+.betaField label {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: #1F2937 !important;
+}
+
+/* Make textareas inside beta fields 50% taller */
+.betaField .modalTextarea {
+  height: 144px !important;
+}

@@ -1,0 +1,303 @@
+@import "tailwindcss";
+
+@import '../assets/utilities/_utilities.theme.css' layer(utilities);
+@import '../assets/legacy/responsive-table.css' layer(utilities);
+@import '../assets/tabs/react-tabs.css' layer(utilities);
+
+@plugin "@tailwindcss/forms";
+
+/* Theme variants (block form) */
+@custom-variant aw {
+  &:where([data-theme="aw"], [data-theme="aw"] *) { @slot; }
+}
+
+@custom-variant rba {
+  &:where([data-theme="rba"], [data-theme="rba"] *) { @slot; }
+}
+
+/* Override or add tokens */
+
+@theme {
+  /* === Colors (from your tailwind.aw.js) === */
+  --color-light-gray: #f8f6f4;
+  --color-dark-gray: #686869;
+  --color-gray: #c4bfb6;
+  --color-primary: #f26924;
+  --color-darkprimary: #cb4c0c;
+  --color-secondary: #000000;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-error-outline: #F14343; /* was 'error-outline' in v3 */
+  --color-error:         #B91515; /* if you also use `text-error` / `bg-error` */
+
+/* Optional semantic colors from your base theme (so you can use bg-theme-bg, etc.) */
+  /* If you use these, override them per theme below */
+
+  --color-theme-body:              var(--color-white);
+  --color-theme-bg:                var(--color-white);
+  --color-theme-btn-bg:            #F0F2F7;
+  --color-theme-btn-bg-hover:      var(--color-primary);
+  --color-theme-btn-text:          #1F2937;
+  --color-theme-btn-text-hover:    var(--color-white);
+  --color-theme-btn-border:        var(--color-primary);
+  --color-theme-btn-border-hover:  var(--color-primary);
+  --color-theme-btn-icon:          #6B7280;
+  --color-theme-btn-icon-hover:    #374151;
+  --color-theme-btn-secondary-bg:           var(--color-white);
+  --color-theme-btn-secondary-bg-hover:     var(--color-secondary);
+  --color-theme-btn-secondary-text:         var(--color-black);
+  --color-theme-btn-secondary-text-hover:   var(--color-white);
+  --color-theme-btn-secondary-border:       var(--color-black);
+  --color-theme-btn-secondary-border-hover: var(--color-black);
+  --color-theme-text:                       var(--color-black);
+
+  /* === Font families === */
+  --font-sans: "futura-pt", system-ui;     /* enables: font-sans         */
+  --font-serif: "open-sans", system-ui;    /* enables: font-serif        */
+
+  /* You can also define a custom token for a custom utility name: */
+  --font-futura-pt: "futura-pt", system-ui;   /* enables: font-futura-pt */
+
+
+  /* === Font weights === */
+  --font-weight-demi: 500;
+  --font-weight-heavy: 600;
+  --font-weight-bold: 700;
+  --font-weight-medium: 450;
+  --font-weight-regular: 400;
+  --font-weight-light: 300;
+  --font-weight-extralight: 200;
+
+  /* === Border radius === */
+  --radius-none: 0;
+  --radius-lg: 4.0625rem;
+
+/* === Spacing (so gap-s / p-s / m-s exist) === */
+  --spacing-xxl: 7.5rem;
+  --spacing-xl:  5rem;
+  --spacing-l:   2.5rem;
+  --spacing-ml:  2rem;
+  --spacing-m:   1.5rem;
+  --spacing-s:   1rem;
+  --spacing-xs:  0.75rem;
+  --spacing-xxs: 0.5rem;
+  --spacing-xxxs:0.25rem;
+  --spacing-0:   0px;
+
+/* === Breakpoints (from your base config) === */
+  --breakpoint-xl: 1488px;
+  --breakpoint-lg: 1248px;
+  --breakpoint-mml:1024px;
+  --breakpoint-ml: 1008px;
+  --breakpoint-mmd:800px;
+  --breakpoint-md: 672px;
+  --breakpoint-sm: 375px;
+
+  /* === Font sizes (size + optional line-height) === */
+  /* Desktop */
+  --text-xxl: 7.5rem;
+  --text-xxl--line-height: 100%;
+  --text-xl: 3.5rem;
+  --text-xl--line-height: 125%;
+  --text-l: 3rem;
+  --text-l--line-height: 125%;
+  --text-m: 2.25rem;
+  --text-m--line-height: 125%;
+  --text-s: 1.5rem;
+  --text-s--line-height: 124%;
+  --text-xs: 1.125rem;
+  --text-xs--line-height: 125%;
+  --text-xxs: 0.875rem;
+  --text-xxs--line-height: 125%;
+  --text-large-body: 1.125rem;
+  --text-large-body--line-height: 140%;
+  --text-body: 0.875rem;
+  --text-body--line-height: 157%;
+  --text-button: 1rem;
+  --text-button--line-height: 1.125rem;
+  --text-text-link: 1rem;
+  --text-text-link--line-height: 1.125rem;
+  --text-caption: 1rem;
+  --text-caption--line-height: 0.875rem;
+  --text-small: 0.75rem;
+  --text-small--line-height: 130%;
+  --text-legal: 0.625rem;
+  --text-legal--line-height: 160%;
+  --text-base: 1rem;
+  --text-base--line-height: 1.125rem;
+
+  /* Mobile */
+  --text-sm-xxl: 5rem;
+  --text-sm-xxl--line-height: 100%;
+  --text-sm-xl: 2.25rem;
+  --text-sm-xl--line-height: 125%;
+  --text-sm-l: 1.875rem;
+  --text-sm-l--line-height: 125%;
+  --text-sm-m: 1.5rem;
+  --text-sm-m--line-height: 100%;
+  --text-sm-s: 1.25rem;
+  --text-sm-s--line-height: 125%;
+  --text-sm-xs: 1rem;
+  --text-sm-xs--line-height: 125%;
+  --text-sm-xxs: 0.875rem;
+  --text-sm-xxs--line-height: 120%;
+
+  /* Aspect Ratios */
+  --aspect-hero: 21 / 9;
+  --aspect-video: 16 / 9;
+  --aspect-picture: 4 / 3;
+  --aspect-snapshot: 3 / 2;
+  --aspect-portrait: 2 / 3;
+  --aspect-square: 1 / 1;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+
+  put it in the base layer so utilities override it
+
+  // lowest-priority class names
+*/
+@layer base {
+  /* *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  } */
+
+  .body-copy {
+    font-size: var(--text-body);
+  }
+
+  .legal-copy {
+    font-size: var(--text-legal);
+  }
+
+  .body-copy ol {
+    list-style: decimal;
+    margin: 10px 0;
+  }
+
+  .body-copy ul {
+    margin: 20px;
+  }
+
+  .body-copy ol li::marker {
+    font-size: inherit;
+  }
+}
+/* medium-priority class names */
+@layer components {
+  .aw .body-copy p {
+    font-size: var(--text-body);
+  }
+
+  .aw .body-copy a:link,
+  .aw .body-copy a:visited {
+    font-family: var(--font-serif);
+    color: var(--color-darkprimary);
+    cursor: pointer;
+    text-underline-offset: 4px;
+  }
+
+  .aw .body-copy a:hover,
+  .aw .body-copy a:focus {
+    text-decoration-line: underline;
+  }
+
+  .aw .body-copy ul li {
+    color: inherit;
+  }
+
+  .aw .body-copy ul {
+    color: inherit;
+    list-style-type: disc;
+  }
+
+  .aw .body-copy ul ul {
+    margin-left: 20px;
+    list-style-type: circle;
+  }
+
+  .aw .theme-black .body-copy ul li::before {
+    background-color: var(--color-white);
+  }
+
+  .aw [data-component='general/socialimagecarousel'] .body-copy a {
+    display: inline-block;
+  }
+
+  .aw .caption a:link,
+  .aw .caption a:visited {
+    font-family: inherit;
+    color: var(--color-darkprimary);
+    cursor: pointer;
+    text-decoration-line: underline;
+  }
+
+  .aw .caption a span.svg-icon {
+    margin-top: -0.25rem;
+  }
+
+  .body-copy p {
+    margin-bottom: 1rem;
+  }
+
+  .sc-jss-editing-error,
+  .sc-jss-placeholder-error {
+    padding: 1em;
+    background-color: lightyellow;
+  }
+
+  #main {
+    outline: none;
+  }
+
+  #main:focus {
+    outline: 2px dashed #0066cc;
+    outline-offset: 4px;
+  }
+
+  /* Remove focus outline when not focused via keyboard */
+  #main:focus:not(:focus-visible) {
+    outline: none;
+  }
+  .awfooter .accordion-item {
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
+    height: auto;
+    max-height: 9999px;
+  }
+
+  .awfooter .accordion-item.collapsed {
+    max-height: 0;
+    transition: max-height 0.35s cubic-bezier(0, 1, 0, 1);
+  }
+
+  /* any other foundation selectors go here */
+}
+
+/*
+  Hides Sitecore editor markup,
+  if you run the app in connected mode while the Sitecore cookies
+  are set to edit mode.
+*/
+.scChromeData,
+.scpm {
+  display: none !important;
+}
+
+/*
+  Styles for default JSS error components
+*/
+body {
+  font-family: open-sans, system-ui, sans-serif;
+  overflow-x: hidden;
+}

@@ -1,0 +1,17 @@
+export enum QueryNodeOperator {
+  Equal = '=',
+  ExactMatch = '==',
+  NotEqual = '<>',
+  WildcardMatch = '*=',
+  LessThan = '<',
+  GreaterThan = '>',
+  LessThanOrEqual = '<=',
+  GreaterThanOrEqual = '>=',
+  EmptyField = 'emptyField*',
+  EmptyFieldValue = 'emptyValue*',
+  Range = '..',
+  FuzzyMatch = '~=',
+  RegexMatch = '/=',
+  PhoneticMatch = '%=',
+  Unknown = '',
+}

@@ -1,0 +1,281 @@
+[data-component="general/bazaarvoicereviews"] .bv_main_container .bv_numReviews_component_container,
+[data-component="general/bazaarvoicereviews"] .bv_main_container .bv_numReviews_component_container .bv_numReviews_text,
+[data-component="general/bazaarvoicereviews"] .bv_main_container .bv_avgRating_component_container[itemprop="ratingValue"] {
+  font-weight: var(--font-weight-medium) !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-flex-container-column
+{
+    width: 100% !important;
+    margin-left: 0 !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-section-summary-inline .bv-secondary-rating-summary .bv-table
+{
+    margin-left: 0 !important;
+}
+
+[data-component="general/bazaarvoicereviews"] bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-reference-data {
+  border-left: 0 !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-section-summary .bv-section-summary-block .bv-content-title {
+  font-family: var(--font-sans) !important;
+  font-size: var(--text-sm-xs) !important;
+  line-height: var(--text-sm-xs--line-height) !important;
+  font-weight: var(--font-weight-heavy) !important;
+  padding-top: 0px !important;
+  padding-bottom: 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-section-summary .bv-section-summary-inline .bv-inline-histogram-ratings .bv-histogram-filter-helper {
+  font-weight: 400 !important;
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.375rem !important;
+  padding-left: 0 !important;
+  padding-bottom: 0 !important;
+  margin-left: 0 !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-action-bar {
+  padding-top: 24px !important;
+  padding-bottom: 16px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-action-bar .bv-action-bar-header {
+  font-weight: var(--font-weight-heavy) !important;
+  font-size: var(--text-sm-s) !important;
+  line-height: 125% !important;
+  margin-bottom: 0px !important;
+}
+
+
+/* Control Bar */
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar {
+  margin-bottom: 24px !important;
+  padding: 12px 16px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-control-bar-count {
+  text-align: initial !important;
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  line-height: 22px !important;
+  padding: 0 !important;
+  margin-bottom: 12px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-control-bar-sort
+{
+    flex-grow: 1;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-control-bar-sort .bv-dropdown-label {
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-control-bar-sort .bv-dropdown-title
+{
+  margin-top: 4px !important;
+  margin-bottom: 5px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-target {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-target button {
+  border: 1px solid var(--color-gray) !important;
+  margin: 0 16px 0 8px !important;
+  height: 32px !important;
+  flex-grow: 1;
+  background: var(--color-white) !important;
+  position: relative !important;
+  padding: 0 30px 0 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-arrow {
+    right: 13px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-expand-filter-button {
+  background-color: var(--color-white) !important;
+  border: 1px solid var(--color-gray) !important;
+  height: 32px !important;
+  width: 32px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-expand-filter-button .bv-filter-control-icon {
+  max-width: 100% !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-author {
+  border-left: 0 !important;
+  font-weight: var(--font-weight-heavy) !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--text-sm-xs) !important;
+  line-height: var(--text-sm-xs--line-height) !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-datetime {
+  font-weight: 400 !important;
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.375rem !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-datetime-dot {
+  display: none !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-content-datetime-stamp:before {
+  content: "|" !important;
+}
+
+/* rating number indicator */
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-flex-container-column .bv-flex-container div:first-child {
+  font-weight: var(--font-weight-medium) !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--text-xs) !important;
+  line-height: var(--text-xs--line-height) !important;
+}
+
+/* rating number count */
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-flex-container-column .bv-flex-container div:last-child,
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-section-summary-inline .bv-secondary-rating-summary .bv-table .bv-table-row .bv-table-cell,
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-section-summary-inline .bv-secondary-rating-summary .bv-table .bv-table-row span.bv-table-cell:nth-of-type(2) {
+  font-family: var(--font-sans) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--text-xs) !important;
+  line-height: var(--text-xs--line-height) !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-secondary-ratings-container {
+  border-radius: 0 !important;
+  height: 1rem !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-secondary-ratings-container > span {
+  border-radius: 0 !important;
+  height: 1rem !important;
+}
+
+/* Review Data */
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-item.bv-content-review {
+  margin-bottom: 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared p:last-of-type
+{
+    margin-bottom: 0px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-header {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-item .bv-content-meta-wrapper {
+  padding-top: 11px !important;
+  padding-bottom: 11px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-title {
+  font-family: var(--font-sans) !important;
+  font-weight: var(--font-weight-heavy) !important;
+  font-size: var(--text-s) !important;
+  line-height: var(--text-s--line-height) !important;
+}
+
+[data-component="general/bazaarvoicereviews"] div.bv-content-summary-body-text {
+  font-family: var(--font-serif) !important;
+  font-size: 0.875rem !important;
+  line-height: 22px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list .bv-content-item {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list .bv-content-item .bv-content-core {
+  padding: 25px 16px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list .bv-content-item .bv-content-core .bv-content-header {
+  padding-top: 0 !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-data,
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-product-questions,
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-tag-dimensions,
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list {
+  margin-bottom: 0px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared ol {
+  margin-top: 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared ol:empty {
+  margin-top: 0px !important;
+  margin-bottom: 8px !important;
+}
+
+[data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-rating-stars-container .bv-rating-stars {
+  font-size: 18px !important;
+}
+
+@media only screen and (min-width: 959px) {
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-target
+  {
+      float: right !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-dropdown-target button {
+    flex-grow: initial !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-action-bar .bv-action-bar-header {
+    font-size: var(--text-s) !important;
+    line-height: var(--text-s--line-height) !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-section-summary .bv-section-summary-block .bv-content-title {
+    font-size: var(--text-xs) !important;
+    line-height: var(--text-xs--line-height) !important;
+    font-weight: var(--font-weight-heavy) !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-data-summary .bv-content-meta .bv-author {
+    font-size: var(--text-xs) !important;
+    line-height: var(--text-xs--line-height) !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-secondary-content-list .bv-content-item .bv-content-core {
+    padding: 30px 31px !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-flex-container-column {
+    width: 65% !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-content-secondary-ratings-container {
+    max-width: 320px !important;
+  }
+
+  [data-component="general/bazaarvoicereviews"] .bv-cv2-cleanslate .bv-shared .bv-control-bar .bv-control-bar-count {
+    font-family: var(--font-sans) !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    font-weight: 600 !important;
+    margin-bottom: 0 !important;
+  }
+}
