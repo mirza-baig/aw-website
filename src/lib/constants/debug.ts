@@ -33,6 +33,11 @@ export const Debug = {
         ),
       },
     },
+    designTool: {
+      renoworksGetProductOptions: debug(
+        `${defaultNamespace}:api:design-tool:renoworks-get-product-options`
+      ),
+    },
     genericFormBuilder: {
       submitActions: {
         saveToDatabase: debug(
