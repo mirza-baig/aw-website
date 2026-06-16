@@ -214,12 +214,15 @@ export class RenoworksClient {
       body: JSON.stringify(formJson),
     });
 
+    const body = await response.json();
+
     if (response.ok) {
-      let data = await response.json();
-      return data.results;
-    } else {
-      console.log('Error: ' + response?.statusText);
+      return body.data;
     }
+
+    throw new Error(
+      body.title || body.detail || `Failed to fetch Renoworks product options (${response.status})`
+    );
   }
 
   getRenoworksImageUrl(productSide, settings, queryString, renoworksKey) {
