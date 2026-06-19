@@ -28,11 +28,20 @@ import { ProductSwatch } from './product-swatch';
 import { ProductIntroTheme } from './ProductIntro.theme';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
+type BazaarvoiceReviewData = {
+  ReviewStatistics?: {
+    TotalReviewCount?: number;
+    AverageOverallRating?: number;
+    OverallRatingRange?: number;
+  };
+};
+
 type ProductIntroProps = Sitecore.Components.Product.ProductIntro.ProductIntro & {
   fields?: {
     children?: ProductSwatch[];
     tabLinkToSelect: Sitecore.FieldSets.ContentAnchor;
   };
+  awAggregateRating?: BazaarvoiceReviewData;
 };
 
 export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
@@ -177,7 +186,10 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
     aggregateRating = {
       '@type': 'AggregateRating',
       reviewCount: awAggregateRating?.ReviewStatistics?.TotalReviewCount,
-      ratingValue: awAggregateRating?.ReviewStatistics?.OverallRatingRange,
+      ratingValue:
+        awAggregateRating?.ReviewStatistics?.AverageOverallRating ??
+        awAggregateRating?.ReviewStatistics?.OverallRatingRange,
+      bestRating: awAggregateRating?.ReviewStatistics?.OverallRatingRange,
     };
   }
 

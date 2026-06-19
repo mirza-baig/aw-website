@@ -23,13 +23,13 @@ type ProductIntroProps = ComponentProps &
   };
 
 async function ProductIntro_Default(props: ProductIntroProps): Promise<JSX.Element> {
-  const { fields, productReviewStaticProps } = await getComponentServerProps(props.rendering);
+  const { fields, awAggregateRating } = await getComponentServerProps(props.rendering);
 
   return (
     <ProductIntroClient
       fields={fields}
       rendering={props.rendering}
-      productReviewStaticProps={productReviewStaticProps}
+      awAggregateRating={awAggregateRating}
     />
   );
 }
@@ -87,7 +87,7 @@ async function getComponentServerProps(rendering: ComponentRendering) {
         }
         const directReview = await response.json();
         const ratingData = directReview?.Includes?.Products?.[sanitizeProductId];
-        productReviewStaticProps.awAggregateRating = ratingData !== undefined ? ratingData : null;
+        productReviewStaticProps.awAggregateRating = ratingData ?? null;
       } catch (error) {
         console.error('Error fetching direct Bazaarvoice review:', error);
         productReviewStaticProps.awAggregateRating = null;
