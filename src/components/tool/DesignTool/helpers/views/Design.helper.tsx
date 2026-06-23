@@ -294,8 +294,9 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     const isSummaryStep = index === (viewModel?.attributes?.length ?? 0) - 1;
 
     prepareDesignSelectionData(`Jump To Step ${index + 1}`, isSummaryStep, product, viewModel);
-    // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-    globalThis.history.pushState(null, '', newPath);
+    // Step navigation must replace, not push, so the URL history doesn't accumulate
+    // one entry per attribute step. Back button should leave the tool entirely.
+    globalThis.history.replaceState(null, '', newPath);
   };
 
   const nextAttribute = () => {
@@ -312,8 +313,9 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     prepareDesignSelectionData('Next Step', isSummaryStep, product, viewModel);
 
-    // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-    globalThis.history.pushState(null, '', newPath);
+    // Step navigation must replace, not push, so the URL history doesn't accumulate
+    // one entry per attribute step. Back button should leave the tool entirely.
+    globalThis.history.replaceState(null, '', newPath);
   };
 
   const previousAttribute = () => {
@@ -325,20 +327,17 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     prepareDesignSelectionData('Previous Step', false, product, viewModel);
 
     if (attributeIndex === 0) {
-      console.log('previousAttribute', `${urlParts.pathName}${queryPart}#/${product.parentId}`);
-      // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-      globalThis.history.pushState(
+      // Step navigation must replace, not push, so the URL history doesn't accumulate
+      // one entry per attribute step. Back button should leave the tool entirely.
+      globalThis.history.replaceState(
         null,
         '',
         `${urlParts.pathName}${queryPart}#/${product.parentId}`
       );
     } else {
-      console.log(
-        'previousAttribute',
-        `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex - 1}`
-      );
-      // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-      globalThis.history.pushState(
+      // Step navigation must replace, not push, so the URL history doesn't accumulate
+      // one entry per attribute step. Back button should leave the tool entirely.
+      globalThis.history.replaceState(
         null,
         '',
         `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex - 1}`
@@ -1444,15 +1443,16 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                   </button>
                   <ul className={theme.mobileMenu.list}>
                     <li className={theme.mobileMenu.listItem}>
-                      <Link
-                        href={'#/'}
+                      <a
+                        href="#/"
                         className={
                           theme.mobileMenu.listItemLink + theme.mobileMenu.listItemStartOver
                         }
                         title="Start Over"
                         aria-label="Start Over"
-                        onClick={() => {
-                          designToolRouter.clearRouteData();
+                        onClick={(e) => {
+                          e.preventDefault();
+                          designToolRouter.goToStart(asPath);
                         }}
                       >
                         <SvgIcon
@@ -1464,7 +1464,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                           }
                         ></SvgIcon>
                         Start Over
-                      </Link>
+                      </a>
                     </li>
                     <li className={theme.mobileMenu.listItem}>
                       <button
@@ -1507,11 +1507,20 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (option: any) => (
                           <li key={option.id} className={theme.mobileMenu.optionsListItem}>
-                            <Link
-                              href={'#' + option.id}
+                            <a
+                              href={'#/' + option.id}
                               className={theme.mobileMenu.optionsListItemLink}
                               title={option.heading?.value}
                               aria-label={option.heading?.value}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const urlParts = GetUrlParts(asPath);
+                                globalThis.history.replaceState(
+                                  null,
+                                  '',
+                                  `${urlParts.pathName}#/${option.id}`
+                                );
+                              }}
                             >
                               {option.icon && (
                                 <img
@@ -1521,7 +1530,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                                 ></img>
                               )}
                               <Text field={option.heading}></Text>
-                            </Link>
+                            </a>
                           </li>
                         )
                       )}
@@ -1596,14 +1605,23 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                             }
                             key={option.id}
                           >
-                            <Link
+                            <a
                               href={'#/' + option.id}
                               className={theme.ctaSection.subMenuLink}
                               title={'Design a different ' + option.heading?.value}
                               aria-label={'Design a different ' + option.heading?.value}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const urlParts = GetUrlParts(asPath);
+                                globalThis.history.replaceState(
+                                  null,
+                                  '',
+                                  `${urlParts.pathName}#/${option.id}`
+                                );
+                              }}
                             >
                               <Text field={option.heading}></Text>
-                            </Link>
+                            </a>
                           </li>
                         )
                       )}

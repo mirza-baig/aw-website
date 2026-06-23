@@ -5,12 +5,13 @@ import ImageWrapper from 'helpers/Media/ImageWrapper';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { SliderWrapper } from 'helpers/SliderWrapper/SliderWrapper';
 // Components
-import NextLink from 'next/link';
+import { useAsPath } from 'lib/hooks/use-as-path';
 import { useContext } from 'react';
 import { useTheme } from 'src/lib/context/ThemeContext';
 
 import { DesignToolProductProps } from '../DesignTool.types';
 import { DesignToolContext } from '../DesignToolContext.helper';
+import { GetUrlParts } from '../js/utils';
 import { RelatedProductTheme, RelatedProductThemeSubType } from './RelatedProduct.theme';
 
 export const RelatedProduct = (props: DesignToolProductProps) => {
@@ -18,6 +19,13 @@ export const RelatedProduct = (props: DesignToolProductProps) => {
   const theme = (themeData as RelatedProductThemeSubType).classes;
 
   const { designToolRouter } = useContext(DesignToolContext);
+  const asPath = useAsPath();
+
+  const handleDesignLinkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const urlParts = GetUrlParts(asPath);
+    globalThis.history.replaceState(null, '', `${urlParts.pathName}#/${props.id}/0`);
+  };
 
   // Computed
   const cost = props?.cost?.fields?.priceLevelText?.value || 0;
@@ -140,12 +148,13 @@ export const RelatedProduct = (props: DesignToolProductProps) => {
           className={theme.detailsLink + theme.secondaryLink}
           target="_blank"
         ></Link>
-        <NextLink
+        <a
           href={designToolRouter.getRouteDataForProduct(props)}
           className={theme.designLink}
+          onClick={handleDesignLinkClick}
         >
           <Text field={props.ctaText}></Text>
-        </NextLink>
+        </a>
       </div>
     </div>
   );

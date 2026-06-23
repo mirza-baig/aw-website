@@ -51,6 +51,7 @@ export type BouncyCardProps = {
   children?: React.ReactNode | React.ReactNode[];
   onClick?: (param: any) => void;
   ctaUrl?: string;
+  ctaOnClick?: (e: React.MouseEvent) => void;
   ctaAlwaysVisible?: boolean;
   cardWidth?: string;
   renderAsLink?: boolean;
@@ -115,6 +116,16 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
 
   const ctaUrl = props?.ctaUrl ?? '#/' + props?.id;
 
+  // When the parent provides ctaOnClick, intercept the click so we can use
+  // history.replaceState (or any custom handler) instead of the default
+  // next/link App Router navigation.
+  const handleCtaClick = (e: React.MouseEvent) => {
+    if (props.ctaOnClick) {
+      e.preventDefault();
+      props.ctaOnClick(e);
+    }
+  };
+
   const RenderInnerContent = () => {
     return (
       <>
@@ -171,6 +182,7 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
             className={theme.optionBtn}
             title={option.heading?.value}
             aria-label={option.heading?.value}
+            onClick={handleCtaClick}
           >
             {RenderInnerContent()}
             {props.children ? props.children : <></>}
@@ -258,6 +270,7 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
                           className={theme.help.mobileDisplay.button}
                           title={'Choose ' + props.heading?.value}
                           aria-label={'Choose ' + props.heading?.value}
+                          onClick={handleCtaClick}
                         >
                           Choose
                         </Link>
@@ -298,6 +311,7 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
                               className={theme.help.desktopDisplay.button}
                               title={'Choose ' + option.heading?.value}
                               aria-label={'Choose ' + option.heading?.value}
+                              onClick={handleCtaClick}
                             >
                               Choose
                             </Link>

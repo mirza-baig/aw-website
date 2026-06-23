@@ -3,17 +3,19 @@ import Image from 'helpers/Media/Image';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import RichTextWrapper from 'helpers/RichTextWrapper/RichTextWrapper';
 import { SliderWrapper } from 'helpers/SliderWrapper';
-import Link from 'next/link';
+import { useAsPath } from 'lib/hooks/use-as-path';
 import { useTheme } from 'src/lib/context/ThemeContext';
 import { useBVScript } from 'src/lib/utils/use-bv-script';
 import { environment } from 'startup/environment';
 
 import { DesignToolProductProps } from '../DesignTool.types';
+import { GetUrlParts } from '../js/utils';
 import { ProductTheme, ProductThemeSubType } from './Product.theme';
 
 export const Product = (props: DesignToolProductProps) => {
   const { themeName, themeData } = useTheme(ProductTheme());
   const theme = themeData as ProductThemeSubType;
+  const asPath = useAsPath();
 
   useBVScript({ environment, theme: themeName });
 
@@ -37,6 +39,15 @@ export const Product = (props: DesignToolProductProps) => {
     return '#/' + props.id + '/0';
   };
 
+  // Replace (not push) so navigating into a product doesn't accumulate
+  // history entries. Drop the query string so prior product selections don't
+  // bleed into the new product's view.
+  const handleRouteToClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const urlParts = GetUrlParts(asPath);
+    globalThis.history.replaceState(null, '', `${urlParts.pathName}#/${props.id}/0`);
+  };
+
   const sliderSettings = {
     infinite: false,
     className: theme.classes.imgSliderContainer,
@@ -51,72 +62,77 @@ export const Product = (props: DesignToolProductProps) => {
           <SliderWrapper sliderSettings={sliderSettings} theme={themeName}>
             {product.image1.value?.src && (
               <div className={theme.classes.imgSlide}>
-                <Link
+                <a
                   href={routeTo()}
                   aria-label={product.ctaText?.value}
                   title={product.ctaText?.value}
+                  onClick={handleRouteToClick}
                 >
                   <ImageWrapper
                     image={product.image1}
                     additionalDesktopClasses={theme.classes.imgSlideImage}
                   ></ImageWrapper>
-                </Link>
+                </a>
               </div>
             )}
             {product.image2.value?.src && (
               <div className={theme.classes.imgSlide}>
-                <Link
+                <a
                   href={routeTo()}
                   aria-label={product.ctaText?.value}
                   title={product.ctaText?.value}
+                  onClick={handleRouteToClick}
                 >
                   <ImageWrapper
                     image={product.image2}
                     additionalDesktopClasses={theme.classes.imgSlideImage}
                   ></ImageWrapper>
-                </Link>
+                </a>
               </div>
             )}
             {product.image3.value?.src && (
               <div className={theme.classes.imgSlide}>
-                <Link
+                <a
                   href={routeTo()}
                   aria-label={product.ctaText?.value}
                   title={product.ctaText?.value}
+                  onClick={handleRouteToClick}
                 >
                   <ImageWrapper
                     image={product.image3}
                     additionalDesktopClasses={theme.classes.imgSlideImage}
                   ></ImageWrapper>
-                </Link>
+                </a>
               </div>
             )}
             {product.image4.value?.src && (
               <div className={theme.classes.imgSlide}>
-                <Link
+                <a
                   href={routeTo()}
                   aria-label={product.ctaText?.value}
                   title={product.ctaText?.value}
+                  onClick={handleRouteToClick}
                 >
                   <ImageWrapper
                     image={product.image4}
                     additionalDesktopClasses={theme.classes.imgSlideImage}
                   ></ImageWrapper>
-                </Link>
+                </a>
               </div>
             )}
             {product.image5.value?.src && (
               <div className={theme.classes.imgSlide}>
-                <Link
+                <a
                   href={routeTo()}
                   aria-label={product.ctaText?.value}
                   title={product.ctaText?.value}
+                  onClick={handleRouteToClick}
                 >
                   <ImageWrapper
                     image={product.image5}
                     additionalDesktopClasses={theme.classes.imgSlideImage}
                   ></ImageWrapper>
-                </Link>
+                </a>
               </div>
             )}
           </SliderWrapper>
@@ -144,13 +160,14 @@ export const Product = (props: DesignToolProductProps) => {
               <Text field={product.series} />
             </h3>
             <div className={theme.classes.category}>
-              <Link
+              <a
                 href={routeTo()}
                 aria-label={product.ctaText?.value}
                 title={product.ctaText?.value}
+                onClick={handleRouteToClick}
               >
                 <Text field={product.category} />
-              </Link>
+              </a>
             </div>
             <div className={theme.classes.reviewCost}>
               {product.bazaarvoice.productId && (
@@ -172,72 +189,77 @@ export const Product = (props: DesignToolProductProps) => {
             <SliderWrapper sliderSettings={sliderSettings} theme={themeName}>
               {product.image1 && (
                 <div className={theme.classes.imgSlide}>
-                  <Link
+                  <a
                     href={routeTo()}
                     aria-label={product.ctaText?.value}
                     title={product.ctaText?.value}
+                    onClick={handleRouteToClick}
                   >
                     <ImageWrapper
                       image={product.image1}
                       additionalDesktopClasses={theme.classes.imgSlideImage}
                     ></ImageWrapper>
-                  </Link>
+                  </a>
                 </div>
               )}
               {product.image2 && (
                 <div className={theme.classes.imgSlide}>
-                  <Link
+                  <a
                     href={routeTo()}
                     aria-label={product.ctaText?.value}
                     title={product.ctaText?.value}
+                    onClick={handleRouteToClick}
                   >
                     <ImageWrapper
                       image={product.image2}
                       additionalDesktopClasses={theme.classes.imgSlideImage}
                     ></ImageWrapper>
-                  </Link>
+                  </a>
                 </div>
               )}
               {product.image3 && (
                 <div className={theme.classes.imgSlide}>
-                  <Link
+                  <a
                     href={routeTo()}
                     aria-label={product.ctaText?.value}
                     title={product.ctaText?.value}
+                    onClick={handleRouteToClick}
                   >
                     <ImageWrapper
                       image={product.image3}
                       additionalDesktopClasses={theme.classes.imgSlideImage}
                     ></ImageWrapper>
-                  </Link>
+                  </a>
                 </div>
               )}
               {product.image4 && (
                 <div className={theme.classes.imgSlide}>
-                  <Link
+                  <a
                     href={routeTo()}
                     aria-label={product.ctaText?.value}
                     title={product.ctaText?.value}
+                    onClick={handleRouteToClick}
                   >
                     <ImageWrapper
                       image={product.image4}
                       additionalDesktopClasses={theme.classes.imgSlideImage}
                     ></ImageWrapper>
-                  </Link>
+                  </a>
                 </div>
               )}
               {product.image5 && (
                 <div className={theme.classes.imgSlide}>
-                  <Link
+                  <a
                     href={routeTo()}
                     aria-label={product.ctaText?.value}
                     title={product.ctaText?.value}
+                    onClick={handleRouteToClick}
                   >
                     <ImageWrapper
                       image={product.image5}
                       additionalDesktopClasses={theme.classes.imgSlideImage}
                     ></ImageWrapper>
-                  </Link>
+                  </a>
                 </div>
               )}
             </SliderWrapper>
@@ -254,14 +276,15 @@ export const Product = (props: DesignToolProductProps) => {
             </li>
           </ul>
           <div className={theme.classes.buttonContainer}>
-            <Link
+            <a
               href={routeTo()}
               className={theme.classes.button}
               title={product.ctaText?.value}
               aria-label={product.ctaText?.value}
+              onClick={handleRouteToClick}
             >
               <Text field={product.ctaText} />
-            </Link>
+            </a>
           </div>
         </div>
       </div>

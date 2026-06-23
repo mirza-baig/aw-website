@@ -146,6 +146,14 @@ export class DesignToolRouter {
   clearRouteData() {
     this.setRouteData(DefaultDesignToolRouteData);
   }
+
+  goToStart(url: string) {
+    const urlParts = GetUrlParts(url);
+    // Replace the current history entry with a clean pathName + '#/' (no query string)
+    // so prior product selections (frameColor, glass, etc.) don't carry over.
+    globalThis.history.replaceState(null, '', `${urlParts.pathName}#/`);
+    this.clearRouteData();
+  }
 }
 
 export type DesignToolRouteData = {
