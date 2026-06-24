@@ -14,8 +14,8 @@ export const ComparisonTitles = ({
   onSelectionChange,
   isMobile,
   comparisonTableRef,
-  staticHeader = false,
   singleSelect = false,
+  selectedText,
 }: {
   removeSeries: (index: number) => any;
   totalNumberOfSeries: number;
@@ -27,8 +27,8 @@ export const ComparisonTitles = ({
   isMobile?: boolean;
   isProductComparison?: boolean;
   comparisonTableRef: React.RefObject<HTMLDivElement | null>;
-  staticHeader: boolean;
   singleSelect?: boolean;
+  selectedText?: string;
 }) => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(() => {
     const indices = new Set<number>();
@@ -113,7 +113,7 @@ export const ComparisonTitles = ({
       container?.removeEventListener('scroll', handleHorizontalScroll);
       window.removeEventListener('resize', checkScrollButtons);
     };
-  }, [comparisonTableRef, staticHeader, allSeriesTitles, isMobile]);
+  }, [comparisonTableRef, allSeriesTitles, isMobile]);
 
   const ButtonCard = (
     props: { cardIndex: number; isSelected: boolean; onToggleSelect: () => void } & SeriesTitle
@@ -198,7 +198,7 @@ export const ComparisonTitles = ({
             tabIndex={0}
           >
             <span className="truncate font-medium text-sm font-sans">
-              {props.isSelected ? 'SELECTED:SEE BELOW' : buttonText}
+              {props.isSelected ? selectedText || 'SELECTED: SEE BELOW' : buttonText}
             </span>
 
             {props.isSelected && (

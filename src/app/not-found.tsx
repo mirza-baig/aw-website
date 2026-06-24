@@ -4,6 +4,7 @@ import scConfig from 'sitecore.config';
 import { ErrorPage } from '@sitecore-content-sdk/nextjs';
 import Layout from 'src/Layout';
 import Providers from 'src/Providers';
+import { loader } from 'lib/feature-flags/loader';
 
 export default async function NotFound() {
   if (scConfig.defaultSite) {
@@ -13,7 +14,8 @@ export default async function NotFound() {
     });
 
     if (page) {
-      const pageWithCustomProps = await client.getPageWithCustomProps(page);
+      const featureFlags = await loader();
+      const pageWithCustomProps = await client.getPageWithCustomProps(page, featureFlags);
 
       return (
         <Providers page={pageWithCustomProps}>

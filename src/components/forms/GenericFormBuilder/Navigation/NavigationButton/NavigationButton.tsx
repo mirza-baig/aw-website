@@ -6,6 +6,7 @@ import { FormikValues, useFormikContext } from 'formik';
 import { useGenericFormBuilderContext } from 'helpers/GenericFormBuilder/GenericFormBuilderContext';
 import { IconTypes } from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
+import { FormsConstants } from 'lib/constants/forms-constants';
 import { useTheme } from 'lib/context/ThemeContext';
 import { FormField, isCompositeField, isStandardField } from 'lib/generic-form-builder/form-props';
 import {
@@ -18,6 +19,7 @@ import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
+import { startTimer } from 'lib/personalize/abandon-tracker';
 import { getEnum } from 'lib/utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX, useState } from 'react';
@@ -192,19 +194,64 @@ function NavigationButton_Default(props: NavigationButtonProps): JSX.Element | n
     }
   };
 
-  const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    /* first check if botchecker field have value and if found,
-     set the Error messages and,
-     stop the execution and return click handler */
+  function updateFormStep(navigationStep: number) {
+    let currentStep = Number(sessionStorage.getItem(FormsConstants.AW.Form.CCPFormStep) || 1);
+
+    // update based on navigationStep
+    if (navigationStep === 1) {
+      currentStep += 1; // next
+    } else if (navigationStep === -1) {
+      currentStep -= 1; // previous
+    }
+    // save updated step
+    sessionStorage.setItem(FormsConstants.AW.Form.CCPFormStep, String(currentStep));
+    return currentStep;
+  }
+
+  function resetAbandonTimer() {
+    startTimer(
+      () => globalThis.dispatchEvent(new Event('aw_ccp_abandon')),
+      sessionStorage.getItem(FormsConstants.AW.Form.CCPFormTimeout)
+        ? Number(sessionStorage.getItem(FormsConstants.AW.Form.CCPFormTimeout))
+        : 15 * 60 * 1000 // default to 15 minutes
+    );
+  }
+
+  function handleBotCheck(
+    botCheckers: string[],
+    values: FormikValues,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setFieldError: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setIsErrorOnSubmit: any
+  ) {
     for (const botChecker of botCheckers) {
       if (values[botChecker]) {
         setFieldError(botChecker, 'Submission Unsuccessful');
         setIsErrorOnSubmit('Submission Unsuccessful');
-        return;
+        return false;
       }
       delete values[botChecker];
     }
+    return true;
+  }
+
+  const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    // update the FormStep
+    updateFormStep(navigationStep);
+
+    // reset timer
+    resetAbandonTimer();
+
+    /* first check if botchecker field have value and if found,
+     set the Error messages and,
+     stop the execution and return click handler */
+    if (!handleBotCheck(botCheckers, values, setFieldError, setIsErrorOnSubmit)) {
+      return;
+    }
+
     // Validate the current step's fields if skip validation is not checked
     const errors = fields?.skipValidation?.value ? [] : await validateForm();
     if (Object.keys(errors).length === 0 || navigationStep === -1) {

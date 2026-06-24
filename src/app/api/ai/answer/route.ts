@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
+        Referer: req.headers.get('referer') ?? req.headers.get('origin') ?? 'unknown',
         ...(stream ? { Accept: 'application/x-ndjson' } : {}),
       },
       body: JSON.stringify({ question, verbose, session_id, stream }),

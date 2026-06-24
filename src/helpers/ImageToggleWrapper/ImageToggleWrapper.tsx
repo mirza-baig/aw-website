@@ -2,6 +2,7 @@
 import classNames from 'classnames';
 import { ProductSwatch } from 'components/product/ProductIntro/helpers/product-swatch';
 import { useTheme } from 'lib/context/ThemeContext';
+import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX, useEffect, useRef, useState } from 'react';
 import Slider from 'react-slick';
 
@@ -29,31 +30,35 @@ export const ImageToggleWrapper = (props: ImageToggleWrapperProps): JSX.Element 
   const { themeName } = useTheme();
   const { fields, ratio, maxW, maxH, updateToggleState, colorSwatches, selectedSwatchIndex } =
     props;
-  const primaryImage = fields?.primaryImage?.value?.src
-    ? {
-        image: fields?.primaryImage,
-        mobileImage: fields?.primaryImageMobile,
-        mobileFocusArea: fields?.primaryImageMobileFocusArea,
-        additionalDesktopClasses: 'w-fit mx-auto',
-        additionalMobileClasses: 'w-fit mx-auto',
-        ratio: ratio,
-        maxW: maxW,
-        maxH: maxH,
-      }
-    : false;
+  const isEE = useExperienceEditor();
 
-  const secondaryImage = fields?.secondaryImage?.value?.src
-    ? {
-        image: fields?.secondaryImage,
-        mobileImage: fields?.secondaryImageMobile,
-        mobileFocusArea: fields?.secondaryImageMobileFocusArea,
-        additionalDesktopClasses: 'w-fit mx-auto',
-        additionalMobileClasses: 'w-fit mx-auto',
-        ratio: ratio,
-        maxW: maxW,
-        maxH: maxH,
-      }
-    : false;
+  const primaryImage =
+    isEE || fields?.primaryImage?.value?.src
+      ? {
+          image: fields?.primaryImage,
+          mobileImage: fields?.primaryImageMobile,
+          mobileFocusArea: fields?.primaryImageMobileFocusArea,
+          additionalDesktopClasses: 'w-fit mx-auto',
+          additionalMobileClasses: 'w-fit mx-auto',
+          ratio: ratio,
+          maxW: maxW,
+          maxH: maxH,
+        }
+      : false;
+
+  const secondaryImage =
+    isEE || fields?.secondaryImage?.value?.src
+      ? {
+          image: fields?.secondaryImage,
+          mobileImage: fields?.secondaryImageMobile,
+          mobileFocusArea: fields?.secondaryImageMobileFocusArea,
+          additionalDesktopClasses: 'w-fit mx-auto',
+          additionalMobileClasses: 'w-fit mx-auto',
+          ratio: ratio,
+          maxW: maxW,
+          maxH: maxH,
+        }
+      : false;
 
   const activeButtonStyle =
     'text-regular inline-block rounded-full px-l py-[8px] text-small uppercase leading-tight border-2 border-black font-heavy text-secondary';
@@ -173,15 +178,15 @@ export const ImageToggleWrapper = (props: ImageToggleWrapperProps): JSX.Element 
     }
   };
 
-  const isToggleAvailable =
+  const isToggleAvailable = !!(
     (primaryImage && secondaryImage) ||
-    (colorSwatches?.exteriorColorSwatches?.length && colorSwatches?.interiorColorSwatches?.length);
+    (colorSwatches?.exteriorColorSwatches?.length && colorSwatches?.interiorColorSwatches?.length)
+  );
 
   return (
     <>
-      {/* redner image toggle slider */}
+      {/* render image toggle slider */}
       {imageSlider()}
-
       {/* Toggle Buttons */}
       {isToggleAvailable && (
         <div className={classNames('mt-m mb-m flex justify-center')}>

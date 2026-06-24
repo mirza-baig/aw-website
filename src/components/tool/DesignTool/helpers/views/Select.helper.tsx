@@ -4,13 +4,14 @@ import { Text } from '@sitecore-content-sdk/nextjs';
 import BouncyCard from 'helpers/BouncyCard/BouncyCard';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
-import Link from 'next/link';
+import { useAsPath } from 'lib/hooks/use-as-path';
 import { JSX, useContext } from 'react';
 import { useTheme } from 'src/lib/context/ThemeContext';
 
 import { DesignToolOptionDataProps } from '../DesignTool.helper';
 import { DesignToolProductProps, DesignToolProps } from '../DesignTool.types';
 import { DesignToolContext } from '../DesignToolContext.helper';
+import { GetUrlParts } from '../js/utils';
 import { Product } from '../partial/Product.helper';
 import { SelectTheme, SelectThemeSubType } from './Select.theme';
 
@@ -19,6 +20,7 @@ export const Select = (props: DesignToolOptionDataProps): JSX.Element => {
   const { designToolRouter } = useContext(DesignToolContext);
   const options = designToolRouter?.routeData?.options ?? [];
   const products = designToolRouter?.routeData?.products ?? [];
+  const asPath = useAsPath();
   const { themeData } = useTheme(SelectTheme());
   const theme = (themeData as SelectThemeSubType).classes;
 
@@ -47,6 +49,10 @@ export const Select = (props: DesignToolOptionDataProps): JSX.Element => {
                 {...option}
                 key={index}
                 additionalButtonClassName={theme.bouncyCardShadow}
+                ctaOnClick={() => {
+                  const urlParts = GetUrlParts(asPath);
+                  globalThis.history.replaceState(null, '', `${urlParts.pathName}#/${option.id}`);
+                }}
               />
             ))}
           </div>
@@ -59,16 +65,18 @@ export const Select = (props: DesignToolOptionDataProps): JSX.Element => {
           </div>
         )}
       </div>
-      <Link
+      <a
         href="#/"
-        passHref={true}
         className={theme.mobileResetBtn}
-        onClick={() => designToolRouter.clearRouteData()}
+        onClick={(e) => {
+          e.preventDefault();
+          designToolRouter.goToStart(asPath);
+        }}
         title="Start Over"
         aria-label="Start Over"
       >
         <SvgIcon icon={'reset'} size="28" className={theme.mobileResetBtnIcon}></SvgIcon>
-      </Link>
+      </a>
     </div>
   );
 };

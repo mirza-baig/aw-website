@@ -734,6 +734,31 @@ export class AWViewModelBuilder extends ViewModelBuilderBase {
         ) {
           productSettingValues.set(this._GrilleStyle, 'None');
         }
+
+        // Additional FIX: aw_400frenchwoodgliderdoor - Reset interior color if invalid for 95 size
+        if (this.product.renoworksKey?.toLowerCase() === 'aw_400frenchwoodgliderdoor') {
+          let currentInterior = productSettingValues.get(this._FrameColor);
+
+          if (currentInterior) {
+            const [, colorPart] = currentInterior.split('; ');
+            const currentColor = colorPart?.split('=')[1];
+
+            const selectedWidth = productSettingValues.get(this._WidthInches);
+            const selectedHeight = productSettingValues.get(this._HeightInches);
+
+            const is95Width = selectedWidth === '95.25';
+            const is95Height = selectedHeight === '95.5';
+
+            const shouldHideBlack =
+              this.product.renoworksKey?.toLowerCase() === 'aw_400frenchwoodgliderdoor' &&
+              (is95Width || is95Height);
+
+            // If current selection becomes invalid → reset it
+            if (shouldHideBlack && currentColor === 'Black') {
+              productSettingValues.set(this._FrameColor, 'Interior; color=White');
+            }
+          }
+        }
       }
     }
 
@@ -994,7 +1019,6 @@ export class AWViewModelBuilder extends ViewModelBuilderBase {
     if (!this._sizingIsEnabled) {
       return;
     }
-
     if (this._currentProductConfiguration === null) {
       attributes.push(new DescriptionAttributeViewModel('Sizing', this.product.text.sizing));
 
@@ -1164,6 +1188,16 @@ export class AWViewModelBuilder extends ViewModelBuilderBase {
     let tab = renoworksResult.interiorResult.product.tab.singleOrDefault(
       (_) => _.name === RenoworksKeys.FrameColor.name
     );
+
+    let selectedWidth = renoworksResult.productSettingValues.get(this._WidthInches);
+    let selectedHeight = renoworksResult.productSettingValues.get(this._HeightInches);
+    const is95Width = selectedWidth === '95.25';
+    const is95Height = selectedHeight === '95.5';
+
+    const shouldHideBlack =
+      this.product.renoworksKey?.toLowerCase() === 'aw_400frenchwoodgliderdoor' &&
+      (is95Width || is95Height);
+
     if (tab != null) {
       let showMahoganyNote = false;
 
@@ -1198,6 +1232,10 @@ export class AWViewModelBuilder extends ViewModelBuilderBase {
 
             for (let color of component.color) {
               if (EntryDoorUnfinishedInteriors.includes(color.name)) {
+                continue;
+              }
+
+              if (shouldHideBlack && color.name === 'Black') {
                 continue;
               }
 
@@ -1395,11 +1433,15 @@ export class AWViewModelBuilder extends ViewModelBuilderBase {
 
           // 400 Series Gliding Door
           // Only allow White as an interior if it is selected as an exterior color
-          if (this.product.renoworksKey == 'aw_400frenchwoodgliderdoor') {
+          if (this.product.renoworksKey === 'aw_400frenchwoodgliderdoor') {
             group.note = 'White interior only available with matching exterior color.';
           }
 
           for (let color of component.color) {
+            if (shouldHideBlack && color.name === 'Black') {
+              continue;
+            }
+
             let parameters = [
               new ProductSettingSetValue(
                 this._FrameColor,

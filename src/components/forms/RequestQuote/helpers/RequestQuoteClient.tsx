@@ -61,6 +61,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     Number.isFinite(parsedAbandonMinutes) && parsedAbandonMinutes > 0 ? parsedAbandonMinutes : 15;
   const abandonTimeoutMs = abandonTimeoutMinutes * 60 * 1000;
   const abandonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abandonTrackingStartedRef = useRef(false);
   const hasSubmittedRef = useRef(false);
   const hasAbandonedRef = useRef(false);
   const latestFormValuesRef = useRef<FormikValues>(requestQuoteInitialValues);
@@ -115,7 +116,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   };
 
   const fireAbandonIfNeeded = () => {
-    if (hasSubmittedRef.current || hasAbandonedRef.current) {
+    if (!abandonTrackingStartedRef.current || hasSubmittedRef.current || hasAbandonedRef.current) {
       return;
     }
 
@@ -129,7 +130,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   };
 
   const startAbandonTimer = () => {
-    if (hasSubmittedRef.current) {
+    if (!abandonTrackingStartedRef.current || hasSubmittedRef.current) {
       return;
     }
 
@@ -140,8 +141,18 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     }, abandonTimeoutMs);
   };
 
+  const beginAbandonTracking = () => {
+    if (abandonTrackingStartedRef.current || hasSubmittedRef.current) {
+      return;
+    }
+
+    abandonTrackingStartedRef.current = true;
+    hasAbandonedRef.current = false;
+    startAbandonTimer();
+  };
+
   const handleFormInteraction = () => {
-    if (hasSubmittedRef.current) {
+    if (!abandonTrackingStartedRef.current || hasSubmittedRef.current) {
       return;
     }
 
@@ -177,15 +188,12 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     latestPageIndexRef.current = pageIndex;
   }, [pageIndex]);
 
-  // Start the timer when the form opens
+  // Clean up timers on unmount
   useEffect(() => {
-    startAbandonTimer();
-
     return () => {
       clearAbandonTimer();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [abandonTimeoutMs]);
+  }, []);
 
   useEffect(() => {
     if (currentFlow === 'homeowner' && pageIndex === 2) {
@@ -726,6 +734,9 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   };
 
   const fireStart = (userType: 'homeowner' | 'professional') => {
+    // Start abandonment tracking when the first step is completed
+    beginAbandonTracking();
+
     // Guard: do not fire more than once per browser session.
     if (sessionStorage.getItem('awRAQStarted') === 'true') {
       return;
@@ -861,10 +872,10 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                               isMultiSelectEnabled={false}
                               onClick={() => {
                                 setCurrentFlow(user.value as UserType);
-                                fireStepComplete({ ...values, about: user.value });
-                                updatePageIndex(1);
                                 // Support Personalization | UC-1 & UC-2 | RAQ Start Event
                                 fireStart(user.value as UserType);
+                                fireStepComplete({ ...values, about: user.value });
+                                updatePageIndex(1);
                               }}
                             />
                           </div>

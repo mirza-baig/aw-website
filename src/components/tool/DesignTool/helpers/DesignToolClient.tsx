@@ -118,6 +118,12 @@ export function DesignToolClient(props: DesignToolProps): JSX.Element {
     }
   };
 
+  // Clear session storage of design start flag on initial load of the Design Tool
+  useEffect(() => {
+    sessionStorage.removeItem('awDTDesignStarted');
+    sessionStorage.removeItem('awDTGlassReached');
+  }, []);
+
   // add the designtool2 class to the body so that css overrides take place.
   useEffect(() => {
     document.body.classList.add('design-tool-2-module');

@@ -17,6 +17,8 @@ import SitecoreStyles from 'components/content-sdk/SitecoreStyles';
 import componentMap from '.sitecore/component-map';
 import classNames from 'classnames';
 import { WebsiteStaticState } from 'lib/website/website-state';
+import { SetFeatureFlags } from 'lib/feature-flags/SetFeatureFlags';
+import { DemoFeatureFlag } from 'lib/feature-flags/DemoFeatureFlag';
 
 interface LayoutProps {
   page: Page & { customProps: WebsiteStaticState };
@@ -55,85 +57,87 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
         'app.role': awClientConfig.app.role,
       }}
     >
+      <SetFeatureFlags values={page.customProps.featureFlags} />
       <ApmErrorBoundary disableSuspense={true}>
-      <Scripts />
-      <SitecoreStyles layoutData={layout} />
-      {/* root placeholder for the app, which we add components to using route data */}
-      <div className={classNames(mainClassPageEditing, page.customProps.theme)}>
-        {mode.isDesignLibrary ? (
-          route && (
-            <DesignLibraryApp
-              page={page}
-              rendering={route}
-              componentMap={componentMap}
-              loadServerImportMap={() => import('.sitecore/import-map.server')}
-            />
-          )
-        ) : (
-          <>
-            <SkipLink />
-            <WebsiteContextProvider
-              initialDynamicState={initialDynamicState}
-              staticState={page.customProps}
-            >
-              <SourcingCookies />
-              <BoldOrangeScript />
-              <TrustArcScript />
-              <GoogleTagManager />
-              <TypeKit />
-              <BeforeAfterScript />
-              <PageSchemaOrg />
-              <header>
-                <div id="header">
-                  {route && (
-                    <AppPlaceholder
-                      page={page}
-                      componentMap={componentMap}
-                      name="headless-header"
-                      rendering={route}
-                    />
-                  )}
-                </div>
-              </header>
-              <main id="main" tabIndex={-1} role="main">
-                <div id="hero">
-                  {route && (
-                    <AppPlaceholder
-                      page={page}
-                      componentMap={componentMap}
-                      name="headless-hero"
-                      rendering={route}
-                    />
-                  )}
-                </div>
-                <div id="content">
-                  {route && (
-                    <AppPlaceholder
-                      page={page}
-                      componentMap={componentMap}
-                      name="headless-main"
-                      rendering={route}
-                    />
-                  )}
-                </div>
-              </main>
-              <footer>
-                <div id="footer">
-                  {route && (
-                    <AppPlaceholder
-                      page={page}
-                      componentMap={componentMap}
-                      name="headless-footer"
-                      rendering={route}
-                    />
-                  )}
-                </div>
-              </footer>
-            </WebsiteContextProvider>
-          </>
-        )}
-      </div>
-    </ApmErrorBoundary>
+        <Scripts />
+        <SitecoreStyles layoutData={layout} />
+        {/* root placeholder for the app, which we add components to using route data */}
+        <div className={classNames(mainClassPageEditing, page.customProps.theme)}>
+          {mode.isDesignLibrary ? (
+            route && (
+              <DesignLibraryApp
+                page={page}
+                rendering={route}
+                componentMap={componentMap}
+                loadServerImportMap={() => import('.sitecore/import-map.server')}
+              />
+            )
+          ) : (
+            <>
+              <SkipLink />
+              <WebsiteContextProvider
+                initialDynamicState={initialDynamicState}
+                staticState={page.customProps}
+              >
+                <SourcingCookies />
+                <BoldOrangeScript />
+                <TrustArcScript />
+                <GoogleTagManager />
+                <TypeKit />
+                <BeforeAfterScript />
+                <PageSchemaOrg />
+                <header>
+                  <div id="header">
+                    {route && (
+                      <AppPlaceholder
+                        page={page}
+                        componentMap={componentMap}
+                        name="headless-header"
+                        rendering={route}
+                      />
+                    )}
+                  </div>
+                </header>
+                <main id="main" tabIndex={-1} role="main">
+                  <div id="hero">
+                    {route && (
+                      <AppPlaceholder
+                        page={page}
+                        componentMap={componentMap}
+                        name="headless-hero"
+                        rendering={route}
+                      />
+                    )}
+                  </div>
+                  <div id="content">
+                    {route && (
+                      <AppPlaceholder
+                        page={page}
+                        componentMap={componentMap}
+                        name="headless-main"
+                        rendering={route}
+                      />
+                    )}
+                  </div>
+                </main>
+                <footer>
+                  <div id="footer">
+                    {route && (
+                      <AppPlaceholder
+                        page={page}
+                        componentMap={componentMap}
+                        name="headless-footer"
+                        rendering={route}
+                      />
+                    )}
+                  </div>
+                </footer>
+              </WebsiteContextProvider>
+            </>
+          )}
+        </div>
+        <DemoFeatureFlag page={page} />
+      </ApmErrorBoundary>
     </AppInsightsClient>
   );
 };

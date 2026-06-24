@@ -18,6 +18,10 @@
 /* Override or add tokens */
 
 @theme {
+  /* === Anchor / sticky header offset === */
+  --sticky-header-height: 121px;
+  --anchor-offset: calc(var(--sticky-header-height) + 16px);
+
   /* === Colors (from your tailwind.aw.js) === */
   --color-light-gray: #f8f6f4;
   --color-dark-gray: #686869;
@@ -151,6 +155,13 @@
   --aspect-square: 1 / 1;
 }
 
+/* Adjust the sticky header height for mobile devices */
+@media (max-width: 1008px) {
+  :root {
+    --sticky-header-height: 110px;
+  }
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -171,6 +182,11 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   } */
+
+  /* Anchor offset for sticky header */
+  main [id] {
+    scroll-margin-top: var(--anchor-offset);
+  }
 
   .body-copy {
     font-size: var(--text-body);

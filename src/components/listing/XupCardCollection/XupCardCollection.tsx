@@ -18,8 +18,6 @@ function XupCardCollection_Default(props: XupCardCollectionProps): JSX.Element {
   // This ensures a better user experience across devices.
   const MAX_CARDS_PER_ROW_TABLET_DEFAULT = 3;
 
-  // const phKey = `cards-${props.params?.DynamicPlaceholderId}`;
-
   const dynamicPlaceholderId = props.params?.DynamicPlaceholderId;
   const phKey = dynamicPlaceholderId ? `cards-${dynamicPlaceholderId}` : undefined;
 
@@ -30,11 +28,10 @@ function XupCardCollection_Default(props: XupCardCollectionProps): JSX.Element {
     getEnum<XupDisplayStyle>(props?.fields?.desktopDisplayStyle) ?? 'grid';
   const mobileDisplayStyle = getEnum<XupDisplayStyle>(props?.fields?.mobileDisplayStyle) ?? 'grid';
 
-  const maxCardsPerRow: number = parseInt(getEnum<string>(props?.fields?.cardsPerRow) ?? '3');
-  const tabletMaxCardsPerRow =
-    maxCardsPerRow > MAX_CARDS_PER_ROW_TABLET_DEFAULT
-      ? MAX_CARDS_PER_ROW_TABLET_DEFAULT
-      : maxCardsPerRow;
+  const maxCardsPerRow: number = Number.parseInt(
+    getEnum<string>(props?.fields?.cardsPerRow) ?? '3'
+  );
+  const tabletMaxCardsPerRow = Math.min(maxCardsPerRow, MAX_CARDS_PER_ROW_TABLET_DEFAULT);
 
   return (
     <XupCardCollectionClient

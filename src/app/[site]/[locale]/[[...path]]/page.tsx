@@ -18,6 +18,7 @@ import { isNullOrEmpty } from 'lib/utils/string-utils/is-null-or-empty';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace'
 import { sites } from '.sitecore/aw-sites';
 import { DraftModeWorkaroundMiddleware } from 'lib/middleware/draft-mode-workaround-middleware';
+import { loader } from 'lib/feature-flags/loader';
 
 // Enable Incremental Static Regeneration (ISR)
 export const revalidate = 60;
@@ -56,7 +57,8 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  page = await client.getPageWithCustomProps(page, path);
+  const featureFlags = await loader();
+  page = await client.getPageWithCustomProps(page, featureFlags, path);
 
   return (
       <NextIntlClientProvider>

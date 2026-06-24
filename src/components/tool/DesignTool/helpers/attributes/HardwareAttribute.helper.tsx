@@ -34,6 +34,10 @@ const HardwareAttribute = ({
     onUpdateOptionGroup && onUpdateOptionGroup(optionGroup, collection);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const selectedHardware = viewModel.groups.singleOrDefault((_: any) => _.isSelected);
+  const isStandardLockAndKeeperSelected = selectedHardware?.title === 'Standard Lock and Keeper';
+
   return (
     <div className={theme.attributeOption}>
       <p className={theme.titleMobile}>Hardware</p>
@@ -79,43 +83,49 @@ const HardwareAttribute = ({
           </div>
         )}
 
-        {finishOptions().length > 0 && (
+        {(finishOptions().length > 0 || isStandardLockAndKeeperSelected) && (
           <div className={theme.containerFinish}>
             <p className={theme.title}>Select Finish</p>
-            <ul className={theme.containerlist}>
-              {finishOptions().map(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (option: any, index: number) => (
-                  <li className={theme.listItem} key={`${option?.title}-${index}`}>
-                    <button
-                      className={theme.listItemButton}
-                      onClick={() => optionClicked(option, finishOptions())}
-                    >
-                      {option.image && (
-                        <span
-                          className={`${theme.listItemImageWrapper} ${
-                            option.isSelected || option.isClicked
-                              ? theme.selected
-                              : theme.unselected
-                          }`}
-                        >
-                          <div style={{ background: '#' + option.colorRgb, borderRadius: '50%' }}>
-                            <img
-                              className={theme.listItemImage}
-                              src={option.image === 'empty' ? empty.src : option.image}
-                              alt={option.title}
-                              width={76}
-                              height={76}
-                            ></img>
-                          </div>
-                        </span>
-                      )}
-                      <span className={theme.listItemButtonText}>{option.title}</span>
-                    </button>
-                  </li>
-                )
-              )}
-            </ul>
+            {isStandardLockAndKeeperSelected ? (
+              <p className={theme.copy + ' ' + theme.containerTextFinishDisclaimer}>
+                Standard lock and keeper finishes match your interior finish selection.
+              </p>
+            ) : (
+              <ul className={theme.containerlist}>
+                {finishOptions().map(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (option: any, index: number) => (
+                    <li className={theme.listItem} key={`${option?.title}-${index}`}>
+                      <button
+                        className={theme.listItemButton}
+                        onClick={() => optionClicked(option, finishOptions())}
+                      >
+                        {option.image && (
+                          <span
+                            className={`${theme.listItemImageWrapper} ${
+                              option.isSelected || option.isClicked
+                                ? theme.selected
+                                : theme.unselected
+                            }`}
+                          >
+                            <div style={{ background: '#' + option.colorRgb, borderRadius: '50%' }}>
+                              <img
+                                className={theme.listItemImage}
+                                src={option.image === 'empty' ? empty.src : option.image}
+                                alt={option.title}
+                                width={76}
+                                height={76}
+                              ></img>
+                            </div>
+                          </span>
+                        )}
+                        <span className={theme.listItemButtonText}>{option.title}</span>
+                      </button>
+                    </li>
+                  )
+                )}
+              </ul>
+            )}
           </div>
         )}
         {viewModel.optional.length > 0 && (

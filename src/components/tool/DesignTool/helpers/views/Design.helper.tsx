@@ -253,6 +253,9 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     updateSettings(optionGroup.productSettingChanges);
     updateVisibleImage(optionGroup.imageSide);
+
+    // Reset Abandon Event TIMER ON USER INTERACTION
+    startOrResetAbandonTimer();
   };
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -266,6 +269,9 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     option._isSelected = true;
     updateSettings(option.productSettingChanges);
     updateVisibleImage(option.imageSide);
+
+    // Reset Abandon Event TIMER ON USER INTERACTION
+    startOrResetAbandonTimer();
   };
 
   const updateVisibleImage = (imageSide: number) => {
@@ -281,11 +287,32 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     }
   };
 
+  const DESIGN_STARTED_KEY = 'awDTDesignStarted';
+  const getDesignStarted = () => {
+    return sessionStorage.getItem(DESIGN_STARTED_KEY) === 'true';
+  };
+
+  const setDesignStarted = (started: boolean) => {
+    sessionStorage.setItem(DESIGN_STARTED_KEY, String(started));
+    console.log('bmc - setDesignStarted: ', started);
+  };
+
+  const fireDesignProgress = (changedAttribute?: string, changedValue?: string) => {
+    if (attributeIndex === 0) {
+      sessionStorage.setItem('awDTGlassReached', 'false');
+    }
+
+    if (!getDesignStarted()) {
+      fireDesignStart();
+      return;
+    }
+
+    fireDesignUpdate(changedAttribute, changedValue);
+  };
+
   const goToStep = (index: number) => {
-    if (attributeIndex === 0 && index > 0) {
-      fireDesignStart(); // jump from sizing(Step 1)
-    } else {
-      fireDesignUpdate();
+    if (index !== attributeIndex) {
+      fireDesignProgress();
     }
     const urlParts = GetUrlParts(asPath);
     const queryPart = urlParts.query ? `?${urlParts.query}` : '';
@@ -294,16 +321,13 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     const isSummaryStep = index === (viewModel?.attributes?.length ?? 0) - 1;
 
     prepareDesignSelectionData(`Jump To Step ${index + 1}`, isSummaryStep, product, viewModel);
-    // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-    globalThis.history.pushState(null, '', newPath);
+    // Back button should leave the tool entirely.
+    globalThis.history.replaceState(null, '', newPath);
   };
 
   const nextAttribute = () => {
-    if (attributeIndex === 0) {
-      fireDesignStart(); // leaving sizing(Step 1)
-    } else {
-      fireDesignUpdate();
-    }
+    fireDesignProgress();
+
     const urlParts = GetUrlParts(asPath);
     const queryPart = urlParts.query ? `?${urlParts.query}` : '';
     const newPath = `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex + 1}`;
@@ -312,12 +336,12 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     prepareDesignSelectionData('Next Step', isSummaryStep, product, viewModel);
 
-    // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-    globalThis.history.pushState(null, '', newPath);
+    // Back button should leave the tool entirely.
+    globalThis.history.replaceState(null, '', newPath);
   };
 
   const previousAttribute = () => {
-    fireDesignUpdate();
+    fireDesignProgress();
     const urlParts = GetUrlParts(asPath);
     const queryPart = urlParts.query ? `?${urlParts.query}` : '';
 
@@ -325,20 +349,15 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     prepareDesignSelectionData('Previous Step', false, product, viewModel);
 
     if (attributeIndex === 0) {
-      console.log('previousAttribute', `${urlParts.pathName}${queryPart}#/${product.parentId}`);
-      // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-      globalThis.history.pushState(
+      //  Back button should leave the tool entirely.
+      globalThis.history.replaceState(
         null,
         '',
         `${urlParts.pathName}${queryPart}#/${product.parentId}`
       );
     } else {
-      console.log(
-        'previousAttribute',
-        `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex - 1}`
-      );
-      // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2, was router.push here
-      globalThis.history.pushState(
+      //  Back button should leave the tool entirely.
+      globalThis.history.replaceState(
         null,
         '',
         `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex - 1}`
@@ -612,7 +631,6 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     }
   };
   const summaryCtaText = props.fields?.summaryCtaText?.value || undefined;
-  console.log(summaryCtaText);
   const handleSummaryPillCTAClick = (e: React.MouseEvent) => {
     e?.preventDefault();
     // Trigger Design tool to RAQ click payload
@@ -692,13 +710,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
   const isOptionalStep = (title: string): boolean => optionalTitles.has(title);
 
-  // ----- Start Personalization Payload ------
-  const hasDesignStarted = () => sessionStorage.getItem('awDesignStarted') === 'true';
-
-  const markDesignStarted = () => {
-    sessionStorage.setItem('awDesignStarted', 'true');
-  };
-
+  // ============ Start Personalization Payload ============
   const getQueryParams = () => {
     const params = new URLSearchParams(globalThis.location.search);
     return {
@@ -712,33 +724,88 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     };
   };
 
-  // START Event - US #311
-  const fireDesignStart = () => {
-    if (hasDesignStarted()) {
+  const extractColor = (value?: string | null) => {
+    if (!value) {
+      return '';
+    }
+    const regex = /color=([^;]+)/;
+    const result = regex.exec(value);
+
+    return result ? result[1] : '';
+  };
+
+  const getBasePayload = () => {
+    const params = getQueryParams();
+    type SelectedOption = { title: string; value: string };
+    const getSelectedValue = (title: string) => {
+      return (
+        viewModel?._selectedOptions?.find((o: SelectedOption) => o.title === title)?.value || ''
+      );
+    };
+
+    const getValue = (paramValue: string | undefined, title: string) => {
+      return paramValue || getSelectedValue(title);
+    };
+
+    return {
+      timestamp: new Date().toISOString(),
+      pageUrl: globalThis.location.href,
+      // Product info
+      productSeries: product?.series?.value,
+      productType: product?.productType?.value,
+      productName: product?.name,
+      productId: product?.productId,
+      // Attribute selections info from URL
+      attributeIndex: attributeIndex,
+      widthIn: getValue(params.width, 'Unit Width'),
+      heightIn: getValue(params.height, 'Unit Height'),
+
+      frameColor: getValue(params.frameColor, 'Interior Color'),
+      glass: getValue(params.glass, 'Glass'),
+      hardware: getValue(params.hardware, 'Hardware'),
+      grillesStyle: getValue(params.grille, 'Grille Pattern'),
+
+      interiorColor: extractColor(params.frameColor || getSelectedValue('Interior Color')),
+      exteriorColor: extractColor(params.frameColorExt || getSelectedValue('Exterior Door Color')),
+    };
+  };
+  const abandonTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abandonStartedRef = React.useRef(false);
+  const abandonCancelledRef = React.useRef(false);
+  const abandonFiredRef = React.useRef(false);
+
+  const abandonTimeoutMinutes = Number(props?.fields?.cdpInactivityMinutes?.value ?? 10);
+  const abandonTimeoutMs = abandonTimeoutMinutes * 60 * 1000;
+
+  const clearAbandonTimeout = () => {
+    if (abandonTimeoutRef.current) {
+      clearTimeout(abandonTimeoutRef.current);
+      abandonTimeoutRef.current = null;
+    }
+  };
+
+  const startOrResetAbandonTimer = () => {
+    if (!abandonStartedRef.current || abandonCancelledRef.current) {
       return;
     }
+    clearAbandonTimeout();
+
+    abandonTimeoutRef.current = setTimeout(() => {
+      fireAbandonEvent();
+    }, abandonTimeoutMs);
+  };
+  // START Event - US #311
+  const fireDesignStart = () => {
+    setDesignStarted(true);
 
     sessionStorage.setItem('awDTGlassReached', 'false');
-    const params = getQueryParams();
     const startPayload = {
       type: 'AW:DESIGN_TOOL_START',
       channel: 'WEB',
       language: 'EN',
       ext: {
-        timestamp: new Date().toISOString(),
-        pageUrl: globalThis.location.href,
+        ...getBasePayload(),
         referrer: document.referrer,
-
-        // Product info
-        productSeries: product?.series?.value,
-        productType: product?.productType?.value,
-        productName: product?.name,
-        productId: product?.productId,
-
-        // Attribute selections info from URL
-        attributeIndex: attributeIndex,
-        widthIn: params.width,
-        heightIn: params.height,
       },
     };
 
@@ -746,7 +813,11 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       .then(() => console.log('[CDP] Design Tool fireStart payload:', startPayload))
       .catch((err) => console.error('[CDP] Design Tool fireStart Event error', err));
 
-    markDesignStarted();
+    // START ABANDON TIMER
+    abandonStartedRef.current = true;
+    abandonCancelledRef.current = false;
+    abandonFiredRef.current = false;
+    startOrResetAbandonTimer();
   };
 
   // SEPARATE GLASS TRACKING
@@ -760,69 +831,41 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       sessionStorage.setItem('awDTGlassReached', 'true');
     }
   }, [attributeIndex, progressBar]);
+
   // Update EVENT - US #312
   const fireDesignUpdate = (changedAttribute?: string, changedValue?: string) => {
-    if (!hasDesignStarted()) {
-      return;
-    }
-
-    const params = getQueryParams();
-    type SelectedOption = { title: string; value: string };
-    const getSelectedValue = (title: string) => {
-      return (
-        viewModel?._selectedOptions?.find((o: SelectedOption) => o.title === title)?.value || ''
-      );
-    };
-
     const updatePayload = {
       type: 'AW:DESIGN_TOOL_UPDATE',
       channel: 'WEB',
       language: 'EN',
       ext: {
-        timestamp: new Date().toISOString(),
-        pageUrl: globalThis.location.href,
-
-        // Product info
-        productSeries: product?.series?.value,
-        productType: product?.productType?.value,
-        productName: product?.name,
-        awProductId: product?.productId,
-
+        ...getBasePayload(),
         // Resume link
         resumeUrl: globalThis.location.href,
-
         // Attribute selections info from URL
-        attributeIndex: attributeIndex,
         changedAttribute: changedAttribute || '', //gtmItemHeader
         changedValue: changedValue || '', //gtmItemDetail
-        widthIn: getSelectedValue('Unit Width'),
-        heightIn: getSelectedValue('Unit Height'),
-        frameColor: params.frameColor, // from Query Params as it's not a selected option
-        glass: getSelectedValue('Glass'),
-        hardware: getSelectedValue('Hardware'),
-        grillesStyle: getSelectedValue('Grille Pattern'),
-        interiorColor: getSelectedValue('Interior Color'),
-        exteriorColor: getSelectedValue('Exterior Door Color'),
       },
     };
     event(updatePayload)
       .then(() => console.log('[CDP] Design Tool fireUpdate payload:', updatePayload))
       .catch((err) => console.error('[CDP] Design Tool fireUpdate Event error', err));
+
+    // Re-Initiate ABANDON TIMER
+    abandonStartedRef.current = true;
+    abandonCancelledRef.current = false;
+    abandonFiredRef.current = false;
+    startOrResetAbandonTimer();
   };
 
   // Move to RAQ Event - US #315
   const fireRequestQuoteClick = () => {
-    const params = getQueryParams();
+    // Reset design-start tracking for the next design flow
+    setDesignStarted(false);
 
-    const extractColor = (value?: string | null) => {
-      if (!value) {
-        return '';
-      }
-      const regex = /color=([^;]+)/;
-      const result = regex.exec(value);
-
-      return result ? result[1] : '';
-    };
+    // CANCEL Abandon Event TIMER
+    abandonCancelledRef.current = true;
+    clearAbandonTimeout();
 
     const fromExperience = sessionStorage.getItem('awDTFromExperience') === 'true';
     const experienceId = sessionStorage.getItem('awDTExperienceId') || '';
@@ -833,31 +876,13 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       channel: 'WEB',
       language: 'EN',
       ext: {
-        timestamp: new Date().toISOString(),
-        pageUrl: globalThis.location.href,
-
+        ...getBasePayload(),
         // UC-03 Experience linking
         fromExperience: fromExperience,
         experienceId: experienceId,
 
-        // Product info
-        productSeries: product?.series?.value,
-        productType: product?.productType?.value,
-        productName: product?.name,
-        productId: product?.productId,
-
         // Resume link
         resumeUrl: resumeUrl,
-
-        // Attribute selections info from URL
-        widthIn: params.width,
-        heightIn: params.height,
-        frameColor: params.frameColor,
-        glass: params.glass,
-        hardware: params.hardware,
-        grillesStyle: params.grille,
-        interiorColor: extractColor(params.frameColor),
-        exteriorColor: extractColor(params.frameColorExt),
       },
     };
 
@@ -866,7 +891,36 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       .catch((err) => console.error('[CDP] Design tool - RAQ Click error', err));
   };
 
-  // ----- End Personalization Payload --------
+  // Abandon Event - US #313
+  const fireAbandonEvent = () => {
+    if (abandonFiredRef.current || abandonCancelledRef.current) {
+      return;
+    }
+    abandonFiredRef.current = true;
+    const payload = {
+      type: 'AW:DESIGN_TOOL_ABANDON',
+      channel: 'WEB',
+      language: 'EN',
+      ext: {
+        ...getBasePayload(),
+        // Resume link
+        resumeUrl: globalThis.location.href,
+        referrer: document.referrer,
+
+        elapsedMinutes: abandonTimeoutMinutes,
+        designComplete: sessionStorage.getItem('awDTGlassReached') === 'true',
+      },
+    };
+
+    event(payload)
+      .then(() => console.log('[CDP] Design Tool ABANDON:', payload))
+      .catch((err) => console.error('[CDP] Abandon error', err));
+
+    // Clear the Timer
+    clearAbandonTimeout();
+  };
+  // ======= End Personalization Payload ==========
+
   return (
     legacyAWViewModel && (
       <div className={theme.stepDesign}>
@@ -1444,15 +1498,16 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                   </button>
                   <ul className={theme.mobileMenu.list}>
                     <li className={theme.mobileMenu.listItem}>
-                      <Link
-                        href={'#/'}
+                      <a
+                        href="#/"
                         className={
                           theme.mobileMenu.listItemLink + theme.mobileMenu.listItemStartOver
                         }
                         title="Start Over"
                         aria-label="Start Over"
-                        onClick={() => {
-                          designToolRouter.clearRouteData();
+                        onClick={(e) => {
+                          e.preventDefault();
+                          designToolRouter.goToStart(asPath);
                         }}
                       >
                         <SvgIcon
@@ -1464,7 +1519,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                           }
                         ></SvgIcon>
                         Start Over
-                      </Link>
+                      </a>
                     </li>
                     <li className={theme.mobileMenu.listItem}>
                       <button
@@ -1507,11 +1562,20 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (option: any) => (
                           <li key={option.id} className={theme.mobileMenu.optionsListItem}>
-                            <Link
-                              href={'#' + option.id}
+                            <a
+                              href={'#/' + option.id}
                               className={theme.mobileMenu.optionsListItemLink}
                               title={option.heading?.value}
                               aria-label={option.heading?.value}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const urlParts = GetUrlParts(asPath);
+                                globalThis.history.replaceState(
+                                  null,
+                                  '',
+                                  `${urlParts.pathName}#/${option.id}`
+                                );
+                              }}
                             >
                               {option.icon && (
                                 <img
@@ -1521,7 +1585,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                                 ></img>
                               )}
                               <Text field={option.heading}></Text>
-                            </Link>
+                            </a>
                           </li>
                         )
                       )}
@@ -1596,14 +1660,23 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                             }
                             key={option.id}
                           >
-                            <Link
+                            <a
                               href={'#/' + option.id}
                               className={theme.ctaSection.subMenuLink}
                               title={'Design a different ' + option.heading?.value}
                               aria-label={'Design a different ' + option.heading?.value}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const urlParts = GetUrlParts(asPath);
+                                globalThis.history.replaceState(
+                                  null,
+                                  '',
+                                  `${urlParts.pathName}#/${option.id}`
+                                );
+                              }}
                             >
                               <Text field={option.heading}></Text>
-                            </Link>
+                            </a>
                           </li>
                         )
                       )}

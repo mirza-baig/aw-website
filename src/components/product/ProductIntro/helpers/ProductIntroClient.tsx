@@ -17,8 +17,8 @@ import SingleButton from 'helpers/SingleButton/SingleButton';
 import { Subheadline } from 'helpers/Subheadline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { useBVScript } from 'lib/utils/use-bv-script';
+import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
 import { JSX, useEffect, useMemo, useState } from 'react';
@@ -44,6 +44,78 @@ type ProductIntroProps = Sitecore.Components.Product.ProductIntro.ProductIntro &
   awAggregateRating?: BazaarvoiceReviewData;
 };
 
+// Reduce cognitive complexity) ---
+
+function renderEyebrow(
+  fields: ProductIntroProps['fields'],
+  isEE: boolean,
+  themeData: { classes: Record<string, string> },
+  props: ProductIntroProps
+): JSX.Element {
+  if (fields?.productItem) {
+    return (
+      <Text
+        tag="h4"
+        className={themeData.classes.eyebrow}
+        field={{
+          value: fields.productItem?.fields?.productSeries?.fields?.productTypeName?.value ?? '',
+        }}
+      />
+    );
+  }
+  if (isEE || fields?.eyebrowText?.value) {
+    return <Eyebrow classes={themeData.classes.eyebrow} {...props} />;
+  }
+  return <></>;
+}
+
+function renderHeadline(
+  fields: ProductIntroProps['fields'],
+  isEE: boolean,
+  themeData: { classes: Record<string, string> },
+  props: ProductIntroProps
+): JSX.Element {
+  if (fields?.productItem) {
+    return (
+      <div className={themeData.classes.headlineWrapper}>
+        <Text
+          useTag="h4"
+          className={themeData.classes.headline}
+          field={{ value: fields.productItem?.fields?.productName?.value ?? '' }}
+        />
+      </div>
+    );
+  }
+  if (isEE || fields?.headlineText?.value) {
+    return <Headline classes={themeData.classes.headline} {...props} />;
+  }
+  return <></>;
+}
+
+function renderBody(
+  fields: ProductIntroProps['fields'],
+  isEE: boolean,
+  themeData: { classes: Record<string, string> },
+  props: ProductIntroProps
+): JSX.Element {
+  if (fields?.productItem) {
+    return (
+      <RichTextWrapper
+        field={{ value: fields.productItem?.fields?.productDescription?.value ?? '' }}
+        classes={themeData.classes.bodyClass}
+      />
+    );
+  }
+  if (isEE || fields?.body?.value) {
+    return (
+      <BodyCopy classes={classNames(themeData.classes.bodyClass, 'overflow-x-auto')} {...props} />
+    );
+  }
+  return <></>;
+}
+
+// --- Component ---
+
 export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
   const { fields, awAggregateRating } = props;
   const { themeName, themeData } = useTheme(ProductIntroTheme);
@@ -54,7 +126,7 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
   const [isInterior, setIsInterior] = useState<boolean>(true);
   const [selectedSwatchColor, setSelectedSwatchColor] = useState<number | undefined>();
   const [colorSwatches, setColorSwatches] = useState<ProductSwatch[] | undefined>();
-  const { currentScreenWidth } = useCurrentScreenType();
+  const isEE = useExperienceEditor();
 
   const { siteInfo } = useWebsiteContext();
   // Add the bazaarvoice script
@@ -86,7 +158,7 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
   useEffect(() => {
     const tabId =
       fields?.tabLinkToSelect?.fields?.contentId?.value ?? props?.fields?.tabLinkToSelect?.id;
-    const newUrl = new URL(`${window.location.pathname}#${tabId}`, window.location.href);
+    const newUrl = new URL(`${globalThis.location.pathname}#${tabId}`, globalThis.location.href);
     setTabUrl(tabId ? newUrl.href : undefined);
     // we can ignore suggested deps as they are directly coming from layout and can be ommited here
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,7 +167,7 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     isInterior ? setColorSwatches(interiorColorSwatches) : setColorSwatches(exteriorColorSwatches);
-    if (themeName === 'aw' && fields?.children?.length) {
+    if (fields?.children?.length) {
       setSelectedSwatchColor(0);
     }
   }, [
@@ -106,13 +178,14 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
     themeName,
   ]);
 
-  if (!fields) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    null;
+  // Always render in edit mode so Sitecore field editors appear
+  if (!fields && !isEE) {
+    return <></>;
   }
 
   function renderColorSwatches(): JSX.Element {
-    if (colorSwatches?.length) {
+    // Always render swatch headline fields in edit mode so Sitecore field editors appear
+    if (colorSwatches?.length || isEE) {
       return (
         <>
           <Subheadline
@@ -123,56 +196,65 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
             }}
           />
 
-          <ul className="mb-m flex gap-m">
-            {colorSwatches?.map((_childItem, index: number) => {
-              // Use a unique identifier for the key, fallback to index if not available
-              const swatchKey =
-                _childItem?.fields?.productImageSwatch?.fields?.swatchName?.value ??
-                `colorswatch-${index}`;
-              return (
-                <li key={swatchKey} className="flex flex-col items-center">
-                  <button
-                    type="button"
-                    aria-pressed={selectedSwatchColor === index}
-                    onClick={() => {
-                      setSelectedSwatchColor(index);
-                    }}
-                    className={classNames(
-                      'block h-[46px] w-[46px] rounded-full p-[2px]',
-                      selectedSwatchColor === index && themeName === 'aw' ? 'border-2' : '',
-                      themeName === 'aw' ? 'cursor-pointer' : ''
-                    )}
-                  >
-                    <span className="mx-auto block h-[38px] w-[38px] rounded-full  [&_img]:rounded-full">
-                      <ImagePrimary
-                        imageLayout="responsive"
-                        fields={{
-                          primaryImage: _childItem?.fields?.productImageSwatch?.fields
-                            ?.swatchImage as ImageField,
-                          primaryImageMobile: _childItem?.fields?.productImageSwatch?.fields
-                            ?.swatchImage as ImageField,
-                          primaryImageCaption: {
-                            value: '',
-                          },
-                        }}
-                      />
-                    </span>
-                  </button>
+          {isEE && !colorSwatches?.length ? (
+            // Show placeholder for swatch children in edit mode when no swatches exist
+            <div className="mb-m flex gap-m">
+              <span className="text-gray-400 italic text-sm">
+                No color swatches configured, add child swatch items
+              </span>
+            </div>
+          ) : (
+            <ul className="mb-m flex gap-m">
+              {colorSwatches?.map((_childItem, index: number) => {
+                // Use a unique identifier for the key, fallback to index if not available
+                const swatchKey =
+                  _childItem?.fields?.productImageSwatch?.fields?.swatchName?.value ??
+                  `colorswatch-${index}`;
+                return (
+                  <li key={swatchKey} className="flex flex-col items-center">
+                    <button
+                      type="button"
+                      aria-pressed={selectedSwatchColor === index}
+                      onClick={() => {
+                        setSelectedSwatchColor(index);
+                      }}
+                      className={classNames(
+                        'block h-[46px] w-[46px] rounded-full p-[2px]',
+                        selectedSwatchColor === index ? 'border-2' : '',
+                        'cursor-pointer'
+                      )}
+                    >
+                      <span className="mx-auto block h-[38px] w-[38px] rounded-full  [&_img]:rounded-full">
+                        <ImagePrimary
+                          imageLayout="responsive"
+                          fields={{
+                            primaryImage: _childItem?.fields?.productImageSwatch?.fields
+                              ?.swatchImage as ImageField,
+                            primaryImageMobile: _childItem?.fields?.productImageSwatch?.fields
+                              ?.swatchImage as ImageField,
+                            primaryImageCaption: {
+                              value: '',
+                            },
+                          }}
+                        />
+                      </span>
+                    </button>
 
-                  <Subheadline
-                    useTag="span"
-                    fields={{
-                      subheadlineText: _childItem?.fields?.productImageSwatch?.fields
-                        ?.swatchName ?? {
-                        value: '',
-                      },
-                    }}
-                    classes={themeData.classes.swatchTitle}
-                  />
-                </li>
-              );
-            })}
-          </ul>
+                    <Subheadline
+                      useTag="span"
+                      fields={{
+                        subheadlineText: _childItem?.fields?.productImageSwatch?.fields
+                          ?.swatchName ?? {
+                          value: '',
+                        },
+                      }}
+                      classes={themeData.classes.swatchTitle}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </>
       );
     } else {
@@ -180,20 +262,16 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
     }
   }
 
-  let aggregateRating;
+  const aggregateRating = {
+    '@type': 'AggregateRating',
+    reviewCount: awAggregateRating?.ReviewStatistics?.TotalReviewCount,
+    ratingValue:
+      awAggregateRating?.ReviewStatistics?.AverageOverallRating ??
+      awAggregateRating?.ReviewStatistics?.OverallRatingRange,
+    bestRating: awAggregateRating?.ReviewStatistics?.OverallRatingRange,
+  };
 
-  if (themeName === 'aw') {
-    aggregateRating = {
-      '@type': 'AggregateRating',
-      reviewCount: awAggregateRating?.ReviewStatistics?.TotalReviewCount,
-      ratingValue:
-        awAggregateRating?.ReviewStatistics?.AverageOverallRating ??
-        awAggregateRating?.ReviewStatistics?.OverallRatingRange,
-      bestRating: awAggregateRating?.ReviewStatistics?.OverallRatingRange,
-    };
-  }
-
-  const brandName = themeName === 'aw' ? 'Andersen Windows' : '';
+  const brandName = 'Andersen Windows';
   const ldJsonScript = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -215,8 +293,8 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
       />
       <Component variant="lg" dataComponent="product/productintro" {...props}>
-        {/* Favourite */}
-        {showFavorite && (
+        {/* Favourite - Always render in edit mode so Sitecore field editors appear */}
+        {(showFavorite || isEE) && (
           <div className="absolute -top-[16px] right-0 max-md:hidden">
             <div
               className={classNames(
@@ -235,27 +313,23 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
           </div>
         )}
         <div className={themeData.classes.imageColClasses}>
-          {themeName === 'aw' ? (
-            <ImageToggleWrapper
-              fields={{
-                primaryImage: fields.primaryImage,
-                secondaryImage: fields.secondaryImage,
-                primaryImageMobile: fields?.primaryImageMobile,
-                secondaryImageMobile: fields?.secondaryImageMobile,
-                primaryImageMobileFocusArea: fields?.primaryImageMobileFocusArea,
-                secondaryImageMobileFocusArea: fields?.secondaryImageMobileFocusArea,
-              }}
-              colorSwatches={{
-                interiorColorSwatches: interiorColorSwatches,
-                exteriorColorSwatches: exteriorColorSwatches,
-              }}
-              selectedSwatchIndex={selectedSwatchColor}
-              updateToggleState={updateToggleState}
-              ratio={'square'}
-            />
-          ) : (
-            <></>
-          )}
+          <ImageToggleWrapper
+            fields={{
+              primaryImage: fields.primaryImage,
+              secondaryImage: fields.secondaryImage,
+              primaryImageMobile: fields?.primaryImageMobile,
+              secondaryImageMobile: fields?.secondaryImageMobile,
+              primaryImageMobileFocusArea: fields?.primaryImageMobileFocusArea,
+              secondaryImageMobileFocusArea: fields?.secondaryImageMobileFocusArea,
+            }}
+            colorSwatches={{
+              interiorColorSwatches: interiorColorSwatches,
+              exteriorColorSwatches: exteriorColorSwatches,
+            }}
+            selectedSwatchIndex={selectedSwatchColor}
+            updateToggleState={updateToggleState}
+            ratio={'square'}
+          />
         </div>
         <div className={themeData.classes.descriptionColClasses}>
           {/* Favourite */}
@@ -279,76 +353,26 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
               </div>
             </div>
           )}
-          {(() => {
-            if (fields.eyebrowText?.value) {
-              return <Eyebrow classes={themeData.classes.eyebrow} {...props} />;
-            }
-            const productTypeName =
-              fields.productItem?.fields?.productSeries?.fields?.productTypeName?.value;
-            if (productTypeName) {
-              return (
-                <Text
-                  tag="h4"
-                  className={themeData.classes.eyebrow}
-                  field={{
-                    value: productTypeName,
-                  }}
-                />
-              );
-            }
-            return <></>;
-          })()}
 
-          {(() => {
-            if (fields.headlineText?.value) {
-              return <Headline classes={themeData.classes.headline} {...props} />;
-            }
-            if (fields.productItem?.fields?.productName) {
-              return (
-                <div className={themeData.classes.headlineWrapper}>
-                  <Text
-                    useTag="h4"
-                    className={themeData.classes.headline}
-                    field={{ value: fields.productItem.fields.productName.value }}
-                  />
-                </div>
-              );
-            }
-            return <></>;
-          })()}
+          {renderEyebrow(fields, isEE, themeData, props)}
+          {renderHeadline(fields, isEE, themeData, props)}
+          {renderBody(fields, isEE, themeData, props)}
 
-          {(() => {
-            let bodyContent = <></>;
-            if (fields.body?.value) {
-              bodyContent = (
-                <BodyCopy
-                  classes={classNames(themeData.classes.bodyClass, 'overflow-x-auto')}
-                  {...props}
-                />
-              );
-            } else if (fields.productItem?.fields?.productDescription) {
-              bodyContent = (
-                <RichTextWrapper
-                  field={{ value: fields.productItem.fields.productDescription.value }}
-                  classes={themeData.classes.bodyClass}
-                />
-              );
-            }
-            return bodyContent;
-          })()}
-          {fields?.claim?.value ? (
+          {/* Always render claim in edit mode so Sitecore field editor appears */}
+          {fields?.claim?.value || isEE ? (
             <RichTextWrapper
-              field={{ value: fields.claim?.value }}
+              field={isEE ? fields.claim : { value: fields.claim?.value }}
               classes={themeData.classes.claimClass}
             />
           ) : (
             <></>
           )}
-          {fields?.disclaimer?.value ? (
+          {/* Always render disclaimer in edit mode so Sitecore field editor appears */}
+          {fields?.disclaimer?.value || isEE ? (
             <DisclaimerText
               fields={{
                 ...fields,
-                disclaimerText: fields?.disclaimer,
+                disclaimerText: isEE ? fields.disclaimer : fields?.disclaimer,
               }}
               disclaimerLayoutClasses="col-span-12 md:col-span-10 md:col-start-2"
               disclaimerClasses="text-dark-gray! mb-s"
@@ -357,9 +381,14 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
             <></>
           )}
           {/* ratings */}
+          {isEE && !bazaarvoiceProductId && (
+            <div className="italic text-sm text-gray-400">
+              [Ratings: configure BazaarVoice Product ID on the linked product item]
+            </div>
+          )}
           <div className={themeData.classes.ratingsAndPriceWrapper}>
             <div className={themeData.classes.ratingsWrapper}>
-              {bazaarvoiceProductId && themeName === 'aw' && (
+              {bazaarvoiceProductId && (
                 <div
                   className="review flex-[0_0_auto]"
                   data-bv-show="rating_summary"
@@ -368,137 +397,72 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
               )}
             </div>
           </div>
-          {themeName === 'aw' ? (
-            <div className="flex-none md:flex md:flex-wrap">
-              <ButtonGroup
-                cta1={cta1ToButtonProps(props, themeData.classes.buttonGroupClass.cta1Classes)}
-                cta2={cta2ToButtonProps(props, themeData.classes.buttonGroupClass.cta2Classes)}
-                wrapperClasses={themeData.classes.buttonGroupClass.wrapper}
+          <div className="flex-none md:flex md:flex-wrap">
+            <ButtonGroup
+              cta1={cta1ToButtonProps(props, themeData.classes.buttonGroupClass.cta1Classes)}
+              cta2={cta2ToButtonProps(props, themeData.classes.buttonGroupClass.cta2Classes)}
+              wrapperClasses={themeData.classes.buttonGroupClass.wrapper}
+            />
+            {(fields?.AR?.fields || isEE) && (
+              <CallToActionAR
+                classes={{
+                  wrapper: '',
+                  buttonClasses:
+                    'my-s flex w-fit items-center whitespace-nowrap rounded-lg border-4 border-black px-m py-[9px] font-sans text-button font-heavy hover:bg-black hover:text-white disabled:border-gray disabled:text-gray md:my-0',
+                }}
+                {...fields?.AR}
               />
-              {fields?.AR?.fields && (
-                <CallToActionAR
-                  classes={{
-                    wrapper: '',
-                    buttonClasses:
-                      'my-s flex w-fit items-center whitespace-nowrap rounded-lg border-4 border-black px-m py-[9px] font-sans text-button font-heavy hover:bg-black hover:text-white disabled:border-gray disabled:text-gray md:my-0',
-                  }}
-                  {...fields?.AR}
-                />
-              )}
-            </div>
-          ) : (
-            <>
-              {currentScreenWidth > getBreakpoint('md') && (
-                <>
-                  {currentScreenWidth < getBreakpoint('md') && tabUrl && (
-                    <SingleButton
-                      fields={{
-                        cta1Icon: {
-                          id: 'f8ad4587-51a4-4e66-8eec-b448f78b4cb2',
-                          url: '',
-                          name: 'Augmented Reality',
-                          displayName: 'Augmented Reality',
-                          fields: {
-                            Value: {
-                              value: 'arrow',
-                            },
-                          },
-                        },
-                        cta1Link: {
-                          value: {
-                            href: tabUrl,
-                            text: fields?.tabLinkText?.value,
-                            anchor: '',
-                            linktype: 'internal',
-                            class: '',
-                            title: '',
-                            target: '',
-                            querystring: '',
-                            id: '{BD66C47E-42B0-4EDD-BAD3-4BC981C05E5D}',
-                          },
-                        },
-                        cta1Style: {
-                          id: '8aedd89c-e161-41d4-b773-6a6097a19372',
-                          url: '',
-                          name: 'Secondary',
-                          displayName: 'Secondary',
-                          fields: {
-                            Value: {
-                              value: 'secondary',
-                            },
-                          },
-                        },
-                        cta1ModalLinkText: {
-                          value: '',
-                        },
-                        cta1AriaLabel: {
-                          value: '',
-                        },
-                      }}
-                    />
-                  )}
-                  <ButtonGroup
-                    cta1={cta1ToButtonProps(props, themeData.classes.buttonGroupClass.cta1Classes)}
-                    cta2={cta2ToButtonProps(props, themeData.classes.buttonGroupClass.cta2Classes)}
-                    wrapperClasses={themeData.classes.buttonGroupClass.wrapper}
-                  />
-                </>
-              )}
-            </>
-          )}
+            )}
+          </div>
 
-          {themeName === 'aw' && (
-            <>
-              {renderColorSwatches()}
-              {/* AW custom cta for tab switch */}
-              {tabUrl && (
-                <SingleButton
-                  fields={{
-                    cta1Icon: {
-                      id: 'f8ad4587-51a4-4e66-8eec-b448f78b4cb2',
-                      url: '',
-                      name: 'Augmented Reality',
-                      displayName: 'Augmented Reality',
-                      fields: {
-                        Value: {
-                          value: 'arrow',
-                        },
-                      },
+          {renderColorSwatches()}
+          {/* AW custom cta for tab switch */}
+          {tabUrl && (
+            <SingleButton
+              fields={{
+                cta1Icon: {
+                  id: 'f8ad4587-51a4-4e66-8eec-b448f78b4cb2',
+                  url: '',
+                  name: 'Augmented Reality',
+                  displayName: 'Augmented Reality',
+                  fields: {
+                    Value: {
+                      value: 'arrow',
                     },
-                    cta1Link: {
-                      value: {
-                        href: tabUrl,
-                        text: fields?.tabLinkText?.value,
-                        anchor: '',
-                        linktype: 'internal',
-                        class: '',
-                        title: '',
-                        target: '',
-                        querystring: '',
-                        id: '{BD66C47E-42B0-4EDD-BAD3-4BC981C05E5D}',
-                      },
+                  },
+                },
+                cta1Link: {
+                  value: {
+                    href: tabUrl ?? '#',
+                    text: fields?.tabLinkText?.value,
+                    anchor: '',
+                    linktype: 'internal',
+                    class: '',
+                    title: '',
+                    target: '',
+                    querystring: '',
+                    id: '{BD66C47E-42B0-4EDD-BAD3-4BC981C05E5D}',
+                  },
+                },
+                cta1Style: {
+                  id: '8aedd89c-e161-41d4-b773-6a6097a19372',
+                  url: '',
+                  name: 'Secondary',
+                  displayName: 'Secondary',
+                  fields: {
+                    Value: {
+                      value: 'tertiary',
                     },
-                    cta1Style: {
-                      id: '8aedd89c-e161-41d4-b773-6a6097a19372',
-                      url: '',
-                      name: 'Secondary',
-                      displayName: 'Secondary',
-                      fields: {
-                        Value: {
-                          value: 'tertiary',
-                        },
-                      },
-                    },
-                    cta1ModalLinkText: {
-                      value: '',
-                    },
-                    cta1AriaLabel: {
-                      value: '',
-                    },
-                  }}
-                />
-              )}
-            </>
+                  },
+                },
+                cta1ModalLinkText: {
+                  value: '',
+                },
+                cta1AriaLabel: {
+                  value: '',
+                },
+              }}
+            />
           )}
         </div>
       </Component>

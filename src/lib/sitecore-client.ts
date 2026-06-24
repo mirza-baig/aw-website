@@ -4,6 +4,7 @@ import scConfig from 'sitecore.config';
 
 import { BreadcrumbItem, BreadcrumbService } from './breadcrumb/breadcrumb-service';
 import { ThemeName } from './context/ThemeContext';
+import { FlagValues } from './feature-flags/types';
 import { defaultValues, FeatureToggles } from './feature-toggles/feature-toggles';
 import { FeatureTogglesService } from './feature-toggles/feature-toggles-service';
 import { WebsiteStaticState } from './website/website-state';
@@ -23,6 +24,7 @@ export class AWSitecoreClient extends SitecoreClient {
 
   async getPageWithCustomProps(
     page: Page,
+    featureFlags: FlagValues,
     path: string[] = []
   ): Promise<Page & { customProps: WebsiteStaticState }> {
     const siteInfo = client.getSiteInfoByName(page.siteName);
@@ -32,6 +34,7 @@ export class AWSitecoreClient extends SitecoreClient {
       breadcrumbs: await client.getBreadcrumbs(page.layout.sitecore.route?.itemId, page.locale),
       siteInfo,
       theme: (siteInfo?.theme ?? 'aw') as ThemeName,
+      featureFlags,
     };
     return { ...page, customProps };
   }

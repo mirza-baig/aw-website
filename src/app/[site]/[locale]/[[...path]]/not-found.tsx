@@ -5,6 +5,7 @@ import scConfig from 'sitecore.config';
 import Layout from 'src/Layout';
 import Providers from 'src/Providers';
 import { NextIntlClientProvider } from 'next-intl';
+import { loader } from 'lib/feature-flags/loader';
 
 export default async function NotFound() {
   const { site, locale } = getCachedPageParams();
@@ -15,7 +16,8 @@ export default async function NotFound() {
   });
 
   if (page) {
-    const pageWithCustomProps = await client.getPageWithCustomProps(page);
+    const featureFlags = await loader();
+    const pageWithCustomProps = await client.getPageWithCustomProps(page, featureFlags);
     return (
       <NextIntlClientProvider>
         <Providers page={pageWithCustomProps}>

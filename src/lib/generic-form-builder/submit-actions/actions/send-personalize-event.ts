@@ -1,4 +1,6 @@
 import { event } from '@sitecore-content-sdk/events';
+import { FormsConstants } from 'lib/constants/forms-constants';
+import { stopTimer } from 'lib/personalize/abandon-tracker';
 import { buildPersonalizePayload } from 'lib/personalize/build-personalize-payload';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 
@@ -10,6 +12,7 @@ export class SendPersonalizeEvent extends BaseSubmitAction<Sitecore.BaseTemplate
     try {
       const fields = this.props.submitAction.fields as {
         eventType?: { value?: string };
+        cdpInactivityMinutes?: { value?: string };
         errorMessage?: { value?: string };
       };
 
@@ -42,6 +45,12 @@ export class SendPersonalizeEvent extends BaseSubmitAction<Sitecore.BaseTemplate
         .then(() => console.log('[CDP] Personalize Form Submit Event Payload:', submitPayload))
         .catch((err) => console.error('[CDP] Personalize Form Submit Event error:', err));
       console.log('[CDP] Personalize Form Submit Event fired successfully');
+
+      // STOP ABANDON TIMER on submit
+      stopTimer();
+      // Clear session values on submit
+      sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormStep);
+      sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormTimeout);
 
       return {
         success: true,

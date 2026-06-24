@@ -1,5 +1,10 @@
 export const FormsConstants = {
-  AW: {},
+  AW: {
+    Form: {
+      CCPFormStep: 'awCcpFormStep',
+      CCPFormTimeout: 'awCcpFormTimeout',
+    },
+  },
   Enterprise: {
     openModalEvent: 'openGenericModal',
     openFormEvent: 'openForm',

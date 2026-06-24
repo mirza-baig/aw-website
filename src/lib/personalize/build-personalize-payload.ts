@@ -66,7 +66,6 @@ export function buildPersonalizePayload(input: BuildPayloadInput) {
     channel: 'WEB',
     language: 'EN',
     ext: {
-      // userType: 'Professional', // TODO - After confirmation //<always "Professional" — CCP is for trade pros>',
       ...payloadAttributes,
       ...input.additionalExt,
     },

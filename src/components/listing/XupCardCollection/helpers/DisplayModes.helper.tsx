@@ -103,6 +103,7 @@ export function GridDisplay({ cards, maxCardsPerRow, pageEditMode }: GridDisplay
   return gridCards.map((card) => (
     <div
       key={getNodeKey(card)}
+      data-xup-card-slot={pageEditMode ? '' : undefined}
       className={classNames(
         'col-span-12',
         maxCardsPerRow && GetLayoutClasses(maxCardsPerRow),
@@ -125,6 +126,7 @@ export function SliderDisplay({ cards, sliderSettings, pageEditMode }: SliderDis
         {sliderCards?.map((card) => (
           <button
             type="button"
+            data-xup-card-slot={pageEditMode ? '' : undefined}
             onKeyDown={(e) => {
               if (e.shiftKey && e.key === 'Tab' && sliderRef?.current) {
                 sliderRef.current.slickPrev();

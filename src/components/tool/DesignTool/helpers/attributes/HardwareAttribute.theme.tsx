@@ -13,6 +13,7 @@ export type HardwareAttributeThemeSubType = {
     container: string;
     containerHardware: string;
     containerTypeDesktop: string;
+    containerTextFinishDisclaimer: string;
     listBordered: string;
     hardwareTypeListItem: string;
     hardwareListItem: string;
@@ -58,6 +59,7 @@ export const HardwareAttributeTheme = (): ThemeFile | HardwareAttributeThemeType
         container: ` attribute-options--hardware__container flex flex-col mt-[10px] `,
         containerHardware: ` attribute-options--hardware__container-hardware flex flex-col md:flex-row  `,
         containerTypeDesktop: ` attribute-options--hardware__container-hardware-type desktop hidden md:flex flex-[0_0_100%] min-w-full min-h-[100px] mb-[25px] `,
+        containerTextFinishDisclaimer: `mb-[24px]`,
         listBordered: ` attribute-options__list bordered flex flex-col list-style-none ml-0 mb-0 max-w-full flex-wrap p-[20px_15px] `,
         hardwareTypeListItem: ` attribute-options__list-item flex-[0_0_50%] max-w-[50%] `,
         hardwareListItem: ` attribute-options__list-item flex-[0_0_25%] mb-[40px] pr-[10px] text-center max-w-[25%] lg:pr-[20px] lg:flex-[0_0_25%] lg:max-w-[20%] xl:pr-[20px] xl:flex-[0_0_20%] xl:max-w-[20%] `,

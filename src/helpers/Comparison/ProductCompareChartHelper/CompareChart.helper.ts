@@ -95,7 +95,6 @@ const getValueByKey = (object: Item, key: string): string | string[] | ImageFiel
         const typeList = (object.fields?.[key] as any[] | undefined) ?? [];
         return typeList.map((item: any) => {
           const productTypeLookupFields = getProductTypeLookupField(item);
-          console.log('productTypeLookupFields', productTypeLookupFields);
           if (productTypeLookupFields && item.fields?.[productTypeLookupFields]) {
             return {
               href: item.fields.exploreAllProducts?.value?.href,
@@ -103,7 +102,7 @@ const getValueByKey = (object: Item, key: string): string | string[] | ImageFiel
               productImage: item.fields.productImage.value,
             };
           }
-          return console.log(`${productTypeLookupFields} field does not exist in`, item);
+          return undefined;
         });
       }
 
