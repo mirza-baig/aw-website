@@ -5,7 +5,7 @@ import BouncyCard from 'helpers/BouncyCard/BouncyCard';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useAsPath } from 'lib/hooks/use-as-path';
-import { JSX, useContext } from 'react';
+import { JSX, useContext, useEffect } from 'react';
 import { useTheme } from 'src/lib/context/ThemeContext';
 
 import { DesignToolOptionDataProps } from '../DesignTool.helper';
@@ -23,12 +23,13 @@ export const Select = (props: DesignToolOptionDataProps): JSX.Element => {
   const asPath = useAsPath();
   const { themeData } = useTheme(SelectTheme());
   const theme = (themeData as SelectThemeSubType).classes;
-
+  // Use this after Render
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   if (props == null) {
     return <></>;
   }
-
-  window.scrollTo(0, 0);
 
   return (
     <div className={theme.stepSelect}>
@@ -51,7 +52,7 @@ export const Select = (props: DesignToolOptionDataProps): JSX.Element => {
                 additionalButtonClassName={theme.bouncyCardShadow}
                 ctaOnClick={() => {
                   const urlParts = GetUrlParts(asPath);
-                  globalThis.history.replaceState(null, '', `${urlParts.pathName}#/${option.id}`);
+                  globalThis.history.pushState(null, '', `${urlParts.pathName}#/${option.id}`);
                 }}
               />
             ))}

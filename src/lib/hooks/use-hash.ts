@@ -3,7 +3,13 @@
 import React from 'react';
 
 export const useHash = () => {
-  const [hash, setHash] = React.useState('');
+  const [hash, setHash] = React.useState(() => {
+    // Read hash immediately on mount — avoids the empty-string first render
+    if (typeof globalThis.location !== 'undefined') {
+      return globalThis.location.hash;
+    }
+    return '';
+  });
 
   React.useEffect(() => {
     const updateHash = () => {

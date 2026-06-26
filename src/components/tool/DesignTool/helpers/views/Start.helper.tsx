@@ -4,7 +4,7 @@ import { Text } from '@sitecore-content-sdk/nextjs';
 import BouncyCard from 'helpers/BouncyCard/BouncyCard';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useAsPath } from 'lib/hooks/use-as-path';
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import { useTheme } from 'src/lib/context/ThemeContext';
 
 import { DesignToolDataProps, DesignToolOptionDataProps } from '../DesignTool.helper';
@@ -28,12 +28,15 @@ export const Start = (props: DesignToolDataProps): JSX.Element => {
   const { themeData } = useTheme(StartTheme());
   const theme = (themeData as StartThemeSubType).classes;
   const asPath = useAsPath();
-  window.scrollTo(0, 0);
+  // Use this after Render
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleOptionClick = (option: DesignToolOptionDataProps) => {
     // Drop the query string so prior selections don't carry over.
     const urlParts = GetUrlParts(asPath);
-    globalThis.history.replaceState(null, '', `${urlParts.pathName}#/${option.id}`);
+    globalThis.history.pushState(null, '', `${urlParts.pathName}#/${option.id}`);
   };
 
   return (

@@ -143,19 +143,19 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       return;
     }
 
-    const urlParts = GetUrlParts(asPath);
+    const rawPath = window.location.pathname + window.location.hash;
+    const urlParts = GetUrlParts(rawPath);
     let newIndex = Number.parseInt(urlParts.attributeIndex) ?? 0;
 
     if (newIndex < 0) {
       newIndex = 0;
     }
-
     if (newIndex >= viewModel.attributes.length) {
       newIndex = viewModel.attributes.length - 1;
     }
 
     setAttributeIndex(newIndex);
-  }, [asPath, viewModel]);
+  }, [viewModel, product?.id]);
 
   useEffect(() => {
     const container = $refs.progressBarDesktop.current;
@@ -198,7 +198,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     const newPath = `${urlParts.pathName}#/${product.id}/0`;
 
     // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2
-    globalThis.history.replaceState(null, '', newPath);
+    globalThis.history.pushState(null, '', newPath);
   };
 
   const isFinalStep = () => {
@@ -322,7 +322,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     prepareDesignSelectionData(`Jump To Step ${index + 1}`, isSummaryStep, product, viewModel);
     // Back button should leave the tool entirely.
-    globalThis.history.replaceState(null, '', newPath);
+    globalThis.history.pushState(null, '', newPath);
   };
 
   const nextAttribute = () => {
@@ -337,7 +337,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     prepareDesignSelectionData('Next Step', isSummaryStep, product, viewModel);
 
     // Back button should leave the tool entirely.
-    globalThis.history.replaceState(null, '', newPath);
+    globalThis.history.pushState(null, '', newPath);
   };
 
   const previousAttribute = () => {
@@ -350,14 +350,14 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     if (attributeIndex === 0) {
       //  Back button should leave the tool entirely.
-      globalThis.history.replaceState(
+      globalThis.history.pushState(
         null,
         '',
         `${urlParts.pathName}${queryPart}#/${product.parentId}`
       );
     } else {
       //  Back button should leave the tool entirely.
-      globalThis.history.replaceState(
+      globalThis.history.pushState(
         null,
         '',
         `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex - 1}`
@@ -441,7 +441,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     }/${attributeIndex}`;
 
     // Temporary fix for router.replace(newPath, { scroll: false }); not working in 16.2
-    globalThis.history.replaceState(null, '', newPath);
+    globalThis.history.pushState(null, '', newPath);
   };
 
   const pagingText = isBrandHardwareStep() ? ['Closeup', 'Interior'] : ['Interior', 'Exterior'];
@@ -1570,7 +1570,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 const urlParts = GetUrlParts(asPath);
-                                globalThis.history.replaceState(
+                                globalThis.history.pushState(
                                   null,
                                   '',
                                   `${urlParts.pathName}#/${option.id}`
@@ -1668,7 +1668,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 const urlParts = GetUrlParts(asPath);
-                                globalThis.history.replaceState(
+                                globalThis.history.pushState(
                                   null,
                                   '',
                                   `${urlParts.pathName}#/${option.id}`
