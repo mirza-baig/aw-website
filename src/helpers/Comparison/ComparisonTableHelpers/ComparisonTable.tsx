@@ -17,19 +17,23 @@ import { useEffect, useRef, useState } from 'react';
 
 import { CategoryRow } from './CategoryRow';
 import { CategoryTitle } from './CategoryTitle';
+import { ComparisonSeriesChart } from './ComparisonSeriesChart';
 import {
   ComparisonTableProductsProps,
   getComparisonObject,
   groupProductStyles,
 } from './ComparisonTable.helper';
-import { CategoryDataProps } from './ComparisonTable.Types';
+import { CategoryDataProps, ComparisonSeriesChartFields } from './ComparisonTable.Types';
 import { ComparisonTitles } from './ComparisonTitles';
 import { Selector } from './Selector';
 import { SubCategoryTitle } from './SubCategoryTitle';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
-export type ComparisonTableSeriesProps =
-  Sitecore.Components.Product.ComparisonTable.ComparisonSeriesTable & ComponentProps;
+export type ComparisonTableSeriesProps = ComponentProps &
+  Omit<Sitecore.Components.Product.ComparisonTable.ComparisonSeriesTable, 'fields'> & {
+    fields?: Sitecore.Components.Product.ComparisonTable.ComparisonSeriesTable['fields'] &
+      ComparisonSeriesChartFields;
+  };
 
 export const ComparisonTable = (
   props: ComparisonTableProductsProps | ComparisonTableSeriesProps
@@ -112,6 +116,21 @@ export const ComparisonTable = (
   if (!originalComparisonObject || !props.fields) {
     return <></>;
   }
+
+  // Redesigned series compare chart. Gated by the `releaseRedesignedSeriesCompareChart`
+  // feature flag (see lib/feature-flags/flags.ts) — toggle it in the Vercel Flags
+  // dashboard to preview the new layout without needing Sitecore content changes.
+  // Also opted into per-datasource once `enableRedesignedLayout` exists on the
+  // Sitecore template. Product comparisons and existing series datasources (neither
+  // set) keep rendering the legacy layout below untouched.
+  if (
+    !isProductComparison &&
+    ((props.fields as ComparisonSeriesChartFields).enableRedesignedLayout?.value ||
+      props.page.customProps.featureFlags.releaseRedesignedSeriesCompareChart)
+  ) {
+    return <ComparisonSeriesChart {...(props as ComparisonTableSeriesProps)} />;
+  }
+
   const isMobile = currentScreenWidth <= getBreakpoint('ml');
   const totalNumberOfSeries = isProductComparison
     ? originalGroupedProducts.products[
