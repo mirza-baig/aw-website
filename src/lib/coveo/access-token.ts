@@ -12,7 +12,7 @@ export const getAccessToken = async (organizationId: string): Promise<string> =>
     requestOptions
   );
 
-  const data = await response.json();
+  const { data } = await response.json();
 
   return data.token;
 };
