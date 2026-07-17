@@ -5,6 +5,7 @@ import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
@@ -61,6 +62,21 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
   if (privacyMenuArray == 0) {
     privacyMenuArray = null;
   }
+
+  const isExpandedFooterLayout = FeatureFlags.values.releaseFooterExpandedLayout === true;
+  const navGroupCount = Array.isArray(footerMenuArray) ? footerMenuArray.length : 0;
+  let desktopNavGroupWidthClass = 'ml:w-[25%]';
+  if (navGroupCount <= 5) {
+    desktopNavGroupWidthClass = 'ml:w-[20%]';
+  } else if (navGroupCount === 6) {
+    desktopNavGroupWidthClass = 'ml:w-[33.333%]';
+  }
+  const footerMenuContainerClass = isExpandedFooterLayout
+    ? 'flex w-full max-mmd:flex-col max-mmd:border-b max-mmd:border-solid max-mmd:border-b-white mmd:flex-wrap mmd:gap-y-l ml:shrink ml:grow ml:basis-0'
+    : 'flex w-full max-ml:flex-col max-ml:border-b max-ml:border-solid max-ml:border-b-white ml:shrink ml:grow ml:basis-0';
+  const footerMenuItemClass = isExpandedFooterLayout
+    ? `flex flex-col mmd:pr-xxs mmd:max-ml:w-[33.333%] ${desktopNavGroupWidthClass}`
+    : 'flex flex-col ml:w-[20%] ml:pr-xxs';
   const Accordion = ({ title, children }: AWFooterProps) => {
     const [isOpen, setOpen] = useState(false);
     return (
@@ -132,11 +148,11 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
             <div className="mb-l font-sans text-sm-s font-heavy uppercase ml:hidden">
               <Text tag={'h3'} field={fields.tagLine} />
             </div>
-            <div className="flex w-full max-ml:flex-col max-ml:border-b max-ml:border-solid max-ml:border-b-white ml:shrink ml:grow ml:basis-0">
+            <div className={footerMenuContainerClass}>
               {footerMenuArray &&
                 footerMenuArray.map((menu: AWFooterProps, index: number) => {
                   return (
-                    <div key={index} className="flex flex-col ml:w-[20%] ml:pr-xxs">
+                    <div key={index} className={footerMenuItemClass}>
                       {isDesktop ? (
                         <>
                           <div className="mb-xxxs font-sans text-xxs font-heavy uppercase leading-none">

@@ -1,3 +1,7 @@
+// Load the app's global stylesheet (Tailwind v4 + theme tokens) so components
+// render with real styling inside Storybook.
+import '../src/app/globals.css';
+
 import type { Preview } from '@storybook/nextjs-vite';
 
 const preview: Preview = {
