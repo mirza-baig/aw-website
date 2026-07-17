@@ -26,3 +26,18 @@ export const releaseExampleFeature = flag<boolean>({
     { value: false, label: 'Pending' },
   ],
 });
+
+
+// Release: Redesigned Series Compare Chart
+export const releaseRedesignedSeriesCompareChart = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-redesigned-series-compare-chart`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Renders the redesigned card-based series compare chart (ComparisonSeriesChart) instead of the legacy AW_ComparisonSeriesTable layout.',
+  defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});

@@ -1,4 +1,25 @@
-import { ImageFieldValue, LinkField, LinkFieldValue } from '@sitecore-content-sdk/nextjs';
+import {
+  Field,
+  ImageFieldValue,
+  Item,
+  LinkField,
+  LinkFieldValue,
+} from '@sitecore-content-sdk/nextjs';
+
+/**
+ * New-design series chart fields (chartEyebrow, chartTitle, chartDescription,
+ * finalColumnCTA, finalRowCTAOptions, enableRedesignedLayout). Local augmentation
+ * until these are added to the AW_ComparisonSeriesTable Sitecore template and
+ * `.sitecore/AndersenWindows.model.ts` regenerates with real typed fields.
+ */
+export type ComparisonSeriesChartFields = {
+  chartEyebrow?: Field<string>;
+  chartTitle?: Field<string>;
+  chartDescription?: Field<string>;
+  finalColumnCTA?: LinkField;
+  finalRowCTAOptions?: Item[];
+  enableRedesignedLayout?: Field<boolean>;
+};
 
 export type CategroyBarProps = {
   title: string | undefined;
