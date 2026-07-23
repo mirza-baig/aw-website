@@ -9,6 +9,7 @@ export function cta1ToButtonProps({ fields }: Sitecore.FieldSets.Cta1, classes =
     modalId: (fields?.cta1Modal as unknown as Sitecore.Components.Modal.GenericModal.GenericModal)
       ?.fields?.modalId?.value,
     modalLinkText: fields?.cta1ModalLinkText,
+    ctaPersonalizeEventName: fields?.cta1PersonalizeEventName,
     classes,
   };
 }
@@ -21,6 +22,7 @@ export function cta2ToButtonProps({ fields }: Sitecore.FieldSets.Cta2, classes =
     modalId: (fields?.cta2Modal as unknown as Sitecore.Components.Modal.GenericModal.GenericModal)
       ?.fields?.modalId?.value,
     modalLinkText: fields?.cta2ModalLinkText,
+    ctaPersonalizeEventName: fields?.cta2PersonalizeEventName,
     classes,
   };
 }
@@ -33,6 +35,7 @@ export function cta3ToButtonProps({ fields }: Sitecore.FieldSets.Cta3, classes =
     modalId: (fields?.cta3Modal as unknown as Sitecore.Components.Modal.GenericModal.GenericModal)
       ?.fields?.modalId?.value,
     modalLinkText: fields?.cta3ModalLinkText,
+    ctaPersonalizeEventName: fields?.cta3PersonalizeEventName,
     classes,
   };
 }

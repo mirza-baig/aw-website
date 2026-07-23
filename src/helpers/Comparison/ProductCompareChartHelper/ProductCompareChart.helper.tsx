@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Field, Text } from '@sitecore-content-sdk/nextjs';
+import Button from 'helpers/Button/Button';
 import { ComponentProps } from 'lib/component-props';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { getEnum } from 'lib/utils/get-enum';
@@ -7,12 +8,14 @@ import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
+import useExperienceEditor from 'lib/utils/use-experience-editor';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import Disclaimer from 'src/helpers/DisclaimerText/DisclaimerText';
 import ModalWrapper from 'src/helpers/ModalWrapper/ModalWrapper';
 import SvgIcon from 'src/helpers/SvgIcon/SvgIcon';
 
+import { resolveIntroCta, resolveIntroCtaIcon, resolveIntroCtaStyle } from '../intro-cta-mock';
 import {
   getComparisonObject,
   getProductTypeLookupField,
@@ -27,6 +30,8 @@ export type ProductCompareChartProps =
   Sitecore.Components.Product.ComparisonTable.ProductCompareChart & ComponentProps;
 
 const ENABLE_GRAPHQL_SWATCH_RESOLVER = true;
+
+const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*-\s*\$([\d,]+(?:\.\d+)?)$/;
 
 // Enum for Sitecore product bucket field.
 enum ProductBucket {
@@ -407,14 +412,14 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
       })
       .filter(Boolean);
     return (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center font-sans! font-normal">
         {lines.map((line: string) => (
           <span key={line}>{line}</span>
         ))}
       </div>
     );
   };
-
+  const isEE = useExperienceEditor();
   if (!props.fields) {
     return <></>;
   }
@@ -889,6 +894,54 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     return null;
   };
 
+  // Extracted helpers to keep renderProductCell under complexity limit ──
+
+  // Use RegExp.exec() instead of String.match(); renders a plain string value
+  // as HTML, a price range, or plain text depending on its shape.
+  const renderStringValue = (trimmed: string): React.ReactElement => {
+    if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+      return (
+        <span className="font-sans! font-normal" dangerouslySetInnerHTML={{ __html: trimmed }} />
+      );
+    }
+    const priceRangeMatch = PRICE_RANGE_RE.exec(trimmed);
+    if (priceRangeMatch) {
+      return (
+        <span className="font-sans! font-normal">
+          <strong>${priceRangeMatch[1]}</strong> - <strong>${priceRangeMatch[2]}</strong>
+        </span>
+      );
+    }
+    return <span className="font-sans! font-normal">{trimmed}</span>;
+  };
+
+  // Handles raw values that are objects with a `.value` string property.
+  const renderRawObjectWithValue = (raw: any): React.ReactElement | null => {
+    const v = raw.value;
+    if (typeof v !== 'string' || !v.trim()) {
+      return null;
+    }
+    return renderStringValue(v.trim());
+  };
+
+  // Handles raw values that are arrays — either swatch arrays or named-item lists.
+  const renderRawArray = (raw: any[], fieldName: string): React.ReactElement => {
+    const looksLikeSwatchArray = raw.length > 0 && raw[0]?.fields?.swatchImage;
+    if (looksLikeSwatchArray) {
+      return renderSwatchArray(raw);
+    }
+    return renderNamedItems(raw, fieldName) ?? <span>—</span>;
+  };
+
+  // Handles the materials / productMaterials field specifically.
+  const renderMaterialsField = (raw: any): React.ReactElement => {
+    const arr = Array.isArray(raw) ? raw : [];
+    const lines = arr
+      .map((m: any) => [null, m?.fields?.materialName?.value])
+      .filter((r: any) => r[1]);
+    return renderMaterials(lines);
+  };
+
   // NOSONAR
   const renderProductCell = (product: any, fieldName: string, seriesItem?: any) => {
     // NOSONAR
@@ -900,19 +953,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     }
 
     if (fieldName === 'materials' || fieldName === 'productMaterials') {
-      const arr = Array.isArray(raw) ? raw : [];
-      const lines = arr
-        .map((m: any) => [null, m?.fields?.materialName?.value])
-        .filter((r: any) => r[1]);
-      return renderMaterials(lines);
+      return renderMaterialsField(raw);
     }
 
     if (Array.isArray(raw)) {
-      const looksLikeSwatchArray = raw.length > 0 && raw[0]?.fields?.swatchImage;
-      if (looksLikeSwatchArray) {
-        return renderSwatchArray(raw);
-      }
-      return renderNamedItems(raw, fieldName) ?? <span>—</span>;
+      return renderRawArray(raw, fieldName);
     }
 
     if (raw && typeof raw === 'object' && Array.isArray(raw.swatches)) {
@@ -927,9 +972,21 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     }
 
     if (raw && typeof raw === 'object' && 'value' in raw) {
+      return renderRawObjectWithValue(raw) ?? <span>—</span>;
+    }
+    if (raw && typeof raw === 'object' && raw.fields) {
+      const result = renderFieldsObject(raw.fields);
+      if (result) {
+        return result;
+      }
+    }
+
+    if (raw && typeof raw === 'object' && 'value' in raw) {
       const v = raw.value;
+
       if (typeof v === 'string' && v.trim()) {
         const trimmed = v.trim();
+
         if (/<[a-z][\s\S]*>/i.test(trimmed)) {
           return (
             <span
@@ -938,10 +995,20 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
             />
           );
         }
+
+        const priceRangeMatch = PRICE_RANGE_RE.exec(trimmed);
+
+        if (priceRangeMatch) {
+          return (
+            <span className="font-sans! font-normal">
+              <strong>${priceRangeMatch[1]}</strong> - <strong>${priceRangeMatch[2]}</strong>
+            </span>
+          );
+        }
+
         return <span className="font-sans! font-normal">{trimmed}</span>;
       }
     }
-
     return <span>—</span>;
   };
 
@@ -962,6 +1029,10 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     return count + (products.length > 0 ? products.length : 1);
   }, 0);
 
+  const totalCards = visibleCardsCount;
+  const showArrows = totalCards > 2;
+  const isAtStart = activeCardIndex === 0;
+  const isAtEnd = activeCardIndex === totalCards - 1;
   type ProductLinkDestinationKey =
     | 'productDetailPage'
     | 'designTool'
@@ -1168,6 +1239,49 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     }
   };
   const handleCloseSwatchModal = () => setOpenSwatchModal(null);
+  const editorialEyebrow = props.fields?.eyebrowText?.value;
+  const editorialTitle = props.fields?.headlineText?.value;
+  const editorialDescription = props.fields?.body?.value;
+
+  const finalDescription = editorialDescription || currentProductTypeDescription;
+  const hasEyebrow = typeof editorialEyebrow === 'string' && editorialEyebrow.trim().length > 0;
+
+  // Hardcoded intro heading levels (eyebrow → H4, title → H2, description → paragraph)
+  // so the markup stays consistent with the Series compare chart regardless of author input.
+  const introEyebrowClasses = `font-sans! font-bold uppercase tracking-[0.9px] text-[#F26924] ${
+    isMobile ? 'text-[10px] leading-tight' : 'text-lg'
+  }`;
+  const introTitleClasses = `font-sans! font-bold line-clamp-3 ${
+    isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
+  }`;
+  const introDescriptionClasses = `text-[#333] !font-sans ${isMobile ? 'text-[8px] hidden' : 'text-sm'}`;
+  const introCta = resolveIntroCta((props.fields as any).chartIntroCta);
+  const introCtaStyle = resolveIntroCtaStyle((props.fields as any).chartIntroCtaStyle);
+  const introCtaIcon = resolveIntroCtaIcon((props.fields as any).chartIntroCtaIcon);
+  const hasIntroCta = !!introCta?.value?.href;
+
+  // The legend header and every card header share one height so the rows below line up.
+  // Only desktop needs extra room for the CTA — on mobile/tablet the description is hidden,
+  // which already frees enough space in the fixed header.
+  let introHeaderHeightClass = 'h-[150px]';
+  if (!isMobile) {
+    introHeaderHeightClass = hasIntroCta ? 'h-[272px]' : 'h-[216px]';
+  }
+  // Full-width, wrapping button so the author-chosen style still fits the narrow
+  // (100px) mobile/tablet legend rail; compact overrides shrink it on small screens.
+  const introCtaClasses = isMobile
+    ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
+    : 'mt-2 w-full! justify-center';
+
+  // Always render in edit mode so Sitecore field editors appear
+  if (!props.fields && !isEE) {
+    return <></>;
+  }
+  // Explore All Products Link
+  const selectedProductType = productTypeToCompare[selectedProductTypeIndex];
+  const showExploreAllProductLink = props.fields.showExploreAllProductLink?.value;
+  const exploreAllProductsHref = selectedProductType?.fields?.exploreAllProducts?.value?.href;
+  const shouldRenderExploreAllCard = !!showExploreAllProductLink;
 
   return (
     <>
@@ -1245,7 +1359,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
             ref={comparisonTableRef}
             className="relative shadow-[0px_4px_14px_-3px_rgba(0,0,0,0.06)]"
           >
-            {allProductTypes.length > 0 &&
+            {allProductTypes.length > 1 &&
               (() => {
                 const productTypeTitles = explicitProductTypeTitles;
                 const selectedTitle = productTypeTitles[selectedProductTypeIndex];
@@ -1282,32 +1396,39 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                 }`}
               >
                 <div
-                  className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 h-[150px] pb-2' : 'gap-2 h-[216px] pb-4'}`}
+                  className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-2 pb-4'} ${introHeaderHeightClass}`}
                 >
-                  <span
-                    className={`font-bold uppercase tracking-wider text-[#F26924] ${
-                      isMobile ? 'text-[10px] leading-tight' : 'text-lg'
-                    }`}
-                    style={{ fontFamily: 'futura-pt, sans-serif', letterSpacing: '0.9px' }}
-                  >
-                    COMPARE
-                  </span>
-                  <span
-                    className={`font-bold line-clamp-3 ${
-                      isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
-                    }`}
-                    style={{ fontFamily: 'futura-pt, sans-serif' }}
-                  >
-                    {currentProductTypeName}
-                  </span>
-                  {currentProductTypeDescription && (
-                    <span
-                      className={`text-[#333] !font-sans ${
-                        isMobile ? 'text-[8px] hidden' : 'text-sm'
-                      }`}
-                    >
-                      {currentProductTypeDescription}
-                    </span>
+                  {hasEyebrow ? (
+                    <Text
+                      tag="h4"
+                      field={props.fields.eyebrowText}
+                      className={introEyebrowClasses}
+                    />
+                  ) : (
+                    <h4 className={introEyebrowClasses}>COMPARE</h4>
+                  )}
+                  {editorialTitle ? (
+                    <Text
+                      tag="h2"
+                      field={props.fields.headlineText}
+                      className={introTitleClasses}
+                    />
+                  ) : (
+                    <h2 className={introTitleClasses}>{currentProductTypeName}</h2>
+                  )}
+                  {finalDescription &&
+                    (editorialDescription ? (
+                      <Text tag="p" field={props.fields.body} className={introDescriptionClasses} />
+                    ) : (
+                      <p className={introDescriptionClasses}>{currentProductTypeDescription}</p>
+                    ))}
+                  {hasIntroCta && (
+                    <Button
+                      field={introCta}
+                      variant={introCtaStyle}
+                      icon={introCtaIcon}
+                      classes={introCtaClasses}
+                    />
                   )}
                 </div>
 
@@ -1355,12 +1476,13 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
 
               {/* ── Scrollable Product Cards Area with Slider Arrows ── */}
               <div className="relative flex-1 min-w-0">
-                {!isMobile && (
+                {!isMobile && showArrows && (
                   <button
                     type="button"
                     onClick={handleScrollLeft}
                     className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md border border-[#E0E0E0] text-[#000000] hover:bg-[#000000] hover:text-white transition-colors duration-200"
                     aria-label="Scroll left"
+                    disabled={isAtStart}
                   >
                     <svg
                       width="20"
@@ -1377,12 +1499,13 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                   </button>
                 )}
 
-                {!isMobile && (
+                {!isMobile && showArrows && (
                   <button
                     type="button"
                     onClick={handleScrollRight}
                     className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md border border-[#E0E0E0] text-[#000000] hover:bg-[#000000] hover:text-white transition-colors duration-200"
                     aria-label="Scroll right"
+                    disabled={isAtEnd}
                   >
                     <svg
                       width="20"
@@ -1439,7 +1562,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                           }`}
                         >
                           <div
-                            className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'h-[150px] pb-2' : 'h-[216px] pb-4'}`}
+                            className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'pb-2' : 'pb-4'} ${introHeaderHeightClass}`}
                           >
                             <div
                               className={`flex ${isMobile ? 'h-[90px]' : 'h-[134px]'} w-full items-center justify-center`}
@@ -1531,59 +1654,78 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                   })}
 
                   {/* ── Final-row CTA card ── */}
-                  {(() => {
-                    const exploreAllProductsHref =
-                      productTypeToCompare[selectedProductTypeIndex]?.fields?.exploreAllProducts
-                        ?.value?.href;
-                    if (!exploreAllProductsHref) {
-                      return null;
-                    }
-                    return (
-                      <div
-                        className={`flex shrink-0 items-stretch justify-center rounded border border-[#EAEAEA] bg-white text-center shadow-[0px_4px_12px_rgba(0,0,0,0.04)] ${isMobile ? 'min-w-[145px] w-[145px]' : 'min-w-[163px] w-[163px]'}`}
-                      >
-                        {finalRowCTAs.length > 0 ? (
-                          <div
-                            className={`flex flex-col items-stretch justify-center h-full w-full gap-2 px-2 py-3 !font-sans ${isMobile ? 'text-[10px]' : 'text-sm'}`}
-                            style={{ minHeight: isMobile ? 100 : 320 }}
-                          >
-                            {finalRowCTAs.map((cta) => (
-                              <a
-                                key={`${cta.label}-${cta.href}`}
-                                href={cta.href}
-                                target={cta.target || undefined}
-                                rel={cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                                className={`flex w-full items-center justify-center rounded-full bg-white text-center font-semibold text-[#001722] no-underline transition-colors duration-200 hover:bg-[#F26924] hover:text-white ${isMobile ? 'h-7 text-[10px] border-2 border-[#F26924]' : 'h-11 text-base border-4 border-[#F26924]'}`}
-                                style={{ fontFamily: 'futura-pt, sans-serif' }}
+                  {shouldRenderExploreAllCard && (
+                    <div
+                      className={`flex shrink-0 items-stretch justify-center rounded border border-[#EAEAEA] bg-white text-center shadow-[0px_4px_12px_rgba(0,0,0,0.04)] ${isMobile ? 'min-w-[145px] w-[145px]' : 'min-w-[163px] w-[163px]'}`}
+                    >
+                      {finalRowCTAs.length > 0 ? (
+                        <div
+                          className={`flex flex-col items-stretch justify-center h-full w-full gap-2 px-2 py-3 !font-sans ${isMobile ? 'text-[10px]' : 'text-sm'}`}
+                          style={{ minHeight: isMobile ? 100 : 320 }}
+                        >
+                          {finalRowCTAs.map((cta) => (
+                            <a
+                              key={`${cta.label}-${cta.href}`}
+                              href={cta.href}
+                              target={cta.target || undefined}
+                              rel={cta.target === '_blank' ? 'noopener noreferrer' : undefined}
+                              className={`flex w-full items-center justify-center rounded-full bg-white text-center font-semibold text-[#001722] no-underline transition-colors duration-200 hover:bg-[#F26924] hover:text-white ${isMobile ? 'h-7 text-[10px] border-2 border-[#F26924]' : 'h-11 text-base border-4 border-[#F26924]'}`}
+                              style={{ fontFamily: 'futura-pt, sans-serif' }}
+                            >
+                              {cta.label}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          {exploreAllProductsHref ? (
+                            <a
+                              href={exploreAllProductsHref}
+                              className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 !font-sans font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
+                              style={{ minHeight: isMobile ? 100 : 320 }}
+                            >
+                              <span
+                                className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}
                               >
-                                {cta.label}
-                              </a>
-                            ))}
-                          </div>
-                        ) : (
-                          <a
-                            href={exploreAllProductsHref}
-                            className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 !font-sans font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
-                            style={{ minHeight: isMobile ? 100 : 320 }}
-                          >
-                            <span className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
-                              Explore all
-                            </span>
-                            <span
-                              className={`text-[#666] line-clamp-2 ${isMobile ? 'text-[8px]' : 'text-xs'}`}
+                                Explore all
+                              </span>
+                              <span
+                                className={`text-[#666] line-clamp-2 ${isMobile ? 'text-[8px]' : 'text-xs'}`}
+                              >
+                                {currentProductTypeName}
+                              </span>
+                              <span
+                                className={`inline-flex items-center justify-center rounded-full border border-[#E0E0E0] ${isMobile ? 'h-6 w-6' : 'h-9 w-9'}`}
+                              >
+                                <SvgIcon icon="arrow-right" size="sm" />
+                              </span>
+                            </a>
+                          ) : (
+                            <div
+                              className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 !font-sans font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
+                              style={{ minHeight: isMobile ? 100 : 320 }}
                             >
-                              {currentProductTypeName}
-                            </span>
-                            <span
-                              className={`inline-flex items-center justify-center rounded-full border border-[#E0E0E0] ${isMobile ? 'h-6 w-6' : 'h-9 w-9'}`}
-                            >
-                              <SvgIcon icon="arrow-right" size="sm" />
-                            </span>
-                          </a>
-                        )}
-                      </div>
-                    );
-                  })()}
+                              <span
+                                className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}
+                              >
+                                Explore all
+                              </span>
+                              <span
+                                className={`text-[#666] line-clamp-2 ${isMobile ? 'text-[8px]' : 'text-xs'}`}
+                              >
+                                {currentProductTypeName}
+                              </span>
+                              <span
+                                className={`inline-flex items-center justify-center rounded-full border border-[#E0E0E0] ${isMobile ? 'h-6 w-6' : 'h-9 w-9'}`}
+                              >
+                                <SvgIcon icon="arrow-right" size="sm" />
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* S6479: Array.from with map function instead of chained .map() */}

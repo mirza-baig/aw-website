@@ -23,6 +23,7 @@ export type ProductTypeToCompareItem = {
     productTypeDescription?: Field<string>;
     productTypeImage?: ImageField;
     exploreAllProducts?: LinkField;
+    showExploreAllProductLink?: Field<boolean>;
   };
 };
 

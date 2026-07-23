@@ -116,6 +116,7 @@ const buildCTAField = (
       },
       cta1AriaLabel: { value: '' },
       cta1ModalLinkText: { value: '' },
+      cta1PersonalizeEventName: { value: '' },
       cta1Style: {
         id: '49a23327-0397-4cce-a930-e76918d37c42',
         url: 'http://localhost/sitecore/login/sitecore/system/Settings/Foundation/EnterpriseWeb/Enums/CTA-Styles/Primary%27',

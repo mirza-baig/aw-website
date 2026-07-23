@@ -261,7 +261,11 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
                       )}
                     </SliderWrapper>
                   </div>
-                  <div className={theme.help.mobileDisplay.buttonContainer} onClick={props.onClick}>
+                  <button
+                    type="button"
+                    className={theme.help.mobileDisplay.buttonContainer}
+                    onClick={props.onClick}
+                  >
                     {renderAsLink ? (
                       <Link
                         href={ctaUrl}
@@ -281,7 +285,7 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
                         Choose
                       </div>
                     )}
-                  </div>
+                  </button>
                 </div>
                 <div className={theme.help.desktopDisplay.desktopDisplay}>
                   <div className={theme.help.desktopDisplay.row60}>
@@ -299,7 +303,9 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
                           refer=""
                         ></RichTextWrapper>
                       </div>
-                      <div
+
+                      <button
+                        type="button"
                         className={theme.help.desktopDisplay.buttonContainer}
                         onClick={props.onClick}
                       >
@@ -322,7 +328,7 @@ const BouncyCard = (props: BouncyCardProps): JSX.Element => {
                             Choose
                           </div>
                         )}
-                      </div>
+                      </button>
                       <div className={theme.help.desktopDisplay.image}>
                         <ImageWrapper image={option?.help?.popup?.image2}></ImageWrapper>
                       </div>

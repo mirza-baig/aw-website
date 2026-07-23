@@ -4,6 +4,7 @@ import ImageWrapper from 'helpers/Media/ImageWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { JSX, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 export const Swatches = ({
@@ -14,13 +15,18 @@ export const Swatches = ({
 
   const [isSwatchPanelVisible, setIsSwatchPanelVisible] = useState(false);
   const [leftAlignedSwatchPanel, setLeftAlignedSwatchPanel] = useState(true);
+  const [panelPosition, setPanelPosition] = useState({ top: 0, left: 0 });
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const panelContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleClickOutside = (event: any) => {
-      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedTrigger = panelRef.current?.contains(target);
+      const clickedPanel = panelContentRef.current?.contains(target);
+      if (!clickedTrigger && !clickedPanel) {
         setIsSwatchPanelVisible(false);
       }
     };
@@ -69,41 +75,45 @@ export const Swatches = ({
     isLeftAlignedSwatchPanel,
   }: {
     isLeftAlignedSwatchPanel: boolean;
-  }): JSX.Element => {
-    return (
-      <>
-        <span className="absolute top-2/3 left-0 z-9 h-4 w-4 rotate-45 transform border border-white bg-white"></span>
-        <div
-          className={classNames(
-            'absolute top-full z-8 rounded-xl bg-white px-[30px] pt-xs shadow-[0px_2px_5px_rgba(0,0,0,0.25)]',
-            isLeftAlignedSwatchPanel ? '-left-[100px]' : '-right-[15px]'
-          )}
-        >
-          <div className="relative flex  w-[230px] cursor-pointer flex-wrap items-center justify-start">
-            <div
-              tabIndex={0}
-              onClick={() => {
-                setIsSwatchPanelVisible(false);
-              }}
-            >
-              <SvgIcon className="absolute top-0 -right-m" icon="close" />
-            </div>
-            {swatches.map((swatch: ImageFieldValue, index: number) => (
-              <div key={index} className="mb-xs">
-                <Swatch {...swatch} />
-              </div>
-            ))}
+  }): JSX.Element | null => {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+
+    return createPortal(
+      <div
+        ref={panelContentRef}
+        style={{ position: 'fixed', top: panelPosition.top, left: panelPosition.left }}
+        className={classNames(
+          'z-50 rounded-xl bg-white px-[30px] pt-xs shadow-[0px_2px_5px_rgba(0,0,0,0.25)]',
+          isLeftAlignedSwatchPanel ? '' : '-translate-x-full'
+        )}
+      >
+        <div className="relative flex  w-[230px] cursor-pointer flex-wrap items-center justify-start">
+          <div
+            tabIndex={0}
+            onClick={() => {
+              setIsSwatchPanelVisible(false);
+            }}
+          >
+            <SvgIcon className="absolute top-0 -right-m" icon="close" />
           </div>
+          {swatches.map((swatch: ImageFieldValue, index: number) => (
+            <div key={index} className="mb-xs">
+              <Swatch {...swatch} />
+            </div>
+          ))}
         </div>
-      </>
+      </div>,
+      document.body
     );
   };
 
   const toggleSwatchPanel = (e: MouseEvent | KeyboardEvent) => {
     if (e.currentTarget) {
-      setLeftAlignedSwatchPanel(
-        (e.currentTarget as HTMLDivElement).getBoundingClientRect().x < currentScreenWidth / 2
-      );
+      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+      setLeftAlignedSwatchPanel(rect.x < currentScreenWidth / 2);
+      setPanelPosition({ top: rect.bottom, left: rect.x });
       setIsSwatchPanelVisible(!isSwatchPanelVisible);
     }
   };

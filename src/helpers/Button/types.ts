@@ -1,4 +1,5 @@
 import { Field, Item, LinkField } from '@sitecore-content-sdk/nextjs';
+import { CTASection } from 'helpers/LinkWrapper/LinkWrapper';
 
 export type ButtonVariants =
   | 'primary'
@@ -17,4 +18,6 @@ export type ButtonProps = {
   classes: string;
   modalId?: string;
   modalLinkText?: Field<string>;
+  ctaPersonalizeEventName?: Field<string>;
+  ctaSection?: CTASection;
 };
