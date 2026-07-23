@@ -26,7 +26,8 @@ export const ButtonSecondaryClasses = (themeName: string) => {
 
 const ButtonSecondary = (props: ButtonProps): JSX.Element => {
   const { themeName } = useTheme();
-  const { field, icon, classes, modalId, modalLinkText, ariaLabel } = props;
+  const { field, icon, classes, modalId, modalLinkText, ariaLabel, ctaPersonalizeEventName } =
+    props;
   const _icon = getEnum<IconTypes>(icon);
 
   if (field === undefined) {
@@ -39,7 +40,9 @@ const ButtonSecondary = (props: ButtonProps): JSX.Element => {
       className={classNames(ButtonSecondaryClasses(themeName).btnClass, classes)}
       modalId={modalId}
       modalLinkText={modalLinkText}
+      ctaPersonalizeEventName={ctaPersonalizeEventName}
       ariaLabel={ariaLabel}
+      ctaSection={props.ctaSection}
     >
       {icon && (
         <SvgIcon icon={_icon} className={classNames(ButtonSecondaryClasses(themeName).iconClass)} />

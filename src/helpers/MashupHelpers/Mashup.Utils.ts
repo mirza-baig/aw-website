@@ -74,6 +74,9 @@ export const getItemData = (
     cta1ModalLinkText: {
       value: '',
     },
+    cta1PersonalizeEventName: {
+      value: '',
+    },
     cta1Style: {
       id: '',
       url: '',

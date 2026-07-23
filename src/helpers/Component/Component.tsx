@@ -45,6 +45,8 @@ const containerVariants: Record<ComponentWrapperProps['variant'], string> = {
 };
 
 const containerBgVariants: Record<ComponentWrapperProps['backgroundVariant'], string> = {
+  '': 'theme-white', // if empty use theme-white
+  default: 'theme-white', // if default use theme-white
   black: 'theme-black bg-theme-bg',
   gray: 'theme-gray bg-light-gray',
   white: 'theme-white',
@@ -175,7 +177,7 @@ const Component = ({
               fields?.componentMargin
             ),
             containerVariants[variant],
-            containerBgVariants[backgroundVariant] ?? 'theme-white'
+            containerBgVariants[backgroundVariant]
           )}
         >
           <div className={gridClass}>{children}</div>

@@ -106,6 +106,9 @@ const defaultData = {
     cta1ModalLinkText: {
       value: 'Open modal',
     },
+    cta1PersonalizeEventName: {
+      value: '',
+    },
     cta1AriaLabel: {
       value: '',
     },

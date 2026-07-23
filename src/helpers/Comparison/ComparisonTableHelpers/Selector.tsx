@@ -98,6 +98,9 @@ export const Selector = (
     cta1ModalLinkText: {
       value: '',
     },
+    cta1PersonalizeEventName: {
+      value: '',
+    },
     cta1AriaLabel: {
       value: '',
     },

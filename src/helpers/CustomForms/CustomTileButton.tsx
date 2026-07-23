@@ -48,6 +48,7 @@ const CustomTileButton = ({
           themeData.classes.tileButton.tileButtonItem,
           themeData.classes.tileButton.tileButtonItemDesktop,
           themeData.classes.tileButton.tileButtonCheckboxItem,
+          'h-full',
           icons && subtitle ? 'h-24 bg-white hover:before:border-orange-500!' : ''
         )}
       >

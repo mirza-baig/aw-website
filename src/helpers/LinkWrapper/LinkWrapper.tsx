@@ -1,4 +1,7 @@
+'use client';
+
 // Global
+import { event } from '@sitecore-content-sdk/events';
 import { Field, Link, LinkField } from '@sitecore-content-sdk/nextjs';
 import { useModalIdContext } from 'lib/context/GenericModalIDContext';
 // Lib
@@ -19,6 +22,7 @@ export interface LinkWrapperProps extends React.AnchorHTMLAttributes<HTMLAnchorE
   suppressNewTabIcon?: boolean;
   modalId?: string | undefined;
   modalLinkText?: Field<string>;
+  ctaPersonalizeEventName?: Field<string>;
   ariaLabel?: Field<string>;
   ctaSection?: CTASection;
   children?: ReactNode;
@@ -35,12 +39,13 @@ const LinkWrapper = ({
   suppressNewTabIcon,
   modalId,
   modalLinkText,
+  ctaPersonalizeEventName,
   ariaLabel,
   ctaSection,
   ...props
 }: LinkWrapperProps): JSX.Element => {
   // Format field as LinkField for consistency
-  const asLinkField = !field?.value ? { value: { ...field } } : (field as LinkField);
+  const asLinkField = field?.value ? (field as LinkField) : { value: { ...field } };
   // Sitecore doesn't do tel: links correctly, it appends http to it.  Remove that.
   asLinkField.value.href = asLinkField.value.href?.replace('http://tel:', 'tel:');
 
@@ -56,6 +61,29 @@ const LinkWrapper = ({
   const text = suppressLinkText ? '' : asLinkField?.value?.text;
   const target = asLinkField?.value?.target;
   const { setSelectedModalId, prevFocusedElementRef } = useModalIdContext();
+
+  const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>): void => {
+    props.onClick?.(e);
+
+    if (e.defaultPrevented || !ctaPersonalizeEventName?.value) {
+      return;
+    }
+
+    const submitPayload = {
+      type: ctaPersonalizeEventName?.value ?? '',
+      channel: 'WEB',
+      language: 'EN',
+      extensionData: {
+        timestamp: new Date().toISOString(),
+        pageUrl: globalThis.location.href,
+        AW_CTA_URL: asLinkField?.value?.href ?? '',
+        AW_CTA_TEXT: asLinkField?.value?.text ?? '',
+        AW_CTA_ID: (asLinkField?.value?.id ?? '') as string,
+      },
+    };
+
+    event(submitPayload).catch(console.debug);
+  };
 
   const handleModalClick = (e: MouseEvent) => {
     if (modalId) {
@@ -78,10 +106,17 @@ const LinkWrapper = ({
         'data-gtm-click': '',
         'data-gtm-dl-event': 'nav_click',
         'data-gtm-dl-nav-section': ctaSection,
+        'data-gtm-dl-link-text': text || '',
+        'data-gtm-dl-link-url': asLinkField?.value?.href || '',
       };
     }
 
-    return { 'data-gtm-click': '', 'data-gtm-dl-event': 'cta_click' };
+    return {
+      'data-gtm-click': '',
+      'data-gtm-dl-event': 'cta_click',
+      'data-gtm-dl-link-url': asLinkField?.value?.href || '',
+      'data-gtm-dl-personalize-event-name': ctaPersonalizeEventName?.value || '',
+    };
   })();
 
   const isEE = useExperienceEditor();
@@ -108,7 +143,7 @@ const LinkWrapper = ({
           showLinkTextWithChildrenPresent={false}
           internalLinkMatcher={INTERNAL_LINK_REGEX}
         />
-        {ctaIcon && ctaIcon}
+        {ctaIcon}
       </div>
     );
   }
@@ -123,6 +158,7 @@ const LinkWrapper = ({
       field={asLinkField}
       {...props}
       {...gtmProps}
+      onClick={handleLinkClick}
       showLinkTextWithChildrenPresent={false}
       internalLinkMatcher={INTERNAL_LINK_REGEX}
       tabIndex={0}
@@ -135,16 +171,11 @@ const LinkWrapper = ({
       {text}
       {children}
       {(target === '_blank' || srOnlyText) && (
-        <>
-          <span className="sr-only">
-            {srOnlyText && srOnlyText}
-            {/* Preserve a single space character before SR Tab Text */}
-            {target === '_blank' && ' (Opens in a new tab)'}
-          </span>
-          {/* {!suppressNewTabIcon && target === '_blank' && (
-            <SvgIcon icon="new-tab" size="em" className="ml-2" />
-          )} */}
-        </>
+        <span className="sr-only">
+          {srOnlyText}
+          {/* Preserve a single space character before SR Tab Text */}
+          {target === '_blank' && ' (Opens in a new tab)'}
+        </span>
       )}
     </Link>
   );
