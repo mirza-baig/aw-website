@@ -140,18 +140,12 @@ export const requestQuoteFlow = {
     projectInformation: [
       {
         value: 'Windows or door replacement only',
-        title: 'Replacement',
-        subtitle: "I'm replacing existing windows or doors",
       },
       {
         value: 'New Construction',
-        title: 'New Build',
-        subtitle: "I'm designing or building a new home",
       },
       {
         value: 'Remodeling',
-        title: 'Remodel or addition',
-        subtitle: "I'm remodeling a space in my home",
       },
       /** AWEB-171: Removing service option commenting to add in the future.
       {

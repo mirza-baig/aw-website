@@ -1,6 +1,7 @@
 import { Text } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import ButtonPrimary from 'helpers/Button/buttons/btn--primary';
+import { CTASection } from 'helpers/LinkWrapper/LinkWrapper';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { JSX } from 'react';
@@ -18,6 +19,7 @@ type GenericCardNavProps = {
   fullHeight?: boolean;
   imageRatio?: ImageRatio;
   mobileCtaVariant?: boolean;
+  ctaSection?: CTASection;
 };
 
 const ASPECT_MAP: Record<ImageRatio, string> = {
@@ -36,6 +38,7 @@ const GenericCardNav = ({
   fullHeight,
   imageRatio = 'landscape',
   mobileCtaVariant = false,
+  ctaSection,
 }: GenericCardNavProps): JSX.Element | null => {
   const image = menu.fields?.image?.value?.src ? menu.fields.image : undefined;
   const link = menu.fields?.cta1Link;
@@ -80,7 +83,11 @@ const GenericCardNav = ({
               : 'translateY(calc(calc(1 / 2 * 50%) * -5))',
           }}
         >
-          <ButtonPrimary field={link} classes="cta-button w-fit justify-center" />
+          <ButtonPrimary
+            field={link}
+            classes="cta-button w-fit justify-center"
+            ctaSection={ctaSection}
+          />
         </div>
       )}
 
@@ -106,7 +113,11 @@ const GenericCardNav = ({
 
           {hasLink && !isImageOnlyWithCta && (
             <div className={classNames('mt-4 shrink-0', ctaClasses)}>
-              <ButtonPrimary field={link} classes="cta-button w-fit justify-center" />
+              <ButtonPrimary
+                field={link}
+                classes="cta-button w-fit justify-center"
+                ctaSection={ctaSection}
+              />
             </div>
           )}
         </div>

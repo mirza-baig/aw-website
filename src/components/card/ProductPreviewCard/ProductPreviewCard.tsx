@@ -150,6 +150,7 @@ const ColorAndActions = ({
                 )?.fields?.modalId?.value
               }
               modalLinkText={fields?.cta1ModalLinkText}
+              ctaPersonalizeEventName={fields?.cta1PersonalizeEventName}
               classes={classNames(
                 fields?.cta1Style,
                 themeData.classes.buttonGroupClass.cta1Classes
@@ -165,6 +166,7 @@ const ColorAndActions = ({
                 )?.fields?.modalId?.value
               }
               modalLinkText={fields?.ctaModal2LinkText}
+              ctaPersonalizeEventName={fields?.cta2PersonalizeEventName}
               classes={classNames(
                 fields?.cta2Style,
                 themeData.classes.buttonGroupClass.cta2Classes
@@ -191,6 +193,9 @@ const ColorAndActions = ({
                   value: '',
                 },
                 cta1ModalLinkText: {
+                  value: '',
+                },
+                cta1PersonalizeEventName: {
                   value: '',
                 },
                 cta1Style: {

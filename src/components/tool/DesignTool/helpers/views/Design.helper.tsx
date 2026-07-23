@@ -294,7 +294,6 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
   const setDesignStarted = (started: boolean) => {
     sessionStorage.setItem(DESIGN_STARTED_KEY, String(started));
-    console.log('bmc - setDesignStarted: ', started);
   };
 
   const fireDesignProgress = (changedAttribute?: string, changedValue?: string) => {
@@ -525,9 +524,6 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       {}
     );
 
-    // Trigger Design tool to RAQ click payload
-    fireRequestQuoteClick();
-
     let hostName = '';
     try {
       const requestAQuoteUrl = props.fields?.getAQuoteLink?.value?.href;
@@ -633,8 +629,6 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
   const summaryCtaText = props.fields?.summaryCtaText?.value || undefined;
   const handleSummaryPillCTAClick = (e: React.MouseEvent) => {
     e?.preventDefault();
-    // Trigger Design tool to RAQ click payload
-    fireRequestQuoteClick();
 
     if (hasDesignToolPlaceholder) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

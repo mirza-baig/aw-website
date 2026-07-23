@@ -170,6 +170,7 @@ function GlobalMasthead_Default(props: GlobalMastheadProps): JSX.Element {
               {fields?.children?.map((link: Item & Sitecore.FieldSets.GeneralLink) => (
                 <LinkWrapper
                   field={link?.fields?.Link}
+                  ctaPersonalizeEventName={link?.fields?.linkPersonalizeEventName}
                   key={link?.id ?? (link?.fields?.Link?.value?.id as string)}
                   suppressLinkText
                   ariaLabel={{ value: (link.fields.Link.value.text as string) ?? 'General Link' }}

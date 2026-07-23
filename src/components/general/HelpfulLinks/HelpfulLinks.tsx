@@ -76,6 +76,9 @@ function HelpfulLinks_Default(props: HelpfulLinksProps): JSX.Element {
                     cta1ModalLinkText: {
                       value: '',
                     },
+                    cta1PersonalizeEventName: {
+                      value: '',
+                    },
                     cta1Style: {
                       id: '',
                       url: '',

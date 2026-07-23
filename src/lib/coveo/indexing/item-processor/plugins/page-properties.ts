@@ -1,11 +1,9 @@
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { checkHostNameInMediaURL } from 'lib/coveo/utils';
-import { normalizeSitecoreDateString } from 'lib/utils/string-utils/normalize-sitecore-date-string';
 
 import {
   ChangeFrequency,
   getCheckboxField,
-  getDateField,
   getImageField,
   getLookupField,
   getRichTextField,
@@ -27,13 +25,6 @@ export class PageProperties {
     if (indexableItem.allTemplateIds.indexOf(basePageId) == -1) {
       return siteMapItem;
     }
-
-    const lastUpdated = getDateField(indexableItem.fields, 'lastUpdated');
-    if (lastUpdated && lastUpdated.value) {
-      const normalized = normalizeSitecoreDateString(lastUpdated.value);
-      siteMapItem.lastmod = new Date(normalized);
-    }
-
     const priority = getLookupField(indexableItem.fields, 'sitemapPriority');
     if (priority) {
       const value = Number.parseFloat(

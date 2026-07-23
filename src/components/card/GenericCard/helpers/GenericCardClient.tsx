@@ -124,6 +124,7 @@ export function GenericCardClient(props: GenericCardProps): JSX.Element {
                 )?.fields?.modalId?.value
               }
               modalLinkText={props.fields?.cta1ModalLinkText}
+              ctaPersonalizeEventName={props.fields?.cta1PersonalizeEventName}
               classes={classNames(props.fields?.cta1Style, 'md:whitespace-pre-wrap')}
             ></Button>
             <Button
@@ -137,6 +138,7 @@ export function GenericCardClient(props: GenericCardProps): JSX.Element {
                 )?.fields?.modalId?.value
               }
               modalLinkText={props.fields?.cta2ModalLinkText}
+              ctaPersonalizeEventName={props.fields?.cta2PersonalizeEventName}
               classes={classNames(props.fields?.cta2Style, 'md:whitespace-pre-wrap')}
             ></Button>
           </div>

@@ -8,6 +8,7 @@ export const XupCardCollectionTheme: ThemeFile = {
       buttonGroupClass: {
         wrapper: 'flex flex-col md:flex-row items-start',
       },
+      disclaimerClass: 'pb-s',
     },
   },
   rba: {},

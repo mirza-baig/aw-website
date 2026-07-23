@@ -29,7 +29,7 @@ function HeroSimple_Default(props: HeroSimpleProps): JSX.Element {
   return (
     <Component
       variant="full"
-      backgroundVariant={backgroundColor}
+      backgroundVariant={backgroundColor} // ✅ FIX HERE
       sectionWrapperClasses=""
       padding={'px-0'}
       dataComponent="general/herosimple"

@@ -1,10 +1,8 @@
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { checkHostNameInMediaURL } from 'lib/coveo/utils';
-import { normalizeSitecoreDateString } from 'lib/utils/string-utils/normalize-sitecore-date-string';
 
 import {
   getCheckboxField,
-  getDateField,
   getImageField,
   getLookupField,
   getMultilistField,
@@ -32,13 +30,6 @@ export class PhotoProperties {
     };
 
     type RelatedPages = Array<RelatedPage>;
-
-    const lastUpdated = getDateField(indexableItem.fields, 'lastUpdated');
-    if (lastUpdated && lastUpdated.value) {
-      const normalized = normalizeSitecoreDateString(lastUpdated.value);
-      siteMapItem.lastmod = new Date(normalized);
-    }
-
     siteMapItem.loc = siteMapItem.itemUri;
 
     siteMapItem.metaData['siteLanguage'] = indexableItem.language;

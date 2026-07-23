@@ -160,7 +160,7 @@ function WarrantyRegistration_Default(props: WarrantyRegistrationProps) {
     }
   };
   return (
-    <div data-component="forms/requestquote">
+    <div data-component="forms/warrantyregistration">
       {showThankYouBot ? (
         <>
           <Headline
@@ -345,7 +345,7 @@ function WarrantyRegistration_Default(props: WarrantyRegistrationProps) {
                         <>
                           {values.warranty_products?.map((_, index) => (
                             <ProductFields
-                              key={`${_.productid}_${_.serialnumber}_${index}`}
+                              key={`warranty_products_${_.productid}_${index}`}
                               productIndex={index}
                               removeProduct={() => {
                                 arrayHelpers.remove(index);
@@ -519,6 +519,9 @@ function ProductReviewCard(
       templateName: 'Enum',
     },
     cta1ModalLinkText: {
+      value: '',
+    },
+    cta1PersonalizeEventName: {
       value: '',
     },
     cta1AriaLabel: {

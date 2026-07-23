@@ -21,7 +21,7 @@ import { useBVScript } from 'lib/utils/use-bv-script';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
-import { JSX, useEffect, useMemo, useState } from 'react';
+import React, { JSX, useEffect, useMemo, useRef, useState } from 'react';
 import { environment } from 'startup/environment';
 
 import { ProductSwatch } from './product-swatch';
@@ -36,6 +36,10 @@ type BazaarvoiceReviewData = {
   };
 };
 
+const DEFAULT_PLACEHOLDER_TEXT = '[No text in field]';
+const CONTENT_EDITABLE_SELECTOR = '[contenteditable]';
+const PLACEHOLDER_ATTRIBUTE_NAME = 'placeholder';
+
 type ProductIntroProps = Sitecore.Components.Product.ProductIntro.ProductIntro & {
   fields?: {
     children?: ProductSwatch[];
@@ -44,75 +48,154 @@ type ProductIntroProps = Sitecore.Components.Product.ProductIntro.ProductIntro &
   awAggregateRating?: BazaarvoiceReviewData;
 };
 
-// Reduce cognitive complexity) ---
+// Render fragment with Experience Editor wrapper to handle conditional rendering of fields that only display the productItem field if no
+// product intro field is set.
 
-function renderEyebrow(
-  fields: ProductIntroProps['fields'],
-  isEE: boolean,
-  themeData: { classes: Record<string, string> },
-  props: ProductIntroProps
-): JSX.Element {
-  if (fields?.productItem) {
-    return (
-      <Text
-        tag="h4"
-        className={themeData.classes.eyebrow}
-        field={{
-          value: fields.productItem?.fields?.productSeries?.fields?.productTypeName?.value ?? '',
-        }}
-      />
-    );
-  }
-  if (isEE || fields?.eyebrowText?.value) {
-    return <Eyebrow classes={themeData.classes.eyebrow} {...props} />;
-  }
-  return <></>;
-}
+const RenderFragmentWithEEWrapper = ({
+  ProductIntroField,
+  ProductItemField,
+  productIntroField,
+  props,
+  isEE,
+}: {
+  ProductIntroField: JSX.Element;
+  ProductItemField: JSX.Element;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  productIntroField: any;
+  props: ProductIntroProps;
+  isEE: boolean;
+}): JSX.Element => {
+  const fields = props.fields;
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const fallbackRef = useRef<HTMLDivElement>(null);
 
-function renderHeadline(
-  fields: ProductIntroProps['fields'],
-  isEE: boolean,
-  themeData: { classes: Record<string, string> },
-  props: ProductIntroProps
-): JSX.Element {
-  if (fields?.productItem) {
-    return (
-      <div className={themeData.classes.headlineWrapper}>
+  useEffect(() => {
+    if (!isEE || !wrapperRef.current) {
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      const editInput = wrapperRef.current?.querySelector(CONTENT_EDITABLE_SELECTOR);
+      if (!editInput || !fallbackRef.current) {
+        return;
+      }
+      const text = editInput.textContent?.trim() ?? '';
+      const placeholder =
+        editInput.getAttribute(PLACEHOLDER_ATTRIBUTE_NAME)?.trim() ?? DEFAULT_PLACEHOLDER_TEXT;
+      fallbackRef.current.style.display = !!text && text !== placeholder ? 'none' : '';
+    });
+    observer.observe(wrapperRef.current, { subtree: true, childList: true, characterData: true });
+    return () => observer.disconnect();
+  }, [isEE]);
+
+  if (!isEE) {
+    if (productIntroField?.value) {
+      return ProductIntroField;
+    }
+    if (fields?.productItem) {
+      return ProductItemField;
+    }
+    return <></>;
+  }
+
+  return (
+    <div ref={wrapperRef}>
+      {ProductIntroField}
+      {fields?.productItem && (
+        <div ref={fallbackRef} style={{ display: productIntroField?.value ? 'none' : '' }}>
+          {ProductItemField}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const RenderEyebrow = ({
+  props,
+  themeData,
+  isEE,
+}: {
+  props: ProductIntroProps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  themeData: any;
+  isEE: boolean;
+}): JSX.Element => {
+  const fields = props.fields;
+
+  return (
+    <RenderFragmentWithEEWrapper
+      ProductIntroField={<Eyebrow classes={themeData.classes.eyebrow} {...props} />}
+      ProductItemField={
+        <Text
+          tag="h4"
+          className={themeData.classes.eyebrow}
+          field={{
+            value: fields.productItem?.fields?.productSeries?.fields?.productTypeName?.value ?? '',
+          }}
+        />
+      }
+      productIntroField={fields?.eyebrowText}
+      props={props}
+      isEE={isEE}
+    />
+  );
+};
+
+const RenderHeadline = ({
+  props,
+  themeData,
+  isEE,
+}: {
+  props: ProductIntroProps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  themeData: any;
+  isEE: boolean;
+}): JSX.Element => {
+  const fields = props.fields;
+
+  return (
+    <RenderFragmentWithEEWrapper
+      ProductIntroField={<Headline classes={themeData.classes.headline} {...props} />}
+      ProductItemField={
         <Text
           useTag="h4"
           className={themeData.classes.headline}
           field={{ value: fields.productItem?.fields?.productName?.value ?? '' }}
         />
-      </div>
-    );
-  }
-  if (isEE || fields?.headlineText?.value) {
-    return <Headline classes={themeData.classes.headline} {...props} />;
-  }
-  return <></>;
-}
+      }
+      productIntroField={fields?.headlineText}
+      props={props}
+      isEE={isEE}
+    />
+  );
+};
 
-function renderBody(
-  fields: ProductIntroProps['fields'],
-  isEE: boolean,
-  themeData: { classes: Record<string, string> },
-  props: ProductIntroProps
-): JSX.Element {
-  if (fields?.productItem) {
-    return (
-      <RichTextWrapper
-        field={{ value: fields.productItem?.fields?.productDescription?.value ?? '' }}
-        classes={themeData.classes.bodyClass}
-      />
-    );
-  }
-  if (isEE || fields?.body?.value) {
-    return (
-      <BodyCopy classes={classNames(themeData.classes.bodyClass, 'overflow-x-auto')} {...props} />
-    );
-  }
-  return <></>;
-}
+const RenderBodyCopy = ({
+  props,
+  themeData,
+  isEE,
+}: {
+  props: ProductIntroProps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  themeData: any;
+  isEE: boolean;
+}): JSX.Element => {
+  const fields = props.fields;
+
+  return (
+    <RenderFragmentWithEEWrapper
+      ProductIntroField={<BodyCopy classes={themeData.classes.bodyClass} {...props} />}
+      ProductItemField={
+        <RichTextWrapper
+          field={{ value: fields.productItem?.fields?.productDescription?.value ?? '' }}
+          classes={themeData.classes.bodyClass}
+        />
+      }
+      productIntroField={fields?.body}
+      props={props}
+      isEE={isEE}
+    />
+  );
+};
 
 // --- Component ---
 
@@ -285,6 +368,7 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
     url: `${siteInfo?.canonicalHostName}${fields?.productItem?.fields?.productDetailPageLink?.value?.href}`,
     ...(aggregateRating && { aggregateRating }),
   };
+
   return (
     <>
       <Script
@@ -353,11 +437,9 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
               </div>
             </div>
           )}
-
-          {renderEyebrow(fields, isEE, themeData, props)}
-          {renderHeadline(fields, isEE, themeData, props)}
-          {renderBody(fields, isEE, themeData, props)}
-
+          <RenderEyebrow props={props} themeData={themeData} isEE={isEE} />
+          <RenderHeadline props={props} themeData={themeData} isEE={isEE} />
+          <RenderBodyCopy props={props} themeData={themeData} isEE={isEE} />
           {/* Always render claim in edit mode so Sitecore field editor appears */}
           {fields?.claim?.value || isEE ? (
             <RichTextWrapper
@@ -456,6 +538,9 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
                   },
                 },
                 cta1ModalLinkText: {
+                  value: '',
+                },
+                cta1PersonalizeEventName: {
                   value: '',
                 },
                 cta1AriaLabel: {

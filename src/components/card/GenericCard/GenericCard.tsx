@@ -17,7 +17,15 @@ type GenericCardProps = ComponentProps &
 async function GenericCard_Default(props: GenericCardProps): Promise<JSX.Element> {
   const { mediaPrimary } = await getComponentServerProps(props.rendering);
 
-  return <GenericCardClient fields={props.fields} mediaPrimary={mediaPrimary} />;
+  return (
+    <GenericCardClient
+      desktopVideoDisplayStyle={
+        props.desktopVideoDisplayStyle || props?.params?.desktopVideoDisplayStyle
+      }
+      fields={props.fields}
+      mediaPrimary={mediaPrimary}
+    />
+  );
 }
 
 export const Default = withDatasourceCheck(GenericCard_Default);

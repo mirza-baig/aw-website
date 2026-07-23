@@ -136,8 +136,10 @@ export class TechDocsSitemapService {
       const techDocNode = root.ele('url');
 
       // Replace all edge.sitecorecloud.io/andersencor{environment}-* media URLs with the site target hostname
+      // also handle the case where the URL may not have the https://edge.sitecorecloud.io prefix,
+      // but still has the /andersencor{environment}-* media path
       const urlWithHostnameReplaced = sitemapItem.url?.replace(
-        /https:\/\/edge\.sitecorecloud\.io\/andersencor[^/]+(\/media\/[^\s"'\\)]+)/g,
+        /(?:https:\/\/edge\.sitecorecloud\.io)?\/andersencor[^/]+(\/media\/[^\s"'\\)]+)/g,
         `https://${hostName}/-$1`
       );
 

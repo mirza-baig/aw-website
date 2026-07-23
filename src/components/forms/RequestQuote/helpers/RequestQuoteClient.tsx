@@ -68,6 +68,39 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   const latestPageIndexRef = useRef(0);
 
   const icons = keysIcons.map((key) => props?.fields[key]).filter(Boolean);
+  const homeownerProjectInformation = requestQuoteFlow.homeowner.projectInformation.map(
+    (projectType) => {
+      switch (projectType.value) {
+        case 'Windows or door replacement only':
+          return {
+            ...projectType,
+            title: props.fields?.replacementTitle?.value ?? '',
+            subtitle: props.fields?.replacementSubtitle?.value ?? '',
+          };
+
+        case 'New Construction':
+          return {
+            ...projectType,
+            title: props.fields?.newBuildTitle?.value ?? '',
+            subtitle: props.fields?.newBuildSubtitle?.value ?? '',
+          };
+
+        case 'Remodeling':
+          return {
+            ...projectType,
+            title: props.fields?.remodelTitle?.value ?? '',
+            subtitle: props.fields?.remodelSubtitle?.value ?? '',
+          };
+
+        default:
+          return {
+            ...projectType,
+            title: '',
+            subtitle: '',
+          };
+      }
+    }
+  );
   const getHiddenFieldValue = (): string => {
     const hiddenField = document.querySelector('input[name="website"]') as HTMLInputElement;
     return hiddenField?.value;
@@ -411,11 +444,11 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
             <div className="col-span-10 hidden text-center md:col-start-2 md:block">
               <p className="font-sans text-sm-xxs font-heavy">CHOOSE A PROJECT TYPE</p>
             </div>
-            {requestQuoteFlow.homeowner.projectInformation.map((projectType, index, arr) => {
+            {homeownerProjectInformation.map((projectType, index, arr) => {
               const isLastSingleTile = arr.length % 2 === 1 && index === arr.length - 1;
               return (
                 <div
-                  key={index}
+                  key={projectType.value}
                   className={classNames(
                     'col-span-12 md:col-span-6',
                     isLastSingleTile && 'md:col-start-4'
@@ -737,12 +770,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     // Start abandonment tracking when the first step is completed
     beginAbandonTracking();
 
-    // Guard: do not fire more than once per browser session.
-    if (sessionStorage.getItem('awRAQStarted') === 'true') {
-      return;
-    }
-    // Mark session as started in sessionStorage.
-    sessionStorage.setItem('awRAQStarted', 'true');
+    // Mark session time started in sessionStorage.
     sessionStorage.setItem('awRAQStartTime', String(Date.now()));
     sessionStorage.setItem('awRAQSubmitted', 'false');
 

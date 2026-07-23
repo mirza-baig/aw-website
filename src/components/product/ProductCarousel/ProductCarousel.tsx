@@ -139,6 +139,7 @@ function ProductCarousel_Default(props: ProductCarouselProps): JSX.Element {
                 )?.fields?.modalId?.value
               }
               modalLinkText={props.fields?.cta1ModalLinkText}
+              ctaPersonalizeEventName={props.fields?.cta1PersonalizeEventName}
             ></Button>
           </div>
         </div>

@@ -13,7 +13,7 @@ import {
 } from 'react';
 
 import { GridDisplay, SliderDisplay } from './DisplayModes.helper';
-import { DesktopVideoDisplayStyleType, XupDisplayStyle } from './XupCardCollection.types';
+import { XupDisplayStyle } from './XupCardCollection.types';
 
 // Selectors for DOM-level card wrapping correction in Sitecore Pages edit mode.
 const CHROME_OPEN_SELECTOR = 'code[type="text/sitecore"][chrometype="rendering"][kind="open"]';
@@ -108,7 +108,6 @@ type CardsWrapperProps = Readonly<{
   desktopDisplayStyle: XupDisplayStyle;
   mobileDisplayStyle: XupDisplayStyle;
   isEditing: boolean;
-  desktopVideoDisplayStyle: DesktopVideoDisplayStyleType;
 }>;
 
 export function CardsWrapper({

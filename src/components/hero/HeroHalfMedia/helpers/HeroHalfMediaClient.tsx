@@ -53,6 +53,7 @@ export function HeroHalfMediaClient(props: HeroHalfMediaProps) {
           cta1Link: props.fields.cta1Link,
           cta1AriaLabel: props.fields.cta1AriaLabel ?? { value: '' },
           cta1ModalLinkText: props.fields.cta1ModalLinkText ?? { value: '' },
+          cta1PersonalizeEventName: props.fields.cta1PersonalizeEventName ?? { value: '' },
           cta1Modal: props.fields.cta1Modal,
           cta1Icon: props.fields.cta1Icon?.value?.src
             ? ({
@@ -78,6 +79,7 @@ export function HeroHalfMediaClient(props: HeroHalfMediaProps) {
           cta2Link: props.fields.cta2Link,
           cta2AriaLabel: props.fields.cta2AriaLabel ?? { value: '' },
           cta2ModalLinkText: props.fields.cta2ModalLinkText ?? { value: '' },
+          cta2PersonalizeEventName: props.fields.cta2PersonalizeEventName ?? { value: '' },
           cta2Modal: props.fields.cta2Modal,
           cta2Icon: props.fields.cta2Icon?.value?.src
             ? ({

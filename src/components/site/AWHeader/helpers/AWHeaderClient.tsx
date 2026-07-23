@@ -170,6 +170,7 @@ const MenuContent = ({
           menu={menu}
           fullHeight={options?.fullHeight}
           imageRatio={options?.imageRatio}
+          ctaSection="header"
         />
       </Card>
     );
@@ -698,6 +699,7 @@ export function AWHeaderClient(props: AWHeaderProps): JSX.Element {
                       {showNavLink && (
                         <span className="cursor-pointer text-xxs font-heavy hover:shadow-[0_3px_0_0_#f26924]">
                           <LinkWrapper
+                            ctaSection="header"
                             className="text-sm-s font-heavy hover:no-underline focus:no-underline active:focus:no-underline ml:text-xxs"
                             field={menu.fields.cta1Link}
                           />

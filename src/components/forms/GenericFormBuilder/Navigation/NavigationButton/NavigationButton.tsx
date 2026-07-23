@@ -197,6 +197,9 @@ function NavigationButton_Default(props: NavigationButtonProps): JSX.Element | n
   function updateFormStep(navigationStep: number) {
     let currentStep = Number(sessionStorage.getItem(FormsConstants.AW.Form.CCPFormStep) || 1);
 
+    // STORE completed step BEFORE updating
+    sessionStorage.setItem(FormsConstants.AW.Form.CCPFormCompleted, String(currentStep));
+
     // update based on navigationStep
     if (navigationStep === 1) {
       currentStep += 1; // next
@@ -239,12 +242,6 @@ function NavigationButton_Default(props: NavigationButtonProps): JSX.Element | n
   const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    // update the FormStep
-    updateFormStep(navigationStep);
-
-    // reset timer
-    resetAbandonTimer();
-
     /* first check if botchecker field have value and if found,
      set the Error messages and,
      stop the execution and return click handler */
@@ -259,6 +256,11 @@ function NavigationButton_Default(props: NavigationButtonProps): JSX.Element | n
       setIsButtonEnabled(false);
       // Form is valid, execute actions if available
       try {
+        // update the FormStep
+        updateFormStep(navigationStep);
+        // reset timer
+        resetAbandonTimer();
+
         await executeActions(); // Execute actions and handle any errors
         // Actions executed successfully, advance to the next page (for next and submit buttons)
         if (submitActionNextStep > -1) {

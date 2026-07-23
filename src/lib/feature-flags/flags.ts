@@ -26,3 +26,30 @@ export const releaseExampleFeature = flag<boolean>({
     { value: false, label: 'Pending' },
   ],
 });
+// Release: Raq-web-to-lead-fetch-method
+export const releaseRaqWebToLeadFetchMethod = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-raq-web-to-lead-fetch-method`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Submit Salesforce Web-to-Lead leads via the fetch API instead of a hidden iFrame form. Prevents a spurious CDP "Viewed the Home Page" page-view event on submit. When disabled, the legacy iFrame submission is used.',
+  defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+
+// Release: Redesigned Series Compare Chart
+export const releaseRedesignedSeriesCompareChart = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-redesigned-series-compare-chart`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Renders the redesigned card-based series compare chart (ComparisonSeriesChart) instead of the legacy AW_ComparisonSeriesTable layout.',
+  defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});

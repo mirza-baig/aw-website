@@ -17,7 +17,7 @@ export const HeaderNav = () => {
 
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    globalThis.history.replaceState(null, '', backHref);
+    globalThis.history.pushState(null, '', backHref);
   };
 
   const handleStartOverClick = (e: React.MouseEvent) => {

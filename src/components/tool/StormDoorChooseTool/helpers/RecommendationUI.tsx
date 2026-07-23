@@ -243,6 +243,9 @@ export const RecommendationUI = React.memo(function RecommendationUI({
                           cta1ModalLinkText: {
                             value: '',
                           },
+                          cta1PersonalizeEventName: {
+                            value: '',
+                          },
                           cta1AriaLabel: {
                             value: '',
                           },
@@ -286,6 +289,9 @@ export const RecommendationUI = React.memo(function RecommendationUI({
                           },
                         },
                         cta1ModalLinkText: {
+                          value: '',
+                        },
+                        cta1PersonalizeEventName: {
                           value: '',
                         },
                         cta1AriaLabel: {

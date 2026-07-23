@@ -45,6 +45,15 @@ export const SitecoreIds = {
                     URL: {
                       Id: '{C115B4D7-5DC5-4203-96E5-7BAE5B4EA857}',
                     },
+                    StepCompleted: {
+                      Id: '{97C4E668-30BD-4BD3-B0AE-1D5C6D1135A4}',
+                    },
+                    CurrentStep: {
+                      Id: '{58F67171-4C7E-4D24-B440-1E3DBC657CBD}',
+                    },
+                    FromSession: {
+                      Id: '{466D3B7F-4517-42D3-9789-6136E4F2E95F}',
+                    },
                   },
                 },
               },
@@ -149,6 +158,9 @@ export const SitecoreIds = {
                 },
                 DesignToolProduct: {
                   Id: 'D5CC77EF-584F-4163-9976-AEF60D17B8B6',
+                },
+                DesignToolStart: {
+                  Id: 'C91A7BCC-4CD3-4CA5-8992-480FAA210DFB',
                 },
               },
               StormDoorChooseTool: {
