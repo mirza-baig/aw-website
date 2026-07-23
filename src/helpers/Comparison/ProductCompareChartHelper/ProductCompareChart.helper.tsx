@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Field, Text } from '@sitecore-content-sdk/nextjs';
-import { Eyebrow } from 'helpers/Eyebrow';
+import Button from 'helpers/Button/Button';
 import { ComponentProps } from 'lib/component-props';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { getEnum } from 'lib/utils/get-enum';
@@ -15,6 +15,7 @@ import Disclaimer from 'src/helpers/DisclaimerText/DisclaimerText';
 import ModalWrapper from 'src/helpers/ModalWrapper/ModalWrapper';
 import SvgIcon from 'src/helpers/SvgIcon/SvgIcon';
 
+import { resolveIntroCta, resolveIntroCtaIcon, resolveIntroCtaStyle } from '../intro-cta-mock';
 import {
   getComparisonObject,
   getProductTypeLookupField,
@@ -411,7 +412,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
       })
       .filter(Boolean);
     return (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center font-sans! font-normal">
         {lines.map((line: string) => (
           <span key={line}>{line}</span>
         ))}
@@ -1245,27 +1246,33 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
   const finalDescription = editorialDescription || currentProductTypeDescription;
   const hasEyebrow = typeof editorialEyebrow === 'string' && editorialEyebrow.trim().length > 0;
 
-  let eyebrowContent;
-  if (!hasEyebrow) {
-    eyebrowContent = 'COMPARE';
-  } else if (isEE) {
-    eyebrowContent = <Eyebrow {...props} />;
-  } else {
-    eyebrowContent = editorialEyebrow;
-  }
-  let headlineContent: React.ReactNode = currentProductTypeName;
-  if (editorialTitle) {
-    headlineContent = isEE ? <Text tag="span" field={props.fields.headlineText} /> : editorialTitle;
-  }
+  // Hardcoded intro heading levels (eyebrow → H4, title → H2, description → paragraph)
+  // so the markup stays consistent with the Series compare chart regardless of author input.
+  const introEyebrowClasses = `font-sans! font-bold uppercase tracking-[0.9px] text-[#F26924] ${
+    isMobile ? 'text-[10px] leading-tight' : 'text-lg'
+  }`;
+  const introTitleClasses = `font-sans! font-bold line-clamp-3 ${
+    isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
+  }`;
+  const introDescriptionClasses = `text-[#333] !font-sans ${isMobile ? 'text-[8px] hidden' : 'text-sm'}`;
+  const introCta = resolveIntroCta((props.fields as any).chartIntroCta);
+  const introCtaStyle = resolveIntroCtaStyle((props.fields as any).chartIntroCtaStyle);
+  const introCtaIcon = resolveIntroCtaIcon((props.fields as any).chartIntroCtaIcon);
+  const hasIntroCta = !!introCta?.value?.href;
 
-  let descriptionContent: React.ReactNode = currentProductTypeDescription;
-  if (editorialDescription) {
-    descriptionContent = isEE ? (
-      <Text tag="span" field={props.fields.body} />
-    ) : (
-      editorialDescription
-    );
+  // The legend header and every card header share one height so the rows below line up.
+  // Only desktop needs extra room for the CTA — on mobile/tablet the description is hidden,
+  // which already frees enough space in the fixed header.
+  let introHeaderHeightClass = 'h-[150px]';
+  if (!isMobile) {
+    introHeaderHeightClass = hasIntroCta ? 'h-[272px]' : 'h-[216px]';
   }
+  // Full-width, wrapping button so the author-chosen style still fits the narrow
+  // (100px) mobile/tablet legend rail; compact overrides shrink it on small screens.
+  const introCtaClasses = isMobile
+    ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
+    : 'mt-2 w-full! justify-center';
+
   // Always render in edit mode so Sitecore field editors appear
   if (!props.fields && !isEE) {
     return <></>;
@@ -1389,32 +1396,39 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                 }`}
               >
                 <div
-                  className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 h-[150px] pb-2' : 'gap-2 h-[216px] pb-4'}`}
+                  className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-2 pb-4'} ${introHeaderHeightClass}`}
                 >
-                  <span
-                    className={`font-bold uppercase tracking-wider text-[#F26924] ${
-                      isMobile ? 'text-[10px] leading-tight' : 'text-lg'
-                    }`}
-                    style={{ fontFamily: 'futura-pt, sans-serif', letterSpacing: '0.9px' }}
-                  >
-                    {eyebrowContent}
-                  </span>
-                  <span
-                    className={`font-bold line-clamp-3 ${
-                      isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
-                    }`}
-                    style={{ fontFamily: 'futura-pt, sans-serif' }}
-                  >
-                    {headlineContent}
-                  </span>
-                  {finalDescription && (
-                    <span
-                      className={`text-[#333] !font-sans ${
-                        isMobile ? 'text-[8px] hidden' : 'text-sm'
-                      }`}
-                    >
-                      {descriptionContent}
-                    </span>
+                  {hasEyebrow ? (
+                    <Text
+                      tag="h4"
+                      field={props.fields.eyebrowText}
+                      className={introEyebrowClasses}
+                    />
+                  ) : (
+                    <h4 className={introEyebrowClasses}>COMPARE</h4>
+                  )}
+                  {editorialTitle ? (
+                    <Text
+                      tag="h2"
+                      field={props.fields.headlineText}
+                      className={introTitleClasses}
+                    />
+                  ) : (
+                    <h2 className={introTitleClasses}>{currentProductTypeName}</h2>
+                  )}
+                  {finalDescription &&
+                    (editorialDescription ? (
+                      <Text tag="p" field={props.fields.body} className={introDescriptionClasses} />
+                    ) : (
+                      <p className={introDescriptionClasses}>{currentProductTypeDescription}</p>
+                    ))}
+                  {hasIntroCta && (
+                    <Button
+                      field={introCta}
+                      variant={introCtaStyle}
+                      icon={introCtaIcon}
+                      classes={introCtaClasses}
+                    />
                   )}
                 </div>
 
@@ -1548,7 +1562,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                           }`}
                         >
                           <div
-                            className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'h-[150px] pb-2' : 'h-[216px] pb-4'}`}
+                            className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'pb-2' : 'pb-4'} ${introHeaderHeightClass}`}
                           >
                             <div
                               className={`flex ${isMobile ? 'h-[90px]' : 'h-[134px]'} w-full items-center justify-center`}

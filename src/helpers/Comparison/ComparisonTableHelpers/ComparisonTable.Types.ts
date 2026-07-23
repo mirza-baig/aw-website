@@ -8,14 +8,21 @@ import {
 
 /**
  * New-design series chart fields (chartEyebrow, chartTitle, chartDescription,
- * finalColumnCTA, finalRowCTAOptions, enableRedesignedLayout). Local augmentation
- * until these are added to the AW_ComparisonSeriesTable Sitecore template and
- * `.sitecore/AndersenWindows.model.ts` regenerates with real typed fields.
+ * chartIntroCta, chartIntroCtaStyle, finalColumnCTA, finalRowCTAOptions,
+ * enableRedesignedLayout). Local augmentation until these are added to the
+ * AW_ComparisonSeriesTable Sitecore template and `.sitecore/AndersenWindows.model.ts`
+ * regenerates with real typed fields.
  */
 export type ComparisonSeriesChartFields = {
   chartEyebrow?: Field<string>;
   chartTitle?: Field<string>;
   chartDescription?: Field<string>;
+  /** Optional chart intro CTA shown under the description. */
+  chartIntroCta?: LinkField;
+  /** Button-variant droplink for the intro CTA (primary/secondary/tertiary/link). */
+  chartIntroCtaStyle?: Item;
+  /** Optional icon droplink for the intro CTA (SvgIcon IconTypes value). */
+  chartIntroCtaIcon?: Item;
   finalColumnCTA?: LinkField;
   finalRowCTAOptions?: Item[];
   enableRedesignedLayout?: Field<boolean>;

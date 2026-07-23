@@ -1,6 +1,7 @@
 'use client';
 
 import { Field, Item, LinkField, Text } from '@sitecore-content-sdk/nextjs';
+import Button from 'helpers/Button/Button';
 import Disclaimer from 'helpers/DisclaimerText/DisclaimerText';
 import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
@@ -13,6 +14,7 @@ import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import Image from 'next/image';
 import { useRef } from 'react';
 
+import { resolveIntroCta, resolveIntroCtaIcon, resolveIntroCtaStyle } from '../intro-cta-mock';
 import { renderComparisonCellValue } from './CategoryRow';
 import { getComparisonObject } from './ComparisonTable.helper';
 import { ComparisonSeriesChartFields } from './ComparisonTable.Types';
@@ -275,6 +277,29 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
     isMobile
   );
 
+  const chartIntroCta = resolveIntroCta(props.fields?.chartIntroCta);
+  // real value from sitecore would be const chartIntroCta = props.fields?.chartIntroCta;
+  const chartIntroCtaStyle = resolveIntroCtaStyle(props.fields?.chartIntroCtaStyle);
+  const chartIntroCtaIcon = resolveIntroCtaIcon(props.fields?.chartIntroCtaIcon);
+  const hasIntroCta = !!chartIntroCta?.value?.href;
+
+  // The legend header and every card header share the same height (offset by their
+  // different top paddings) so the rows below line up. When an intro CTA is present we
+  // grow both by the same delta so the button has room and never overlaps the first row.
+  const pickHeaderHeight = (base: string, withCta: string): string =>
+    hasIntroCta ? withCta : base;
+  const introLegendHeaderHeight = isMobile
+    ? pickHeaderHeight('h-[130px]', 'h-[176px]')
+    : pickHeaderHeight('h-[192px]', 'h-[248px]');
+  const introCardHeaderHeight = isMobile
+    ? pickHeaderHeight('h-[130px]', 'h-[176px]')
+    : pickHeaderHeight('h-[175px]', 'h-[231px]');
+  // Full-width, wrapping button so the author-chosen style still fits the narrow
+  // (100px) mobile/tablet legend rail; compact overrides shrink it on small screens.
+  const introCtaClasses = isMobile
+    ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
+    : 'mt-2 w-full! justify-center';
+
   // Card width + gap, used so the scroll buttons advance by exactly one card.
   const SCROLL_AMOUNT = isMobile ? 168 : 292;
   const handleScrollLeft = () => {
@@ -298,7 +323,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
               }`}
             >
               <div
-                className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 h-[130px] pb-2' : 'gap-1.5 h-[192px] pb-3'}`}
+                className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-1.5 pb-3'} ${introLegendHeaderHeight}`}
               >
                 {(() => {
                   const chartEyebrow = props.fields?.chartEyebrow;
@@ -307,29 +332,35 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                   return (
                     <>
                       {chartEyebrow?.value && (
-                        <span
-                          className={`font-bold uppercase tracking-wider text-[#F26924] ${isMobile ? 'text-[11px] leading-tight' : 'text-lg'}`}
-                          style={{ fontFamily: 'futura-pt, sans-serif', letterSpacing: '0.9px' }}
-                        >
-                          <Text field={chartEyebrow} />
-                        </span>
+                        <Text
+                          tag="h4"
+                          field={chartEyebrow}
+                          className={`font-sans! font-bold uppercase tracking-[0.9px] text-[#F26924] ${isMobile ? 'text-[11px] leading-tight' : 'text-lg'}`}
+                        />
                       )}
                       {chartTitle?.value && (
-                        <span
-                          className={`font-bold line-clamp-3 ${
+                        <Text
+                          tag="h2"
+                          field={chartTitle}
+                          className={`font-sans! font-bold line-clamp-3 ${
                             isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
                           }`}
-                          style={{ fontFamily: 'futura-pt, sans-serif' }}
-                        >
-                          <Text field={chartTitle} />
-                        </span>
+                        />
                       )}
                       {chartDescription?.value && (
-                        <span
+                        <Text
+                          tag="p"
+                          field={chartDescription}
                           className={`text-[#555] !font-sans leading-snug ${isMobile ? 'text-[11px]' : 'text-sm'}`}
-                        >
-                          <Text field={chartDescription} />
-                        </span>
+                        />
+                      )}
+                      {hasIntroCta && (
+                        <Button
+                          field={chartIntroCta}
+                          variant={chartIntroCtaStyle}
+                          icon={chartIntroCtaIcon}
+                          classes={introCtaClasses}
+                        />
                       )}
                     </>
                   );
@@ -423,7 +454,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                       }`}
                     >
                       <div
-                        className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 h-[130px] pb-2' : 'gap-1.5 h-[175px] pb-3'}`}
+                        className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-1.5 pb-3'} ${introCardHeaderHeight}`}
                       >
                         <div
                           className={`flex ${isMobile ? 'h-[92px]' : 'h-[140px]'} w-full items-center justify-center`}
@@ -452,7 +483,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                         <div
                           key={row.key}
                           style={{ height: rowHeights[rowIdx] }}
-                          className={`flex w-full shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden border-b border-[#CCC] py-3 text-center ${isMobile ? 'text-[11px]' : 'text-sm'}`}
+                          className={`flex w-full shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden border-b border-[#CCC] font-sans! py-3 text-center ${isMobile ? 'text-[11px]' : 'text-sm'}`}
                         >
                           {row.kind === 'row' &&
                             renderComparisonCellValue(
