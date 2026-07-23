@@ -1,11 +1,10 @@
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { checkHostNameInMediaURL } from 'lib/coveo/utils';
+import { getLastModifiedDate } from 'lib/coveo/utils/get-lastmod';
 import { decimalToFraction } from 'lib/utils/dimension-conversion';
-import { normalizeSitecoreDateString } from 'lib/utils/string-utils/normalize-sitecore-date-string';
 
 import {
   getCheckboxField,
-  getDateField,
   getImageField,
   getLinkField,
   getLookupField,
@@ -29,9 +28,9 @@ export class ProductProperties {
 
     const parentItem = indexableItem.parent as IndexableItem;
 
-    const lastUpdated = GetLastUpdatedDate(indexableItem, parentItem);
-    if (lastUpdated) {
-      siteMapItem.lastmod = lastUpdated;
+    const lastmod = getLastModifiedDate(indexableItem);
+    if (lastmod) {
+      siteMapItem.lastmod = lastmod;
     }
 
     siteMapItem.metaData['siteLanguage'] = indexableItem.language;
@@ -157,28 +156,5 @@ export class ProductProperties {
     });
   }
 }
-
-const GetLastUpdatedDate = (item: IndexableItem, parentItem: IndexableItem): Date | undefined => {
-  let itemUpdatedDate;
-  let parentItemUpdatedDate;
-
-  const itemLlastUpdatedField = getDateField(item.fields, 'lastUpdated');
-  if (itemLlastUpdatedField && itemLlastUpdatedField.value) {
-    itemUpdatedDate = new Date(normalizeSitecoreDateString(itemLlastUpdatedField.value));
-  }
-
-  const parentItemLastUpdatedField = getDateField(parentItem?.fields, 'lastUpdated');
-  if (parentItemLastUpdatedField && parentItemLastUpdatedField.value) {
-    parentItemUpdatedDate = new Date(normalizeSitecoreDateString(parentItemLastUpdatedField.value));
-  }
-
-  let result: Date | undefined;
-  if (itemUpdatedDate && parentItemUpdatedDate) {
-    result = itemUpdatedDate > parentItemUpdatedDate ? itemUpdatedDate : parentItemUpdatedDate;
-  } else {
-    result = itemUpdatedDate || parentItemUpdatedDate;
-  }
-  return result;
-};
 
 export const productPropertiesPlugin = new ProductProperties();

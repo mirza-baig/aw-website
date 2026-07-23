@@ -95,6 +95,11 @@ export default function SendPersonalizeEvent(props: Props) {
       .then(() => {
         console.log('[CDP] Personalize Form Start Event Payload:', startPayload);
 
+        // clear all the session on payload start
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormStep);
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormTimeout);
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormCompleted);
+
         // store timeout globally
         sessionStorage.setItem(FormsConstants.AW.Form.CCPFormTimeout, String(abandonTimeoutMs));
         // START ABANDON TIMER

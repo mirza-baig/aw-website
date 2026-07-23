@@ -22,10 +22,6 @@ export const Debug = {
   onlinescheduling: debug(`${defaultNamespace}:onlinescheduling`),
   draftModeWorkaround: debug(`${defaultNamespace}:draft-mode-workaround`),
   api: {
-    coveo: {
-      accessToken: debug(`${defaultNamespace}:api:coveo:access-token`),
-      sitemap: debug(`${defaultNamespace}:api:coveo:sitemap`),
-    },
     customForms: {
       submitActions: {
         saveToDatabase: debug(

@@ -1,11 +1,9 @@
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { checkHostNameInMediaURL } from 'lib/coveo/utils';
 import { getErrorMessage } from 'lib/utils/error-utils/get-error-message';
-import { normalizeSitecoreDateString } from 'lib/utils/string-utils/normalize-sitecore-date-string';
 
 import {
   getCheckboxField,
-  getDateField,
   getLinkField,
   getLookupField,
   getMultilistField,
@@ -27,12 +25,6 @@ export class TechDocumentProperties {
     if (!indexableItem.templateId.includes(techDocumentTemplateId)) {
       return siteMapItem;
     }
-
-    const lastUpdated = getDateField(indexableItem.fields, 'lastUpdated');
-    if (lastUpdated?.value) {
-      siteMapItem.lastmod = new Date(normalizeSitecoreDateString(lastUpdated.value));
-    }
-
     siteMapItem.metaData['siteLanguage'] = indexableItem.language;
     siteMapItem.metaData['siteName'] = indexableItem.siteName;
 

@@ -18,7 +18,7 @@ export class SendPersonalizeEvent extends BaseSubmitAction<Sitecore.BaseTemplate
 
       const eventType = fields.eventType?.value;
       if (!eventType) {
-        console.warn('[CDP] No event type specified, skipping Personalization Submit Event');
+        console.warn('[CDP] No event type specified, skipping Personalization Submit Action Event');
         return { success: true };
       }
 
@@ -31,27 +31,38 @@ export class SendPersonalizeEvent extends BaseSubmitAction<Sitecore.BaseTemplate
           constantText: fields?.constantText?.value,
         };
       });
-      const submitPayload = buildPersonalizePayload({
+      const actionPayload = buildPersonalizePayload({
         eventType,
         attributes,
       });
 
-      if (!submitPayload) {
+      if (!actionPayload) {
         console.warn('[CDP] No payload generated, skipping event');
         return { success: true };
       }
 
-      await event(submitPayload)
-        .then(() => console.log('[CDP] Personalize Form Submit Event Payload:', submitPayload))
-        .catch((err) => console.error('[CDP] Personalize Form Submit Event error:', err));
-      console.log('[CDP] Personalize Form Submit Event fired successfully');
+      await event(actionPayload)
+        .then(() =>
+          console.log('[CDP] Personalize Form Action ' + eventType + '  Payload:', actionPayload)
+        )
+        .catch((err) =>
+          console.error('[CDP] Personalize Form Action ' + eventType + ' error:', err)
+        );
+      console.log('[CDP] Personalize Form Action ' + eventType + ' fired successfully');
 
-      // STOP ABANDON TIMER on submit
-      stopTimer();
-      // Clear session values on submit
-      sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormStep);
-      sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormTimeout);
+      const isSubmitEventType = eventType === FormsConstants.AW.Form.CCPFormSubmitEventType; // use your actual submit event name
 
+      // STOP ABANDON TIMER, Clear session values on submit
+      if (isSubmitEventType) {
+        stopTimer();
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormStep);
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormTimeout);
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormCompleted);
+
+        // remove CCP experience session keys on submit
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormFromExperience);
+        sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormExperienceId);
+      }
       return {
         success: true,
         errorMessage: this.props.submitAction.fields?.errorMessage?.value,

@@ -1,3 +1,5 @@
+import { SitecoreIds } from 'lib/constants/sitecore-ids';
+import { guidEquals } from 'lib/utils/string-utils/guid-equals';
 import { createContext, Dispatch, SetStateAction } from 'react';
 
 import { DesignToolDataProps, DesignToolOptionDataProps } from './DesignTool.helper';
@@ -6,11 +8,17 @@ import { AWViewModelBuilder } from './js/awviewmodelbuilder';
 import { StormdoorViewModelBuilder } from './js/stormdoorviewmodelbuilder';
 import { GetUrlParts } from './js/utils';
 
+export type LegacyAWViewModel = AWViewModelBuilder | StormdoorViewModelBuilder | undefined;
+
 export class DesignToolRouter {
   routeData: DesignToolRouteData;
   setRouteData: Dispatch<SetStateAction<DesignToolRouteData>>;
   moduleData: DesignToolDataProps;
   shortenedUrl: string;
+
+  NormalizeId = (value: string | undefined) => {
+    return value?.toLowerCase().replace(/[\}\{-]/g, '');
+  };
 
   constructor(
     moduleData: DesignToolDataProps,
@@ -27,9 +35,9 @@ export class DesignToolRouter {
   getStep(url: string) {
     const urlParts = GetUrlParts(url);
 
-    if (urlParts && urlParts.attributeIndex) {
+    if (urlParts?.attributeIndex) {
       return DesignToolStep.Design;
-    } else if (urlParts && urlParts.option) {
+    } else if (urlParts?.option) {
       return DesignToolStep.Select;
     } else {
       return DesignToolStep.Start;
@@ -40,28 +48,22 @@ export class DesignToolRouter {
     return option.id;
   }
 
-  setRouteDataFromOptionId(
-    optionId: string,
-    legacyAWViewModel?: AWViewModelBuilder | StormdoorViewModelBuilder | undefined
-  ) {
-    const moduleData = this.moduleData as DesignToolDataProps;
-    const option = moduleData?.options?.filter(
+  setRouteDataFromOptionId(optionId: string, legacyAWViewModel?: LegacyAWViewModel) {
+    const moduleData = this.moduleData;
+    const option = moduleData?.options?.find(
       (currentOption: DesignToolOptionDataProps) => currentOption.id == optionId
-    )[0];
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     option && this.setRouteDataFromOption(option, legacyAWViewModel);
   }
 
-  setRouteDataFromOption(
-    option: DesignToolOptionDataProps,
-    legacyAWViewModel?: AWViewModelBuilder | StormdoorViewModelBuilder | undefined
-  ) {
+  setRouteDataFromOption(option: DesignToolOptionDataProps, legacyAWViewModel?: LegacyAWViewModel) {
     if (option) {
-      const moduleData = this.moduleData as DesignToolDataProps;
-      const matchedOption = moduleData?.options?.filter(
+      const moduleData = this.moduleData;
+      const matchedOption = moduleData?.options?.find(
         (currentOption: DesignToolOptionDataProps) => currentOption.id === option.id
-      )[0] as DesignToolOptionDataProps;
+      ) as DesignToolOptionDataProps;
 
       this.setRouteData({
         option: matchedOption,
@@ -89,43 +91,56 @@ export class DesignToolRouter {
   }
 
   getProductFromProductId = (productId: string): DesignToolProductProps => {
-    const moduleData = this.moduleData as DesignToolDataProps;
-    const product = moduleData?.products?.filter(
+    const moduleData = this.moduleData;
+    const product = moduleData?.products?.find(
       (currentProduct: DesignToolProductProps) => currentProduct.id == productId
-    )[0];
+    );
 
     return product;
   };
 
   getBackRoute = (url: string): string => {
     const urlParts = GetUrlParts(url);
-    const queryPart = urlParts.query ? `?${urlParts.query}` : '';
 
-    const attributeIndex = parseInt(urlParts.attributeIndex);
+    const attributeIndex = Number.parseInt(urlParts.attributeIndex);
     let option;
     if (this.routeData.product?.id === urlParts.option) {
       option = this.routeData.product;
     } else if (this.routeData.option?.id === urlParts.option) {
       option = this.routeData.option;
     }
-
-    if (isNaN(attributeIndex) || attributeIndex <= 0) {
-      return `${urlParts.pathName}${queryPart}#/${option?.parentId ? option?.parentId : ''}`;
+    // Removed queryPart that Carries old product query
+    if (Number.isNaN(attributeIndex) || attributeIndex <= 0) {
+      // If the parentId is the DesignToolStart item Id, then we want to go back to the start page,
+      // otherwise we want to go back to the option parentId
+      if (
+        guidEquals(
+          this.NormalizeId(option?.parentId),
+          this.NormalizeId(
+            SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.Components.Tool
+              .DesignTool.DesignToolStart.Id
+          )
+        )
+      ) {
+        return `${urlParts.pathName}#/`;
+      } else {
+        return `${urlParts.pathName}#/${option?.parentId ? option?.parentId : ''}`;
+      }
     } else {
-      return `${urlParts.pathName}${queryPart}#/${option?.id}/${attributeIndex - 1}`;
+      return `${urlParts.pathName}#/${option?.id}/${attributeIndex - 1}`;
     }
   };
 
   setRouteDataFromProduct(
     product: DesignToolProductProps,
     attributeIndex: number,
-    legacyAWViewModel?: AWViewModelBuilder | StormdoorViewModelBuilder | undefined
+    legacyAWViewModel?: LegacyAWViewModel
   ) {
     if (product) {
-      const moduleData = this.moduleData as DesignToolDataProps;
-      const matchedProduct = moduleData?.products?.filter(
+      const moduleData = this.moduleData;
+      const matchedProduct = moduleData?.products?.find(
         (currentProduct: DesignToolProductProps) => currentProduct.id === product.id
-      )[0] as DesignToolProductProps;
+      );
 
       this.setRouteData({
         option: undefined,
@@ -163,7 +178,7 @@ export type DesignToolRouteData = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   products: any[];
   attributeIndex: number | undefined;
-  legacyAWViewModel: AWViewModelBuilder | StormdoorViewModelBuilder | undefined;
+  legacyAWViewModel: LegacyAWViewModel;
 };
 
 export const DefaultDesignToolRouteData: DesignToolRouteData = {

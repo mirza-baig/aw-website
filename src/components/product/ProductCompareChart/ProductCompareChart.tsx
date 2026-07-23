@@ -23,7 +23,7 @@ function ProductCompareChart_Default(props: ProductCompareChartProps) {
   return (
     <Component
       variant={isMobile ? 'full' : 'lg'}
-      dataComponent="product/comparisontableseries"
+      dataComponent="product/productcomparechart"
       padding={isMobile && 'px-0'}
       {...props}
     >

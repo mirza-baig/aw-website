@@ -106,6 +106,7 @@ function ButtonCard_Default(props: ButtonCardProps) {
               )}
               modalId={modalId}
               modalLinkText={modalLinkText}
+              ctaPersonalizeEventName={props.fields?.cta1PersonalizeEventName}
               ariaLabel={props.fields?.cta1AriaLabel}
             ></ButtonPrimary>
           </div>

@@ -106,6 +106,9 @@ export const NoResults = ({ fields }: FavoriteProductsProps): ReactElement => {
                 cta1ModalLinkText: {
                   value: '',
                 },
+                cta1PersonalizeEventName: {
+                  value: '',
+                },
                 cta1AriaLabel: {
                   value: '',
                 },

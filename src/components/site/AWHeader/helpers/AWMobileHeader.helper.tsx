@@ -187,6 +187,7 @@ const NavCardList = ({
               fullHeight={isGrid}
               imageRatio="landscape"
               mobileCtaVariant={mobileCtaVariant}
+              ctaSection="mobile"
             />
           </Card>
         </div>
@@ -856,7 +857,8 @@ const AWMobileHeader = (props: AWHeaderProps) => {
                         {showNavLink && (
                           <span className="cursor-pointer text-xxs font-heavy hover:shadow-[0_3px_0_0_#f26924]">
                             <LinkWrapper
-                              className="text-sm-s font-heavy hover:no-underline focus:no-underline active:focus:no-underline ml:text-xxs"
+                              ctaSection="mobile"
+                              className="text-sm-s font-heavy hover:no-underline focus:no-underline active:focus:no-underline ml:text-xxs zzz"
                               field={menu.fields.cta1Link}
                             />
                           </span>

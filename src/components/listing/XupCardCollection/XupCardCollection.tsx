@@ -45,6 +45,9 @@ function XupCardCollection_Default(props: XupCardCollectionProps): JSX.Element {
             rendering={props.rendering}
             page={props.page}
             componentMap={componentMap}
+            params={{ desktopVideoDisplayStyle: desktopVideoDisplayStyle }} // This is ok to pass to the placeholder because
+            // if the child card has a placeholder parameter of its own, the child card parameter
+            // will take precedence.
             render={(cards) => (
               <CardsWrapper
                 cards={cards}
@@ -52,7 +55,6 @@ function XupCardCollection_Default(props: XupCardCollectionProps): JSX.Element {
                 tabletMaxCardsPerRow={tabletMaxCardsPerRow}
                 desktopDisplayStyle={desktopDisplayStyle}
                 mobileDisplayStyle={mobileDisplayStyle}
-                desktopVideoDisplayStyle={desktopVideoDisplayStyle}
                 isEditing={props.page.mode.isEditing}
               />
             )}

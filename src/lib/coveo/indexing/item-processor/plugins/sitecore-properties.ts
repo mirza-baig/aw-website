@@ -1,4 +1,5 @@
 import config from 'aw.config.server';
+import { getLastModifiedDate } from 'lib/coveo/utils/get-lastmod';
 
 import { IndexableItem, SitemapItem } from '../..';
 
@@ -74,8 +75,12 @@ export class SitecoreProperties {
     reversedAncestors.push(indexableItem.id);
     siteMapItem.ancestors = reversedAncestors.join(';');
 
-    // Note: Last Updated is not currently pushed to experience edge. '_Base Page' has a custom Last Updated field, so that will be added there.
-    //siteMapItem.lastModified = indexableItem.
+    // Note: Last Updated from '_Base Page' removed and updated with OOB __updated/ __created field.
+    const lastmod = getLastModifiedDate(indexableItem);
+
+    if (lastmod) {
+      siteMapItem.lastmod = lastmod;
+    }
     return siteMapItem;
   }
 }

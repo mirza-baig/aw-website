@@ -5,6 +5,7 @@ import BodyCopy from 'helpers/BodyCopy/BodyCopy';
 import { cta1ToButtonProps, cta2ToButtonProps } from 'helpers/Button/Utils';
 import ButtonGroup from 'helpers/ButtonGroup/ButtonGroup';
 import Component, { ComponentBackgroundVariants } from 'helpers/Component/Component';
+import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import Headline from 'helpers/Headline/Headline';
 import { useTheme } from 'lib/context/ThemeContext';
 import { getEnum } from 'lib/utils/get-enum';
@@ -38,6 +39,12 @@ export function XupCardCollectionClient(props: XupCardCollectionProps): JSX.Elem
         />
       </div>
       {props.cards}
+      <DisclaimerText
+        {...props}
+        isLegalCopy={true}
+        disclaimerClasses={themeData.classes.disclaimerClass}
+        hideIfDisclaimerTextIsEmpty={true}
+      />
     </Component>
   );
 }

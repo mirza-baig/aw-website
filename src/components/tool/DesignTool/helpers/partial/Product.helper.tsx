@@ -44,7 +44,7 @@ export const Product = (props: DesignToolProductProps) => {
   const handleRouteToClick = (e: React.MouseEvent) => {
     e.preventDefault();
     const urlParts = GetUrlParts(asPath);
-    globalThis.history.replaceState(null, '', `${urlParts.pathName}#/${props.id}/0`);
+    globalThis.history.pushState(null, '', `${urlParts.pathName}#/${props.id}/0`);
   };
 
   const sliderSettings = {

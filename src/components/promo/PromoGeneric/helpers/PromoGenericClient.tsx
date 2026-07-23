@@ -98,6 +98,7 @@ export function PromoGenericClient(props: PromoGenericProps): JSX.Element {
                           )?.fields?.modalId?.value
                         }
                         modalLinkText={props?.fields?.cta1ModalLinkText}
+                        ctaPersonalizeEventName={props?.fields?.cta1PersonalizeEventName}
                         classes=""
                       />
                     )}
@@ -113,6 +114,7 @@ export function PromoGenericClient(props: PromoGenericProps): JSX.Element {
                           )?.fields?.modalId?.value
                         }
                         modalLinkText={props?.fields?.cta2ModalLinkText}
+                        ctaPersonalizeEventName={props?.fields?.cta2PersonalizeEventName}
                         classes=""
                       />
                     )}

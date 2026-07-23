@@ -1,10 +1,9 @@
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { checkHostNameInMediaURL } from 'lib/coveo/utils';
-import { normalizeSitecoreDateString } from 'lib/utils/string-utils/normalize-sitecore-date-string';
+import { getLastModifiedDate } from 'lib/coveo/utils/get-lastmod';
 
 import {
   getCheckboxField,
-  getDateField,
   getImageField,
   getLookupField,
   getRichTextField,
@@ -17,140 +16,17 @@ export class VideoProperties {
   order = 70;
 
   async exec(siteMapItem: SitemapItem, indexableItem: IndexableItem) {
-    const baseGalleryVideoTemplateId =
-      SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.BaseTemplates._BaseGalleryVideo.Id.replace(
-        /-/g,
-        ''
-      );
-
-    if (indexableItem.allTemplateIds.indexOf(baseGalleryVideoTemplateId) == -1) {
+    if (!this.isVideoItem(indexableItem)) {
       return siteMapItem;
     }
 
-    siteMapItem.loc = siteMapItem.itemUri;
-
-    const lastUpdated = getDateField(indexableItem.fields, 'lastUpdated');
-    if (lastUpdated && lastUpdated.value) {
-      const normalized = normalizeSitecoreDateString(lastUpdated.value);
-      siteMapItem.lastmod = new Date(normalized);
-    }
-
-    siteMapItem.metaData['siteLanguage'] = indexableItem.language;
-
-    siteMapItem.metaData['siteName'] = indexableItem.siteName;
-
-    siteMapItem.metaData['sitesearchtopic'] = 'Videos';
-
+    this.setBasicMetadata(siteMapItem, indexableItem);
     this.addTextFieldMeta(indexableItem, siteMapItem, ['eyebrowText', 'headlineText']);
-
-    const body = getRichTextField(indexableItem.fields, 'body');
-    if (body) {
-      siteMapItem.metaData[`video_${body.name}`] = body.value;
-    }
-
+    this.addBody(indexableItem, siteMapItem);
     this.addImageFieldMeta(indexableItem, siteMapItem, ['videoThumbnail', 'videoThumbnailMobile']);
-
     this.addLookupFieldMeta(indexableItem, siteMapItem, ['videoThumbnailMobileFocusArea']);
-
-    const primaryVideo = getLookupField(indexableItem.fields, 'primaryVideo');
-    if (primaryVideo && primaryVideo.targetItem) {
-      const videoId = getTextField(primaryVideo.targetItem.fields, 'videoId');
-
-      if (videoId) {
-        siteMapItem.metaData[videoId.name] = videoId.value;
-
-        const videoName = getTextField(primaryVideo.targetItem.fields, 'videoName');
-        if (videoName) {
-          siteMapItem.metaData[videoName.name] = videoName.value;
-        }
-
-        const videoDescription = getTextField(primaryVideo.targetItem.fields, 'videoDescription');
-        if (videoDescription) {
-          siteMapItem.metaData[videoDescription.name] = videoDescription.value;
-        }
-
-        const lastUpdated = getDateField(primaryVideo.targetItem.fields, 'lastUpdated');
-        if (lastUpdated && lastUpdated.value) {
-          const normalized = normalizeSitecoreDateString(lastUpdated.value);
-          siteMapItem.metaData[lastUpdated.name] = new Date(normalized);
-        }
-
-        siteMapItem.metaData['videotype'] = primaryVideo.targetItem.template?.id;
-
-        if (
-          primaryVideo.targetItem.template?.id?.toLowerCase() ===
-          SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.Elements.Media.YouTubeVideo.Id.replace(
-            /-/g,
-            ''
-          )
-        ) {
-          const youTubeAutoLoop = getCheckboxField(
-            primaryVideo.targetItem.fields,
-            'youTubeAutoLoop'
-          );
-          if (youTubeAutoLoop) {
-            siteMapItem.metaData[`video_${youTubeAutoLoop.name}`] = youTubeAutoLoop.boolValue
-              ? 'true'
-              : 'false';
-          }
-
-          const youTubeClosedCaptions = getCheckboxField(
-            primaryVideo.targetItem.fields,
-            'youTubeClosedCaptions'
-          );
-          if (youTubeClosedCaptions) {
-            siteMapItem.metaData[`video_${youTubeClosedCaptions.name}`] =
-              youTubeClosedCaptions.boolValue ? 'true' : 'false';
-          }
-
-          const youTubeShowControls = getCheckboxField(
-            primaryVideo.targetItem.fields,
-            'youTubeShowControls'
-          );
-          if (youTubeShowControls) {
-            siteMapItem.metaData[`video_${youTubeShowControls.name}`] =
-              youTubeShowControls.boolValue ? 'true' : 'false';
-          }
-
-          const youTubeMute = getCheckboxField(primaryVideo.targetItem.fields, 'youTubeMute');
-          if (youTubeMute) {
-            siteMapItem.metaData[`video_${youTubeMute.name}`] = youTubeMute.boolValue
-              ? 'true'
-              : 'false';
-          }
-        } else if (
-          primaryVideo.targetItem.template?.id?.toLowerCase() ===
-          SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.Elements.Media.FacebookVideo.Id.replace(
-            /-/g,
-            ''
-          )
-        ) {
-          const facebookShowCaptions = getCheckboxField(
-            primaryVideo.targetItem.fields,
-            'facebookShowCaptions'
-          );
-          if (facebookShowCaptions) {
-            siteMapItem.metaData[`video_${facebookShowCaptions.name}`] =
-              facebookShowCaptions.boolValue ? 'true' : 'false';
-          }
-
-          const facebookShowText = getCheckboxField(
-            primaryVideo.targetItem.fields,
-            'facebookShowText'
-          );
-          if (facebookShowText) {
-            siteMapItem.metaData[`video_${facebookShowText.name}`] = facebookShowText.boolValue
-              ? 'true'
-              : 'false';
-          }
-        }
-      }
-    }
-
-    const excludeFromSearch = getCheckboxField(indexableItem.fields, 'excludeFromSearch');
-    if (excludeFromSearch) {
-      siteMapItem.metaData[excludeFromSearch.name] = excludeFromSearch.boolValue ? 'true' : 'false';
-    }
+    this.processPrimaryVideo(indexableItem, siteMapItem);
+    this.addExcludeFromSearch(indexableItem, siteMapItem);
 
     return siteMapItem;
   }
@@ -199,6 +75,124 @@ export class VideoProperties {
         siteMapItem.metaData[`video_${field.name}`] = field.value;
       }
     });
+  }
+
+  private isVideoItem(indexableItem: IndexableItem): boolean {
+    const templateId =
+      SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.BaseTemplates._BaseGalleryVideo.Id.replaceAll(
+        '-',
+        ''
+      );
+
+    return indexableItem.allTemplateIds.includes(templateId);
+  }
+
+  private setBasicMetadata(siteMapItem: SitemapItem, indexableItem: IndexableItem) {
+    siteMapItem.loc = siteMapItem.itemUri;
+    siteMapItem.metaData['siteLanguage'] = indexableItem.language;
+    siteMapItem.metaData['siteName'] = indexableItem.siteName;
+    siteMapItem.metaData['sitesearchtopic'] = 'Videos';
+  }
+  private addBody(indexableItem: IndexableItem, siteMapItem: SitemapItem) {
+    const body = getRichTextField(indexableItem.fields, 'body');
+    if (body) {
+      siteMapItem.metaData[`video_${body.name}`] = body.value;
+    }
+  }
+  private processPrimaryVideo(indexableItem: IndexableItem, siteMapItem: SitemapItem) {
+    const primaryVideo = getLookupField(indexableItem.fields, 'primaryVideo');
+
+    if (!primaryVideo?.targetItem) {
+      return;
+    }
+    this.addPrimaryVideoMetadata(primaryVideo.targetItem, siteMapItem);
+    this.setLastModified(indexableItem, siteMapItem);
+    this.handleVideoType(primaryVideo.targetItem, siteMapItem);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private addPrimaryVideoMetadata(targetItem: any, siteMapItem: SitemapItem) {
+    const fields = ['videoId', 'videoName', 'videoDescription'];
+
+    fields.forEach((name) => {
+      const field = getTextField(targetItem.fields, name);
+      if (field?.value) {
+        siteMapItem.metaData[field.name] = field.value;
+      }
+    });
+  }
+  private setLastModified(indexableItem: IndexableItem, siteMapItem: SitemapItem) {
+    const lastmod = getLastModifiedDate(indexableItem);
+    if (lastmod) {
+      siteMapItem.lastmod = lastmod;
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleVideoType(targetItem: any, siteMapItem: SitemapItem) {
+    const templateId = targetItem.template?.id?.toLowerCase();
+
+    siteMapItem.metaData['videotype'] = templateId;
+
+    if (!templateId) {
+      return;
+    }
+    if (this.isYouTube(templateId)) {
+      this.handleYouTube(targetItem, siteMapItem);
+      return;
+    }
+
+    if (this.isFacebook(templateId)) {
+      this.handleFacebook(targetItem, siteMapItem);
+    }
+  }
+  private isYouTube(templateId: string): boolean {
+    return (
+      templateId ===
+      SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.Elements.Media.YouTubeVideo.Id.replaceAll(
+        '-',
+        ''
+      )
+    );
+  }
+
+  private isFacebook(templateId: string): boolean {
+    return (
+      templateId ===
+      SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.Elements.Media.FacebookVideo.Id.replaceAll(
+        '-',
+        ''
+      )
+    );
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleYouTube(targetItem: any, siteMapItem: SitemapItem) {
+    const fields = [
+      'youTubeAutoLoop',
+      'youTubeClosedCaptions',
+      'youTubeShowControls',
+      'youTubeMute',
+    ];
+
+    this.addCheckboxFields(targetItem, siteMapItem, fields);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleFacebook(targetItem: any, siteMapItem: SitemapItem) {
+    const fields = ['facebookShowCaptions', 'facebookShowText'];
+    this.addCheckboxFields(targetItem, siteMapItem, fields);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private addCheckboxFields(targetItem: any, siteMapItem: SitemapItem, fieldNames: string[]) {
+    fieldNames.forEach((name) => {
+      const field = getCheckboxField(targetItem.fields, name);
+      if (field) {
+        siteMapItem.metaData[`video_${name}`] = field.boolValue ? 'true' : 'false';
+      }
+    });
+  }
+  private addExcludeFromSearch(indexableItem: IndexableItem, siteMapItem: SitemapItem) {
+    const exclude = getCheckboxField(indexableItem.fields, 'excludeFromSearch');
+    if (exclude) {
+      siteMapItem.metaData[exclude.name] = exclude.boolValue ? 'true' : 'false';
+    }
   }
 }
 

@@ -3,6 +3,13 @@ export const FormsConstants = {
     Form: {
       CCPFormStep: 'awCcpFormStep',
       CCPFormTimeout: 'awCcpFormTimeout',
+      CCPFormCompleted: 'awCcpCompletedStep',
+      CCPFormSubmitEventType: 'AW:FORM_CCP_SUBMIT',
+      CCPFormFromExperienceText: 'fromExperience',
+      CCPFormExperienceIdText: 'experienceId',
+      // session keys for CCP form
+      CCPFormFromExperience: 'awCCPFromExperience',
+      CCPFormExperienceId: 'awCCPExperienceId',
     },
   },
   Enterprise: {

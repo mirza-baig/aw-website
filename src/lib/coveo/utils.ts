@@ -11,8 +11,10 @@ import {
   SortOrder,
 } from '@coveo/headless';
 import { XupDynamicResultItem } from 'components/listing/XupCardCollectionDynamic/helpers/XupCardCollectionDynamic.Template.helper';
+import sitecoreClient from 'lib/sitecore-client';
 import { EnumField, getEnum } from 'lib/utils/get-enum';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
+import { environment } from 'startup/environment';
 
 import { currentAccessToken, renewAccessToken } from './access-token';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -201,6 +203,21 @@ export const getResultItemIndex = (
 export const checkHostNameInMediaURL = (url: string): string => {
   if (!url.startsWith('https')) {
     return `${process.env.SITECORE_API_HOST}${url}`;
+  }
+
+  if (environment.isPreview()) {
+    try {
+      const parsedUrl = new URL(url);
+      const siteInfo = sitecoreClient.getSiteInfoByHost(url);
+      const mediaHostName = siteInfo?.mediaHostName as string;
+      if (mediaHostName) {
+        parsedUrl.host = mediaHostName;
+      }
+
+      return parsedUrl.toString();
+    } catch {
+      return url;
+    }
   }
 
   return url;

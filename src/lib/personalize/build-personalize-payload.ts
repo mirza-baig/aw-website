@@ -1,3 +1,4 @@
+import { FormsConstants } from 'lib/constants/forms-constants';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 
@@ -27,11 +28,29 @@ export function buildPersonalizePayload(input: BuildPayloadInput) {
     console.warn('[CDP] Missing Event Type, skipping Personalization Submit');
     return null;
   }
-  const getValueFromType = (constantValueId?: string) => {
+
+  const getValueFromType = (constantValueId?: string, key?: string) => {
     const AttributeConstants =
       SitecoreIds.Content.AndersenCorporation.AndersenWindows.Global.DataSources.Enums.Forms
         .Attributes.AttributeConstants;
-    switch (constantValueId) {
+    const getFromSessionValue = (key?: string): string | boolean => {
+      const fromExperience =
+        sessionStorage.getItem(FormsConstants.AW.Form.CCPFormFromExperience) === 'true';
+
+      switch (key) {
+        case FormsConstants.AW.Form.CCPFormFromExperienceText:
+          return fromExperience;
+
+        case FormsConstants.AW.Form.CCPFormExperienceIdText:
+          return fromExperience
+            ? sessionStorage.getItem(FormsConstants.AW.Form.CCPFormExperienceId) || ''
+            : '';
+
+        default:
+          return '';
+      }
+    };
+    switch (normalizeGuid(constantValueId)) {
       case normalizeGuid(AttributeConstants.Timestamp.Id):
         return new Date().toISOString();
 
@@ -41,24 +60,44 @@ export function buildPersonalizePayload(input: BuildPayloadInput) {
       case normalizeGuid(AttributeConstants.Referrer.Id):
         return typeof document === 'undefined' ? '' : document.referrer;
 
+      case normalizeGuid(AttributeConstants.StepCompleted.Id): {
+        if (typeof document === 'undefined') {
+          return '';
+        }
+        const completedStep = sessionStorage.getItem(FormsConstants.AW.Form.CCPFormCompleted);
+        return completedStep ? Number(completedStep) : 1;
+      }
+      case normalizeGuid(AttributeConstants.CurrentStep.Id): {
+        if (typeof document === 'undefined') {
+          return '';
+        }
+        const currentStep = sessionStorage.getItem(FormsConstants.AW.Form.CCPFormStep);
+        return currentStep ? Number(currentStep) : 1;
+      }
+      case normalizeGuid(AttributeConstants.FromSession.Id): {
+        if (globalThis.window === undefined) {
+          return '';
+        }
+
+        return getFromSessionValue(key);
+      }
       default:
         return '';
     }
   };
-
   const payloadAttributes = attributes.reduce((acc, item) => {
     if (!item.key) {
       return acc;
     }
+    // Other ConstantValue types
     if (item.constantValue) {
-      acc[item.key] = getValueFromType(normalizeGuid(item.constantValue));
+      acc[item.key] = getValueFromType(normalizeGuid(item.constantValue), item.key);
       return acc;
     }
-
+    // ConstantText only
     if (item.constantText) {
       acc[item.key] = item.constantText;
     }
-
     return acc;
   }, {} as ExtRecord);
   return {
