@@ -23,6 +23,7 @@ import { RenoworksProductSide } from '../js/renoworks';
 import { useRenoworks } from '../js/renoworks-context';
 import { GetUrlParts, shortenUrl } from '../js/utils';
 import { PreviewImageThemes } from '../partial/PreviewImage.theme';
+import { buildResumeUrl } from '../resume-url';
 import { ShortDesignUrlContext } from '../ShortDesignUrlContext';
 import { DesignTheme, DesignThemeSubType } from './Design.theme';
 
@@ -705,8 +706,8 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
   const isOptionalStep = (title: string): boolean => optionalTitles.has(title);
 
   // ============ Start Personalization Payload ============
-  const getQueryParams = () => {
-    const params = new URLSearchParams(globalThis.location.search);
+  const getQueryParams = (search: string = globalThis.location.search) => {
+    const params = new URLSearchParams(search);
     return {
       width: params.get('widIn') || '',
       height: params.get('hgtIn') || '',
@@ -728,8 +729,10 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     return result ? result[1] : '';
   };
 
-  const getBasePayload = () => {
-    const params = getQueryParams();
+  // `href` defaults to the current page, but the abandon timer passes the URL it captured when it
+  // was armed — by the time it fires the user may be somewhere else entirely.
+  const getBasePayload = (href: string = globalThis.location.href) => {
+    const params = getQueryParams(new URL(href, globalThis.location.origin).search);
     type SelectedOption = { title: string; value: string };
     const getSelectedValue = (title: string) => {
       return (
@@ -743,7 +746,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     return {
       timestamp: new Date().toISOString(),
-      pageUrl: globalThis.location.href,
+      pageUrl: href,
       // Product info
       productSeries: product?.series?.value,
       productType: product?.productType?.value,
@@ -767,6 +770,10 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
   const abandonStartedRef = React.useRef(false);
   const abandonCancelledRef = React.useRef(false);
   const abandonFiredRef = React.useRef(false);
+  // The design URL as of the user's last interaction. Nothing cancels the timer when this view
+  // unmounts, so by the time it fires the browser may have moved on to an unrelated page —
+  // reading the URL at that point would report the wrong design, or none at all.
+  const abandonHrefRef = React.useRef('');
 
   const abandonTimeoutMinutes = Number(props?.fields?.cdpInactivityMinutes?.value ?? 10);
   const abandonTimeoutMs = abandonTimeoutMinutes * 60 * 1000;
@@ -783,6 +790,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       return;
     }
     clearAbandonTimeout();
+    abandonHrefRef.current = globalThis.location.href;
 
     abandonTimeoutRef.current = setTimeout(() => {
       fireAbandonEvent();
@@ -803,9 +811,13 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       },
     };
 
-    event(startPayload)
-      .then(() => console.log('[CDP] Design Tool fireStart payload:', startPayload))
-      .catch((err) => console.error('[CDP] Design Tool fireStart Event error', err));
+    // Uncomment to inspect the payload locally. Logging before the send keeps it visible even when
+    // the events SDK is uninitialized, which is the case anywhere
+    // NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID is unset.
+    // console.log('[CDP] Design Tool fireStart payload:', startPayload);
+    event(startPayload).catch((err) =>
+      console.error('[CDP] Design Tool fireStart Event error', err)
+    );
 
     // START ABANDON TIMER
     abandonStartedRef.current = true;
@@ -834,16 +846,17 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       language: 'EN',
       ext: {
         ...getBasePayload(),
-        // Resume link
-        resumeUrl: globalThis.location.href,
+        // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
+        resumeUrl: buildResumeUrl(),
         // Attribute selections info from URL
         changedAttribute: changedAttribute || '', //gtmItemHeader
         changedValue: changedValue || '', //gtmItemDetail
       },
     };
-    event(updatePayload)
-      .then(() => console.log('[CDP] Design Tool fireUpdate payload:', updatePayload))
-      .catch((err) => console.error('[CDP] Design Tool fireUpdate Event error', err));
+    // console.log('[CDP] Design Tool fireUpdate payload:', updatePayload);
+    event(updatePayload).catch((err) =>
+      console.error('[CDP] Design Tool fireUpdate Event error', err)
+    );
 
     // Re-Initiate ABANDON TIMER
     abandonStartedRef.current = true;
@@ -880,9 +893,8 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       },
     };
 
-    event(payload)
-      .then(() => console.log('[CDP] Design tool - RAQ Click payload:', payload))
-      .catch((err) => console.error('[CDP] Design tool - RAQ Click error', err));
+    // console.log('[CDP] Design tool - RAQ Click payload:', payload);
+    event(payload).catch((err) => console.error('[CDP] Design tool - RAQ Click error', err));
   };
 
   // Abandon Event - US #313
@@ -891,14 +903,17 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       return;
     }
     abandonFiredRef.current = true;
+
+    const abandonHref = abandonHrefRef.current || globalThis.location.href;
+
     const payload = {
       type: 'AW:DESIGN_TOOL_ABANDON',
       channel: 'WEB',
       language: 'EN',
       ext: {
-        ...getBasePayload(),
-        // Resume link
-        resumeUrl: globalThis.location.href,
+        ...getBasePayload(abandonHref),
+        // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
+        resumeUrl: buildResumeUrl(abandonHref),
         referrer: document.referrer,
 
         elapsedMinutes: abandonTimeoutMinutes,
@@ -906,9 +921,8 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       },
     };
 
-    event(payload)
-      .then(() => console.log('[CDP] Design Tool ABANDON:', payload))
-      .catch((err) => console.error('[CDP] Abandon error', err));
+    // console.log('[CDP] Design Tool ABANDON:', payload);
+    event(payload).catch((err) => console.error('[CDP] Abandon error', err));
 
     // Clear the Timer
     clearAbandonTimeout();

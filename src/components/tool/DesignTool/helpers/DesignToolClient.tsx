@@ -2,7 +2,7 @@
 
 import { Item, useSitecore } from '@sitecore-content-sdk/nextjs';
 import { useAsPath } from 'lib/hooks/use-as-path';
-import { JSX, ReactNode, useEffect, useState } from 'react';
+import { JSX, ReactNode, useEffect, useRef, useState } from 'react';
 import { DesignToolQueryItem } from 'src/app/api/aw/design-tool/design-tool-option-by-id/get-option-by-id';
 import KampyleScript from 'src/helpers/KampyleScript/KampyleScript';
 import { useTheme } from 'src/lib/context/ThemeContext';
@@ -30,6 +30,7 @@ import { GetUrlParts } from './js/utils';
 import { HeaderLogo } from './partial/HeaderLogo.helper';
 import { HeaderNav } from './partial/HeaderNav.helper';
 import { MainBackground } from './partial/MainBackground.helper';
+import { applyResumeRoute } from './resume-url';
 import { Design, DesignViewProps } from './views/Design.helper';
 import { Select } from './views/Select.helper';
 import { Start } from './views/Start.helper';
@@ -77,6 +78,16 @@ type DesignToolProps = Sitecore.Components.Tool.DesignTool.DesignTool & {
 };
 
 export function DesignToolClient(props: DesignToolProps): JSX.Element {
+  // Resume links can arrive with the route in the query string instead of the fragment (see
+  // resume-url.ts). This has to happen during the first render rather than in an effect: by the
+  // time effects run, `useAsPath` below has already read the old hash, so the router would make a
+  // wasted lookup and flash the Start view before correcting itself.
+  const resumeRouteChecked = useRef(false);
+  if (!resumeRouteChecked.current) {
+    resumeRouteChecked.current = true;
+    applyResumeRoute();
+  }
+
   const asPath = useAsPath();
   const [previewImage, setPreviewImage] = useState<boolean | undefined>(true);
   const moduleData = mapDesignToolPropsToViewModelProps(props);
