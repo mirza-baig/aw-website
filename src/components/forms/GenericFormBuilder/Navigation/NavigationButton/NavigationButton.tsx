@@ -19,7 +19,7 @@ import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
-import { startTimer } from 'lib/personalize/abandon-tracker';
+import { startTimer } from 'lib/personalize/abandon-timer';
 import { getEnum } from 'lib/utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX, useState } from 'react';
@@ -213,10 +213,18 @@ function NavigationButton_Default(props: NavigationButtonProps): JSX.Element | n
 
   function resetAbandonTimer() {
     startTimer(
-      () => globalThis.dispatchEvent(new Event('aw_ccp_abandon')),
+      () => {
+        globalThis.dispatchEvent(
+          new CustomEvent('aw_ccp_abandon', {
+            detail: {
+              isInactivity: true,
+            },
+          })
+        );
+      },
       sessionStorage.getItem(FormsConstants.AW.Form.CCPFormTimeout)
         ? Number(sessionStorage.getItem(FormsConstants.AW.Form.CCPFormTimeout))
-        : 15 * 60 * 1000 // default to 15 minutes
+        : 15 * 60 * 1000
     );
   }
 

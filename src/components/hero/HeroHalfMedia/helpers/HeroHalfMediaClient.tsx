@@ -28,7 +28,6 @@ export function HeroHalfMediaClient(props: HeroHalfMediaProps) {
     getEnum<'full-bleed' | 'full-width'>(props.fields?.containerWidth) ?? 'full-bleed';
 
   const { themeData } = useTheme(HeroHalfMediaTheme(ctaRightAlign, !!props.fields?.body?.value));
-  // const componentProps = useComponentProps<MediaPrimaryStaticProps>(props.rendering.uid);
 
   const copyContainerClass =
     containerWidth === 'full-bleed'
@@ -47,57 +46,6 @@ export function HeroHalfMediaClient(props: HeroHalfMediaProps) {
       }
     : undefined;
 
-  const cta1Fields = props.fields.cta1Link
-    ? {
-        fields: {
-          cta1Link: props.fields.cta1Link,
-          cta1AriaLabel: props.fields.cta1AriaLabel ?? { value: '' },
-          cta1ModalLinkText: props.fields.cta1ModalLinkText ?? { value: '' },
-          cta1PersonalizeEventName: props.fields.cta1PersonalizeEventName ?? { value: '' },
-          cta1Modal: props.fields.cta1Modal,
-          cta1Icon: props.fields.cta1Icon?.value?.src
-            ? ({
-                name: 'cta1Icon',
-                fields: {
-                  value: { value: props.fields.cta1Icon.value.src } as Field<string>,
-                },
-              } as Item)
-            : undefined,
-          cta1Style: props.fields.cta1Style
-            ? ({
-                name: 'cta1Style',
-                fields: { value: { value: props.fields.cta1Style.value } as Field<string> },
-              } as Item)
-            : undefined,
-        },
-      }
-    : undefined;
-
-  const cta2Fields = props.fields.cta2Link
-    ? {
-        fields: {
-          cta2Link: props.fields.cta2Link,
-          cta2AriaLabel: props.fields.cta2AriaLabel ?? { value: '' },
-          cta2ModalLinkText: props.fields.cta2ModalLinkText ?? { value: '' },
-          cta2PersonalizeEventName: props.fields.cta2PersonalizeEventName ?? { value: '' },
-          cta2Modal: props.fields.cta2Modal,
-          cta2Icon: props.fields.cta2Icon?.value?.src
-            ? ({
-                name: 'cta2Icon',
-                fields: {
-                  value: { value: props.fields.cta2Icon.value.src } as Field<string>,
-                },
-              } as Item)
-            : undefined,
-          cta2Style: props.fields.cta2Style
-            ? ({
-                name: 'cta2Style',
-                fields: { value: { value: props.fields.cta2Style.value } as Field<string> },
-              } as Item)
-            : undefined,
-        },
-      }
-    : undefined;
   return (
     <Component
       variant={containerWidth === 'full-bleed' ? 'full' : 'lg'}
@@ -133,16 +81,8 @@ export function HeroHalfMediaClient(props: HeroHalfMediaProps) {
         )}
         {props.fields?.cta1Link?.value?.href && (
           <ButtonGroup
-            cta1={
-              cta1Fields
-                ? cta1ToButtonProps(cta1Fields, themeData.classes.buttonGroupClass.cta1Classes)
-                : undefined
-            }
-            cta2={
-              cta2Fields
-                ? cta2ToButtonProps(cta2Fields, themeData.classes.buttonGroupClass.cta2Classes)
-                : undefined
-            }
+            cta1={cta1ToButtonProps(props, themeData.classes.buttonGroupClass.cta1Classes)}
+            cta2={cta2ToButtonProps(props, themeData.classes.buttonGroupClass.cta2Classes)}
             wrapperClasses={themeData.classes.buttonGroupClass.wrapper}
           />
         )}

@@ -10,11 +10,13 @@ import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
+import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import { useRef } from 'react';
+import { environment } from 'startup/environment';
 
-import { resolveIntroCta, resolveIntroCtaIcon, resolveIntroCtaStyle } from '../intro-cta-mock';
 import { renderComparisonCellValue } from './CategoryRow';
 import { getComparisonObject } from './ComparisonTable.helper';
 import { ComparisonSeriesChartFields } from './ComparisonTable.Types';
@@ -256,6 +258,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
   const { currentScreenWidth } = useCurrentScreenType();
   const isMobile = currentScreenWidth <= getBreakpoint('ml');
   const scrollableSectionRef = useRef<HTMLDivElement>(null);
+  const { siteInfo } = useWebsiteContext();
 
   if (!props.fields) {
     return <></>;
@@ -277,15 +280,11 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
     isMobile
   );
 
-  const chartIntroCta = resolveIntroCta(props.fields?.chartIntroCta);
-  // real value from sitecore would be const chartIntroCta = props.fields?.chartIntroCta;
-  const chartIntroCtaStyle = resolveIntroCtaStyle(props.fields?.chartIntroCtaStyle);
-  const chartIntroCtaIcon = resolveIntroCtaIcon(props.fields?.chartIntroCtaIcon);
+  const chartIntroCta = props.fields?.chartCtaLink;
+  const chartIntroCtaStyle = props.fields?.chartCtaStyle;
+  const chartIntroCtaIcon = props.fields?.chartCtaIcon;
   const hasIntroCta = !!chartIntroCta?.value?.href;
 
-  // The legend header and every card header share the same height (offset by their
-  // different top paddings) so the rows below line up. When an intro CTA is present we
-  // grow both by the same delta so the button has room and never overlaps the first row.
   const pickHeaderHeight = (base: string, withCta: string): string =>
     hasIntroCta ? withCta : base;
   const introLegendHeaderHeight = isMobile
@@ -294,8 +293,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
   const introCardHeaderHeight = isMobile
     ? pickHeaderHeight('h-[130px]', 'h-[176px]')
     : pickHeaderHeight('h-[175px]', 'h-[231px]');
-  // Full-width, wrapping button so the author-chosen style still fits the narrow
-  // (100px) mobile/tablet legend rail; compact overrides shrink it on small screens.
+
   const introCtaClasses = isMobile
     ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
     : 'mt-2 w-full! justify-center';
@@ -461,7 +459,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                         >
                           {image?.src && (
                             <Image
-                              src={image.src}
+                              src={getMediaUrl(image.src, MediaUrlType.Cdn, siteInfo!, environment)}
                               width={image.width ? Number.parseInt(String(image.width), 10) : 100}
                               height={
                                 image.height ? Number.parseInt(String(image.height), 10) : 100

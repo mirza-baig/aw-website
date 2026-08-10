@@ -1,9 +1,12 @@
 import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
+import { environment } from 'startup/environment';
 
 import { AddSeriesCard } from './AddSeriesCard';
 import { SeriesTitle } from './ComparisonTable.Types';
@@ -33,6 +36,7 @@ export const ComparisonTitles = ({
   const [lastVisibleButtonCardIndex, setLastVisibleButtonCardIndex] = useState(1);
   const [isSticky, setIsSticky] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
+  const { siteInfo } = useWebsiteContext();
   const getHeaderHeight = () => {
     return document.getElementsByTagName('header')[0]?.getBoundingClientRect().height as number;
   };
@@ -142,7 +146,7 @@ export const ComparisonTitles = ({
         {isProductComparison && !isSticky && (
           <div className="relative h-[80px] w-[80px] ml:mb-xxs">
             <Image
-              src={props.image?.src as string}
+              src={getMediaUrl(props.image?.src, MediaUrlType.Cdn, siteInfo!, environment)}
               width={80}
               height={80}
               layout="responsive"

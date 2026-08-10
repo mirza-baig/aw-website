@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
+import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import SvgIcon from 'src/helpers/SvgIcon/SvgIcon';
+import { environment } from 'startup/environment';
 
 import { SeriesTitle } from './ComparisonTable.Types';
 import { ProductCardDot } from './ProductCardDot';
@@ -30,6 +33,7 @@ export const ComparisonTitles = ({
   singleSelect?: boolean;
   selectedText?: string;
 }) => {
+  const { siteInfo } = useWebsiteContext();
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(() => {
     const indices = new Set<number>();
     comparisonTitles.forEach((title) => {
@@ -171,7 +175,7 @@ export const ComparisonTitles = ({
           >
             {props.image?.src && (
               <Image
-                src={props.image.src}
+                src={getMediaUrl(props.image.src, MediaUrlType.Cdn, siteInfo!, environment)}
                 width={isMobile ? 80 : 130}
                 height={isMobile ? 80 : 130}
                 alt={(props.image?.alt as string) || displayName}

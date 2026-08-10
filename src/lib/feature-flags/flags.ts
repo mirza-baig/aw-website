@@ -26,7 +26,22 @@ export const releaseExampleFeature = flag<boolean>({
     { value: false, label: 'Pending' },
   ],
 });
-// Release: Raq-web-to-lead-fetch-method
+
+// Release: Expanded Footer Layout
+export const releaseFooterExpandedLayout = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-footer-expanded-layout`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Enables the redesigned footer that supports more nav groups. On desktop, columns lay out by count (≤5 in one row, 6 as 3×2, 7 as 4+3, 8 as 4×2); on tablet they wrap into 3 columns. When disabled, the legacy fixed 5-column footer is used.',
+  defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+
+// Release: RAQ Web-to-Lead fetch method
 export const releaseRaqWebToLeadFetchMethod = flag<boolean>({
   key: `${FLAG_KEY_PREFIX}release-raq-web-to-lead-fetch-method`,
   adapter: vercelAdapter(),

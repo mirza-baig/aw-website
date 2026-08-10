@@ -18,15 +18,18 @@ import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import Headline from 'helpers/Headline/Headline';
 import ModalWrapper from 'helpers/ModalWrapper/ModalWrapper';
 import { FormsConstants } from 'lib/constants/forms-constants';
+import { StringConstants } from 'lib/constants/string-constants';
 import { useTheme } from 'lib/context/ThemeContext';
 import { FormsContext } from 'lib/custom-forms/FormContext';
 import { getCookie } from 'lib/utils/client-storage-utils/get-cookie';
+import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
 import { useSearchParams } from 'next/navigation';
 import { JSX, useEffect, useRef, useState } from 'react';
 import TagManager from 'react-gtm-module';
 import { twMerge } from 'tailwind-merge';
 import * as Yup from 'yup';
 
+import { AbandonReason, buildRaqAbandonExtensionData } from './buildRaqAbandonPayload';
 import { fireAbandonEvent } from './FireAbandonEvent.helper';
 import { fireSubmitEvent } from './FireSubmitEvent.helper';
 import {
@@ -44,9 +47,21 @@ import { formActionFactory } from '.sitecore/aw-form-action-factory';
 type RequestQuoteClientProps = {
   fields: Sitecore.Forms.Custom.RequestAQuote.RequestAQuote['fields'];
   cardsPlaceholders?: Record<string, React.ReactNode>;
+  params?: Record<string, string>;
 };
 
 type UserType = 'homeowner' | 'professional';
+
+// Session keys
+const RAQ_SESSION_KEYS = [
+  StringConstants.AW.ActiveJourneyKey,
+  StringConstants.AW.RequestQuote.AbandonPayloadKey,
+  StringConstants.AW.RequestQuote.StartTimeKey,
+  StringConstants.AW.RequestQuote.SubmittedKey,
+  StringConstants.AW.RequestQuote.AbandonEventTriggered,
+  StringConstants.AW.RequestQuote.FromExperienceKey,
+  StringConstants.AW.RequestQuote.ExperienceIdKey,
+];
 
 export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JSX.Element {
   const keysIcons = [
@@ -64,6 +79,9 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   const abandonTrackingStartedRef = useRef(false);
   const hasSubmittedRef = useRef(false);
   const hasAbandonedRef = useRef(false);
+  // Tracks WHY an abandon fired ('timeout' vs 'navigation') so the payload can
+  // include elapsedMinutes.
+  const abandonReasonRef = useRef<AbandonReason>(null);
   const latestFormValuesRef = useRef<FormikValues>(requestQuoteInitialValues);
   const latestPageIndexRef = useRef(0);
 
@@ -148,6 +166,47 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     }
   };
 
+  // current abandon payload into sessionStorage and mark RAQ as
+  // the active journey.
+  // on the next route mount and fires an abandon event if the user
+  // SPA-navigated away from RAQ without submitting.
+  const updateRaqAbandonSession = (values: FormikValues, currentPageIndex: number) => {
+    if (globalThis.window === undefined) {
+      return;
+    }
+
+    // Once the form has been submitted. We don't want to fire the abandon event.
+    if (hasSubmittedRef.current) {
+      return;
+    }
+
+    const extensionData = buildRaqAbandonExtensionData({
+      values,
+      inactivityMinutes: abandonTimeoutMinutes,
+      pageIndex: currentPageIndex,
+      reason: 'navigation',
+    });
+
+    setSessionStorageItems({
+      [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
+        journey: StringConstants.AW.RequestQuote.JourneyName,
+        prevPath: globalThis.location.pathname,
+        eventType: StringConstants.AW.RequestQuote.AbandonEventType,
+        payloadKey: StringConstants.AW.RequestQuote.AbandonPayloadKey,
+      }),
+      [StringConstants.AW.RequestQuote.AbandonPayloadKey]: JSON.stringify(extensionData),
+    });
+    // A fresh snapshot means beforeunload has NOT fired for this journey yet.
+    clearSessionStorageItems([StringConstants.AW.RequestQuote.AbandonEventTriggered]);
+  };
+
+  const clearRaqAbandonSession = () => {
+    if (globalThis.window === undefined) {
+      return;
+    }
+    clearSessionStorageItems(RAQ_SESSION_KEYS);
+  };
+
   const fireAbandonIfNeeded = () => {
     if (!abandonTrackingStartedRef.current || hasSubmittedRef.current || hasAbandonedRef.current) {
       return;
@@ -159,6 +218,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
       values: latestFormValuesRef.current,
       inactivityMinutes: abandonTimeoutMinutes,
       pageIndex: latestPageIndexRef.current,
+      reason: abandonReasonRef.current,
     });
   };
 
@@ -170,6 +230,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     clearAbandonTimer();
 
     abandonTimeoutRef.current = setTimeout(() => {
+      abandonReasonRef.current = 'timeout';
       fireAbandonIfNeeded();
     }, abandonTimeoutMs);
   };
@@ -189,36 +250,52 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
       return;
     }
 
-    // User became active again, so allow a future abandon event
+    // User became active again — allow a future abandon event.
     hasAbandonedRef.current = false;
 
     startAbandonTimer();
+
+    updateRaqAbandonSession(latestFormValuesRef.current, latestPageIndexRef.current);
   };
 
   const handleSubmitSuccess = () => {
     hasSubmittedRef.current = true;
-    sessionStorage.setItem('awRAQSubmitted', 'true');
+    setSessionStorageItems({ [StringConstants.AW.RequestQuote.SubmittedKey]: 'true' });
     clearAbandonTimer();
+    clearRaqAbandonSession();
   };
   // End - Abandon Timer helper functions
 
-  // Send abandon event if user leaves the page before submitting the form
+  // Fire abandon on hard nav / tab close and mark the flag
   useEffect(() => {
     const handleBeforeUnload = () => {
+      abandonReasonRef.current = 'navigation';
       fireAbandonIfNeeded();
+      setSessionStorageItems({
+        [StringConstants.AW.RequestQuote.AbandonEventTriggered]: 'true',
+      });
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    globalThis.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      globalThis.removeEventListener('beforeunload', handleBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [abandonTimeoutMinutes]);
 
-  //Keep the latest page index in a ref to access inside the inactivity timer
+  // Keep latest step in a ref for the inactivity timer + beforeunload paths.
   useEffect(() => {
     latestPageIndexRef.current = pageIndex;
+  }, [pageIndex]);
+
+  // Refresh the sessionStorage snapshot whenever the step index changes.
+  useEffect(() => {
+    if (!abandonTrackingStartedRef.current || hasSubmittedRef.current) {
+      return;
+    }
+    updateRaqAbandonSession(latestFormValuesRef.current, pageIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex]);
 
   // Clean up timers on unmount
@@ -260,6 +337,39 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supplierValue]);
 
+  const pushFormInteraction = (step: number | 'final', formName = 'request_quote') => {
+    TagManager.dataLayer({
+      dataLayer: {
+        event: 'form_interaction',
+        form_name: formName,
+        form_step_number: step,
+      },
+    });
+  };
+  const isDesignToolRAQ = props?.params?.IsDesignToolRAQ === 'true';
+  // Send GTM Step 1 on page load
+  useEffect(() => {
+    if (isDesignToolRAQ) {
+      return;
+    }
+    pushFormInteraction(1);
+  }, [isDesignToolRAQ]);
+  // To handle the step 1 from Design Tool RAQ and PDT RAQ
+  useEffect(() => {
+    if (!isDesignToolRAQ) {
+      return;
+    }
+
+    const handleRAQOpened = () => {
+      pushFormInteraction(1);
+    };
+
+    globalThis.addEventListener('aw-raq-opened', handleRAQOpened);
+
+    return () => {
+      globalThis.removeEventListener('aw-raq-opened', handleRAQOpened);
+    };
+  }, [isDesignToolRAQ]);
   if (!props.fields) {
     return <></>;
   }
@@ -282,6 +392,13 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   const setCardDetails = (cardVariants: Record<string, unknown>[], typeVariant: string) => {
     setCardVariants(cardVariants);
     setTypeVariant(typeVariant);
+  };
+  const trackProfessionalStepThree = (values: FormikValues, currentPageIndex: number) => {
+    const isProfessionalStepOne = values['about'] === 'professional' && currentPageIndex === 1;
+
+    if (isProfessionalStepOne) {
+      pushFormInteraction(3);
+    }
   };
   const handleNextButtonClick = async (
     values: FormikValues,
@@ -314,11 +431,13 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
       setCardDetails(props?.fields?.remodeling, 'remodeling');
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
 
     const errorFieldsObject = await validateForm();
 
     if (Object.keys(errorFieldsObject).length === 0) {
+      trackProfessionalStepThree(values, pageIndex);
+
       if (pageIndex === 2) {
         fireIdentify(values);
         setIsButtonEnabled(false);
@@ -363,6 +482,8 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
               project_type: values['project_type'],
             },
           });
+          // Send GTM Step 4/ final when user submits the form
+          pushFormInteraction('final');
 
           if (!result?.success) {
             setIsButtonEnabled(true);
@@ -462,6 +583,8 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                     name="project_type"
                     isMultiSelectEnabled={false}
                     onClick={() => {
+                      // Send GTM Step 3 when user clicks on a project type (Replacement/ Remodeling/ New Construction)
+                      pushFormInteraction(3);
                       fireStepComplete(values, { project_type: projectType.value });
                       updatePageIndex(1);
                     }}
@@ -770,28 +893,30 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     // Start abandonment tracking when the first step is completed
     beginAbandonTracking();
 
-    // Mark session time started in sessionStorage.
-    sessionStorage.setItem('awRAQStartTime', String(Date.now()));
-    sessionStorage.setItem('awRAQSubmitted', 'false');
+    // Add the sessionStorage as soon as the journey begins so
+    // AbandonRouteTracker has something to send if the user SPA-navigates
+    // away before the inactivity timer fires.
+    updateRaqAbandonSession(latestFormValuesRef.current, latestPageIndexRef.current);
+
+    setSessionStorageItems({
+      [StringConstants.AW.RequestQuote.StartTimeKey]: String(Date.now()),
+      [StringConstants.AW.RequestQuote.SubmittedKey]: 'false',
+    });
 
     const startPayload = {
-      type: 'AW:FORM_RAQ_START',
+      type: StringConstants.AW.RequestQuote.StartEventType,
       channel: 'WEB',
       language: 'EN',
-      extensionData: {
+      ext: {
         timestamp: new Date().toISOString(),
         pageUrl: globalThis.location.href,
         referrer: document.referrer,
         userType: userType === 'homeowner' ? 'Homeowner' : 'Professional',
       },
     };
-    event(startPayload)
-      .then(() => {
-        console.log('[CDP] RAQ fireStart payload:', startPayload);
-      })
-      .catch((err) => {
-        console.error('[CDP] RAQ fireStart Event error', err);
-      });
+    event(startPayload).catch((err) => {
+      console.error('[CDP] RAQ fireStart Event error', err);
+    });
   };
   const fireStepComplete = (values: FormikValues, overrides?: Record<string, string>) => {
     const mergedValues = { ...values, ...overrides };
@@ -803,10 +928,10 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     }
 
     const stepCompletePayload = {
-      type: 'AW:FORM_RAQ_STEP_COMPLETE',
+      type: StringConstants.AW.RequestQuote.StepCompleteEventType,
       channel: 'WEB',
       language: 'EN',
-      extensionData: {
+      ext: {
         timestamp: new Date().toISOString(),
         pageUrl: globalThis.location.href,
         stepCompleted: String(pageIndex),
@@ -832,6 +957,9 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
       },
     };
     event(stepCompletePayload).catch(console.debug);
+
+    // Refresh the snapshot after each completed step so the payload has the
+    updateRaqAbandonSession(mergedValues, pageIndex);
   };
   // --------------- End - Sitecore Personalize -------------
   return (
@@ -899,6 +1027,8 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                               name="about"
                               isMultiSelectEnabled={false}
                               onClick={() => {
+                                // Send GTM Step 2 when user selects homeowner or professional
+                                pushFormInteraction(2);
                                 setCurrentFlow(user.value as UserType);
                                 // Support Personalization | UC-1 & UC-2 | RAQ Start Event
                                 fireStart(user.value as UserType);

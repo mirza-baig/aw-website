@@ -39,6 +39,7 @@ function DesignTool_Default(props: DesignToolProps): JSX.Element {
           rendering.params = {
             ...(rendering.params ?? {}),
             FieldNames: 'DesignTool',
+            IsDesignToolRAQ: 'true',
           };
         }
       });

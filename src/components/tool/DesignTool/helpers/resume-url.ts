@@ -100,7 +100,7 @@ export function getResumeRoutePath(href: string): string | undefined {
  * URL was rewritten.
  */
 export function applyResumeRoute(): boolean {
-  if (typeof globalThis.location === 'undefined' || typeof globalThis.history === 'undefined') {
+  if (globalThis.location === undefined || globalThis.history === undefined) {
     return false;
   }
 

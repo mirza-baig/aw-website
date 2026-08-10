@@ -7,15 +7,17 @@ import { getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
+import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import Disclaimer from 'src/helpers/DisclaimerText/DisclaimerText';
 import ModalWrapper from 'src/helpers/ModalWrapper/ModalWrapper';
 import SvgIcon from 'src/helpers/SvgIcon/SvgIcon';
+import { environment } from 'startup/environment';
 
-import { resolveIntroCta, resolveIntroCtaIcon, resolveIntroCtaStyle } from '../intro-cta-mock';
 import {
   getComparisonObject,
   getProductTypeLookupField,
@@ -124,6 +126,7 @@ type ResolvedSwatchCollectionClient = {
 };
 
 export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProps) => {
+  const { siteInfo } = useWebsiteContext();
   const isProductComparison = props.fields && (() => 'products' in props.fields)();
   const originalGroupedProducts = isProductComparison && groupProductStyles(props.fields);
   const [selectedProductStyleIndex, setSelectedProductStyleIndex] = useState(0);
@@ -1239,12 +1242,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     }
   };
   const handleCloseSwatchModal = () => setOpenSwatchModal(null);
-  const editorialEyebrow = props.fields?.eyebrowText?.value;
-  const editorialTitle = props.fields?.headlineText?.value;
-  const editorialDescription = props.fields?.body?.value;
+  const chartEyebrow = props.fields?.chartEyebrow?.value;
+  const chartTitle = props.fields?.chartTitle?.value;
+  const chartDescription = props.fields?.chartDescription?.value;
 
-  const finalDescription = editorialDescription || currentProductTypeDescription;
-  const hasEyebrow = typeof editorialEyebrow === 'string' && editorialEyebrow.trim().length > 0;
+  const finalDescription = chartDescription || currentProductTypeDescription;
 
   // Hardcoded intro heading levels (eyebrow → H4, title → H2, description → paragraph)
   // so the markup stays consistent with the Series compare chart regardless of author input.
@@ -1255,14 +1257,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
   }`;
   const introDescriptionClasses = `text-[#333] !font-sans ${isMobile ? 'text-[8px] hidden' : 'text-sm'}`;
-  const introCta = resolveIntroCta((props.fields as any).chartIntroCta);
-  const introCtaStyle = resolveIntroCtaStyle((props.fields as any).chartIntroCtaStyle);
-  const introCtaIcon = resolveIntroCtaIcon((props.fields as any).chartIntroCtaIcon);
+  const introCta = props?.fields?.chartCtaLink;
+  const introCtaStyle = props?.fields?.chartCtaStyle;
+  const introCtaIcon = props?.fields?.chartCtaIcon;
   const hasIntroCta = !!introCta?.value?.href;
 
-  // The legend header and every card header share one height so the rows below line up.
-  // Only desktop needs extra room for the CTA — on mobile/tablet the description is hidden,
-  // which already frees enough space in the fixed header.
   let introHeaderHeightClass = 'h-[150px]';
   if (!isMobile) {
     introHeaderHeightClass = hasIntroCta ? 'h-[272px]' : 'h-[216px]';
@@ -1398,27 +1397,27 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                 <div
                   className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-2 pb-4'} ${introHeaderHeightClass}`}
                 >
-                  {hasEyebrow ? (
+                  {chartEyebrow ? (
                     <Text
                       tag="h4"
-                      field={props.fields.eyebrowText}
+                      field={props.fields?.chartEyebrow}
                       className={introEyebrowClasses}
                     />
                   ) : (
                     <h4 className={introEyebrowClasses}>COMPARE</h4>
                   )}
-                  {editorialTitle ? (
-                    <Text
-                      tag="h2"
-                      field={props.fields.headlineText}
-                      className={introTitleClasses}
-                    />
+                  {chartTitle ? (
+                    <Text tag="h2" field={props.fields?.chartTitle} className={introTitleClasses} />
                   ) : (
                     <h2 className={introTitleClasses}>{currentProductTypeName}</h2>
                   )}
                   {finalDescription &&
-                    (editorialDescription ? (
-                      <Text tag="p" field={props.fields.body} className={introDescriptionClasses} />
+                    (chartDescription ? (
+                      <Text
+                        tag="p"
+                        field={props.fields?.chartDescription}
+                        className={introDescriptionClasses}
+                      />
                     ) : (
                       <p className={introDescriptionClasses}>{currentProductTypeDescription}</p>
                     ))}
@@ -1569,7 +1568,12 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                             >
                               {seriesImage?.src && (
                                 <Image
-                                  src={seriesImage.src}
+                                  src={getMediaUrl(
+                                    seriesImage.src,
+                                    MediaUrlType.Cdn,
+                                    siteInfo!,
+                                    environment
+                                  )}
                                   width={
                                     seriesImage?.width
                                       ? Number.parseInt(seriesImage.width, 10)

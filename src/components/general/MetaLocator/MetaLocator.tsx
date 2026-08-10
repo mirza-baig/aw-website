@@ -2,6 +2,8 @@
 
 import { event as trackEvent } from '@sitecore-content-sdk/events';
 import Component from 'helpers/Component/Component';
+import { StringConstants } from 'lib/constants/string-constants';
+import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -31,7 +33,7 @@ function MetaLocator_Default(props: MetaLocatorProps) {
   const abandonFiredRef = useRef(false);
 
   useEffect(() => {
-    sessionStorage.setItem('awWTBContactClicked', 'false');
+    setSessionStorageItems({ [StringConstants.AW.WTB.ContactClickedKey]: 'false' });
   }, []);
 
   const clearAbandonTimeout = useCallback(() => {
@@ -58,7 +60,7 @@ function MetaLocator_Default(props: MetaLocatorProps) {
   const fireMapPopupOpen = useCallback(
     (payload: MetaLocatorMessageDetail) => {
       const cdpPayload = {
-        type: 'AW:WTB_MAP_POPUP_OPEN',
+        type: StringConstants.AW.WTB.MapPopupOpenEventType,
         channel: 'WEB',
         language: 'EN',
         extensionData: {
@@ -75,7 +77,7 @@ function MetaLocator_Default(props: MetaLocatorProps) {
   const firePhoneClicked = useCallback(
     (payload: MetaLocatorMessageDetail) => {
       const cdpPayload = {
-        type: 'AW:WTB_POPUP_CONTACT_CLICK',
+        type: StringConstants.AW.WTB.ContactClickEventType,
         channel: 'WEB',
         language: 'EN',
         extensionData: {
@@ -89,14 +91,14 @@ function MetaLocator_Default(props: MetaLocatorProps) {
   );
 
   const fireAbandon = useCallback(
-    (payload: MetaLocatorMessageDetail) => {
+    (payload: MetaLocatorMessageDetail, includeElapsedMinutes = false) => {
       const cdpPayload = {
-        type: 'AW:WTB_ABANDON',
+        type: StringConstants.AW.WTB.AbandonEventType,
         channel: 'WEB',
         language: 'EN',
         extensionData: {
           ...baseExtensionData(payload),
-          elapsedMinutes: abandonTimeoutMinutes,
+          ...(includeElapsedMinutes && { elapsedMinutes: abandonTimeoutMinutes }),
           searchZip: payload.searchZip ?? '',
         },
       };
@@ -106,24 +108,60 @@ function MetaLocator_Default(props: MetaLocatorProps) {
     [abandonTimeoutMinutes, baseExtensionData]
   );
 
-  const startAbandonTimeout = useCallback(() => {
+  const updateAbandonSession = useCallback(
+    (payload: MetaLocatorMessageDetail) => {
+      const extensionData = {
+        ...baseExtensionData(payload),
+        searchZip: payload.searchZip ?? '',
+      };
+
+      setSessionStorageItems({
+        [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
+          journey: StringConstants.AW.WTB.JourneyName,
+          prevPath: globalThis.location.pathname,
+          eventType: StringConstants.AW.WTB.AbandonEventType,
+          payloadKey: StringConstants.AW.WTB.AbandonPayloadKey,
+        }),
+        [StringConstants.AW.WTB.AbandonPayloadKey]: JSON.stringify(extensionData),
+      });
+      clearSessionStorageItems([StringConstants.AW.WTB.AbandonEventTriggered]);
+    },
+    [baseExtensionData]
+  );
+
+  const clearAbandon = useCallback(() => {
     clearAbandonTimeout();
-    abandonFiredRef.current = false;
+    clearSessionStorageItems([
+      StringConstants.AW.ActiveJourneyKey,
+      StringConstants.AW.WTB.AbandonPayloadKey,
+      StringConstants.AW.WTB.AbandonEventTriggered,
+    ]);
+  }, [clearAbandonTimeout]);
 
-    abandonTimeoutRef.current = setTimeout(() => {
-      const contactClicked = sessionStorage.getItem('awWTBContactClicked') === 'true';
-      const latestPayload = mlPayloadRef.current;
-
-      if (contactClicked || abandonFiredRef.current || !latestPayload) {
-        clearAbandonTimeout();
-        return;
-      }
-
-      abandonFiredRef.current = true;
-      fireAbandon(latestPayload);
+  const startAbandonTimeout = useCallback(
+    (payload: MetaLocatorMessageDetail) => {
       clearAbandonTimeout();
-    }, abandonTimeoutMs);
-  }, [abandonTimeoutMs, clearAbandonTimeout, fireAbandon]);
+      abandonFiredRef.current = false;
+
+      updateAbandonSession(payload);
+
+      abandonTimeoutRef.current = setTimeout(() => {
+        const contactClicked =
+          sessionStorage.getItem(StringConstants.AW.WTB.ContactClickedKey) === 'true';
+        const latestPayload = mlPayloadRef.current;
+
+        if (contactClicked || abandonFiredRef.current || !latestPayload) {
+          clearAbandonTimeout();
+          return;
+        }
+
+        abandonFiredRef.current = true;
+        fireAbandon(latestPayload, true);
+        clearAbandon();
+      }, abandonTimeoutMs);
+    },
+    [abandonTimeoutMs, clearAbandon, clearAbandonTimeout, fireAbandon, updateAbandonSession]
+  );
 
   useEffect(() => {
     const handleMetaLocatorIFrameMessage = (e: Event) => {
@@ -139,13 +177,13 @@ function MetaLocator_Default(props: MetaLocatorProps) {
       mlPayloadRef.current = payload;
 
       if (payload.eventName === 'ml_markeropened') {
-        sessionStorage.setItem('awWTBContactClicked', 'false');
+        setSessionStorageItems({ [StringConstants.AW.WTB.ContactClickedKey]: 'false' });
 
         fireMapPopupOpen(payload);
-        startAbandonTimeout();
+        startAbandonTimeout(payload);
       } else if (payload.eventName === 'ml_phoneClicked') {
-        sessionStorage.setItem('awWTBContactClicked', 'true');
-        clearAbandonTimeout();
+        setSessionStorageItems({ [StringConstants.AW.WTB.ContactClickedKey]: 'true' });
+        clearAbandon();
         firePhoneClicked(payload);
       }
     };
@@ -156,7 +194,29 @@ function MetaLocator_Default(props: MetaLocatorProps) {
       globalThis.removeEventListener('ml-iframe-message', handleMetaLocatorIFrameMessage);
       clearAbandonTimeout();
     };
-  }, [clearAbandonTimeout, fireMapPopupOpen, firePhoneClicked, startAbandonTimeout]);
+  }, [clearAbandon, clearAbandonTimeout, fireMapPopupOpen, firePhoneClicked, startAbandonTimeout]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const contactClicked =
+        sessionStorage.getItem(StringConstants.AW.WTB.ContactClickedKey) === 'true';
+      const latestPayload = mlPayloadRef.current;
+
+      if (abandonFiredRef.current || contactClicked || !latestPayload) {
+        return;
+      }
+
+      abandonFiredRef.current = true;
+      fireAbandon(latestPayload, false);
+      setSessionStorageItems({ [StringConstants.AW.WTB.AbandonEventTriggered]: 'true' });
+    };
+
+    globalThis.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      globalThis.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [fireAbandon]);
 
   useEffect(() => {
     if (props.fields?.metaLocatorScript?.value) {

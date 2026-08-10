@@ -3,7 +3,9 @@ import { Link as Linkfield, Text } from '@sitecore-content-sdk/nextjs';
 import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import { SliderRefType, SliderType, SliderWrapper } from 'helpers/SliderWrapper/SliderWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import { StringConstants } from 'lib/constants/string-constants';
 import { useAsPath } from 'lib/hooks/use-as-path';
+import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
 import Link from 'next/link';
 // Removing for temporary fix of using history: import { useRouter } from 'next/navigation';
 import React, { MouseEvent, useContext, useEffect, useState } from 'react';
@@ -288,18 +290,22 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     }
   };
 
-  const DESIGN_STARTED_KEY = 'awDTDesignStarted';
+  const DESIGN_STARTED_KEY = StringConstants.AW.DesignTool.DesignStartedKey;
   const getDesignStarted = () => {
     return sessionStorage.getItem(DESIGN_STARTED_KEY) === 'true';
   };
 
   const setDesignStarted = (started: boolean) => {
-    sessionStorage.setItem(DESIGN_STARTED_KEY, String(started));
+    setSessionStorageItems({
+      [DESIGN_STARTED_KEY]: String(started),
+    });
   };
 
   const fireDesignProgress = (changedAttribute?: string, changedValue?: string) => {
     if (attributeIndex === 0) {
-      sessionStorage.setItem('awDTGlassReached', 'false');
+      setSessionStorageItems({
+        [StringConstants.AW.DesignTool.GlassReachedKey]: 'false',
+      });
     }
 
     if (!getDesignStarted()) {
@@ -311,9 +317,6 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
   };
 
   const goToStep = (index: number) => {
-    if (index !== attributeIndex) {
-      fireDesignProgress();
-    }
     const urlParts = GetUrlParts(asPath);
     const queryPart = urlParts.query ? `?${urlParts.query}` : '';
     const newPath = `${urlParts.pathName}${queryPart}#/${product.id}/${index ?? 0}`;
@@ -323,6 +326,9 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     prepareDesignSelectionData(`Jump To Step ${index + 1}`, isSummaryStep, product, viewModel);
     // Back button should leave the tool entirely.
     globalThis.history.pushState(null, '', newPath);
+    if (index !== attributeIndex) {
+      fireDesignProgress();
+    }
   };
 
   const nextAttribute = () => {
@@ -569,7 +575,8 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     fireRequestQuoteClick();
 
     $refs.summaryModal.current?.classList.remove(theme.designSummary.containerHidden);
-
+    // For GTM tracking
+    globalThis.dispatchEvent(new CustomEvent('aw-raq-opened'));
     TagManager.dataLayer({
       dataLayer: {
         event: 'design_tool_get_quote',
@@ -706,8 +713,8 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
   const isOptionalStep = (title: string): boolean => optionalTitles.has(title);
 
   // ============ Start Personalization Payload ============
-  const getQueryParams = (search: string = globalThis.location.search) => {
-    const params = new URLSearchParams(search);
+  const getQueryParams = () => {
+    const params = new URLSearchParams(globalThis.location.search);
     return {
       width: params.get('widIn') || '',
       height: params.get('hgtIn') || '',
@@ -729,10 +736,18 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     return result ? result[1] : '';
   };
 
-  // `href` defaults to the current page, but the abandon timer passes the URL it captured when it
-  // was armed — by the time it fires the user may be somewhere else entirely.
-  const getBasePayload = (href: string = globalThis.location.href) => {
-    const params = getQueryParams(new URL(href, globalThis.location.origin).search);
+  const abandonReasonRef = React.useRef<'timeout' | 'navigation' | null>(null);
+  const getCurrentAttributeIndex = () => {
+    const urlParts = GetUrlParts(globalThis.location.pathname + globalThis.location.hash);
+    return Number(urlParts.attributeIndex || 0);
+  };
+  const progressBarRef = React.useRef(progressBar);
+  useEffect(() => {
+    progressBarRef.current = progressBar;
+  }, [progressBar]);
+
+  const getBasePayload = (currentIndex?: number) => {
+    const params = getQueryParams();
     type SelectedOption = { title: string; value: string };
     const getSelectedValue = (title: string) => {
       return (
@@ -746,14 +761,14 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     return {
       timestamp: new Date().toISOString(),
-      pageUrl: href,
+      pageUrl: globalThis.location.href,
       // Product info
       productSeries: product?.series?.value,
       productType: product?.productType?.value,
       productName: product?.name,
       productId: product?.productId,
       // Attribute selections info from URL
-      attributeIndex: attributeIndex,
+      attributeIndex: currentIndex,
       widthIn: getValue(params.width, 'Unit Width'),
       heightIn: getValue(params.height, 'Unit Height'),
 
@@ -764,16 +779,14 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
       interiorColor: extractColor(params.frameColor || getSelectedValue('Interior Color')),
       exteriorColor: extractColor(params.frameColorExt || getSelectedValue('Exterior Door Color')),
+      // Number of steps
+      totalNumberOfSteps: progressBarRef.current?.length ? progressBarRef.current.length - 1 : 0,
     };
   };
   const abandonTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const abandonStartedRef = React.useRef(false);
   const abandonCancelledRef = React.useRef(false);
   const abandonFiredRef = React.useRef(false);
-  // The design URL as of the user's last interaction. Nothing cancels the timer when this view
-  // unmounts, so by the time it fires the browser may have moved on to an unrelated page —
-  // reading the URL at that point would report the wrong design, or none at all.
-  const abandonHrefRef = React.useRef('');
 
   const abandonTimeoutMinutes = Number(props?.fields?.cdpInactivityMinutes?.value ?? 10);
   const abandonTimeoutMs = abandonTimeoutMinutes * 60 * 1000;
@@ -790,34 +803,54 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       return;
     }
     clearAbandonTimeout();
-    abandonHrefRef.current = globalThis.location.href;
-
     abandonTimeoutRef.current = setTimeout(() => {
+      abandonReasonRef.current = 'timeout';
       fireAbandonEvent();
     }, abandonTimeoutMs);
+  };
+  // For Page Nav Abandon Event
+  const getAbandonPayload = () => ({
+    ...getBasePayload(getCurrentAttributeIndex()),
+    // Fragment-free so it survives email and link tracking, see resume-url.ts
+    resumeUrl: buildResumeUrl(),
+    referrer: document.referrer,
+    designComplete:
+      sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true',
+  });
+  const setAbandonSession = () => {
+    setSessionStorageItems({
+      [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
+        journey: StringConstants.AW.DesignTool.JourneyName,
+        prevPath: globalThis.location.pathname, // pass the currentPath here
+        eventType: StringConstants.AW.DesignTool.AbandonEventType,
+        payloadKey: StringConstants.AW.DesignTool.AbandonPayloadKey,
+      }),
+      [StringConstants.AW.DesignTool.AbandonPayloadKey]: JSON.stringify(getAbandonPayload()),
+    });
+    // Remove session whenever there is activeJourney
+    clearSessionStorageItems([StringConstants.AW.DesignTool.AbandonEventTriggered]);
   };
   // START Event - US #311
   const fireDesignStart = () => {
     setDesignStarted(true);
-
-    sessionStorage.setItem('awDTGlassReached', 'false');
+    // For Page Nav Abandon Event
+    setAbandonSession();
+    setSessionStorageItems({
+      [StringConstants.AW.DesignTool.GlassReachedKey]: 'false',
+    });
     const startPayload = {
-      type: 'AW:DESIGN_TOOL_START',
+      type: StringConstants.AW.DesignTool.StartEventType,
       channel: 'WEB',
       language: 'EN',
       ext: {
-        ...getBasePayload(),
+        ...getBasePayload(getCurrentAttributeIndex()),
         referrer: document.referrer,
       },
     };
 
-    // Uncomment to inspect the payload locally. Logging before the send keeps it visible even when
-    // the events SDK is uninitialized, which is the case anywhere
-    // NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID is unset.
-    // console.log('[CDP] Design Tool fireStart payload:', startPayload);
-    event(startPayload).catch((err) =>
-      console.error('[CDP] Design Tool fireStart Event error', err)
-    );
+    event(startPayload)
+      .then(() => console.log('[CDP] Design Tool fireStart payload:', startPayload))
+      .catch((err) => console.error('[CDP] Design Tool fireStart Event error', err));
 
     // START ABANDON TIMER
     abandonStartedRef.current = true;
@@ -834,18 +867,20 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     )?._title;
 
     if (currentStepTitle === 'Glass') {
-      sessionStorage.setItem('awDTGlassReached', 'true');
+      setSessionStorageItems({
+        [StringConstants.AW.DesignTool.GlassReachedKey]: 'true',
+      });
     }
   }, [attributeIndex, progressBar]);
 
   // Update EVENT - US #312
   const fireDesignUpdate = (changedAttribute?: string, changedValue?: string) => {
     const updatePayload = {
-      type: 'AW:DESIGN_TOOL_UPDATE',
+      type: StringConstants.AW.DesignTool.UpdateEventType,
       channel: 'WEB',
       language: 'EN',
       ext: {
-        ...getBasePayload(),
+        ...getBasePayload(getCurrentAttributeIndex()),
         // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
         resumeUrl: buildResumeUrl(),
         // Attribute selections info from URL
@@ -853,10 +888,12 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
         changedValue: changedValue || '', //gtmItemDetail
       },
     };
-    // console.log('[CDP] Design Tool fireUpdate payload:', updatePayload);
-    event(updatePayload).catch((err) =>
-      console.error('[CDP] Design Tool fireUpdate Event error', err)
-    );
+    event(updatePayload)
+      .then(() => console.log('[CDP] Design Tool fireUpdate payload:', updatePayload))
+      .catch((err) => console.error('[CDP] Design Tool fireUpdate Event error', err));
+
+    // For Page Nav Abandon Event
+    setAbandonSession();
 
     // Re-Initiate ABANDON TIMER
     abandonStartedRef.current = true;
@@ -874,59 +911,92 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     abandonCancelledRef.current = true;
     clearAbandonTimeout();
 
-    const fromExperience = sessionStorage.getItem('awDTFromExperience') === 'true';
-    const experienceId = sessionStorage.getItem('awDTExperienceId') || '';
-    const resumeUrl = sessionStorage.getItem('awDTResumeUrl') || '';
+    const fromExperience =
+      sessionStorage.getItem(StringConstants.AW.DesignTool.FromExperienceKey) === 'true';
+    const experienceId =
+      sessionStorage.getItem(StringConstants.AW.DesignTool.ExperienceIdKey) || '';
 
     const payload = {
-      type: 'AW:DESIGN_TOOL_REQUEST_QUOTE_CLICK',
+      type: StringConstants.AW.DesignTool.RAQClickEventType,
       channel: 'WEB',
       language: 'EN',
       ext: {
-        ...getBasePayload(),
+        ...getBasePayload(getCurrentAttributeIndex()),
         // UC-03 Experience linking
         fromExperience: fromExperience,
         experienceId: experienceId,
 
-        // Resume link
-        resumeUrl: resumeUrl,
+        // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
+        resumeUrl: buildResumeUrl(),
       },
     };
 
-    // console.log('[CDP] Design tool - RAQ Click payload:', payload);
-    event(payload).catch((err) => console.error('[CDP] Design tool - RAQ Click error', err));
-  };
+    event(payload)
+      .then(() => console.log('[CDP] Design tool - RAQ Click payload:', payload))
+      .catch((err) => console.error('[CDP] Design tool - RAQ Click error', err));
 
+    clearSessionStorageItems([
+      // Abandon Event sessions
+      StringConstants.AW.ActiveJourneyKey,
+      StringConstants.AW.DesignTool.AbandonPayloadKey,
+      StringConstants.AW.DesignTool.AbandonEventTriggered,
+      // Design Tool Sessions
+      StringConstants.AW.DesignTool.GlassReachedKey,
+      StringConstants.AW.DesignTool.DesignStartedKey,
+      // Experience Sessions
+      StringConstants.AW.DesignTool.FromExperienceKey,
+      StringConstants.AW.DesignTool.ExperienceIdKey,
+    ]);
+  };
   // Abandon Event - US #313
   const fireAbandonEvent = () => {
     if (abandonFiredRef.current || abandonCancelledRef.current) {
       return;
     }
     abandonFiredRef.current = true;
-
-    const abandonHref = abandonHrefRef.current || globalThis.location.href;
-
     const payload = {
-      type: 'AW:DESIGN_TOOL_ABANDON',
+      type: StringConstants.AW.DesignTool.AbandonEventType,
       channel: 'WEB',
       language: 'EN',
       ext: {
-        ...getBasePayload(abandonHref),
+        ...getBasePayload(getCurrentAttributeIndex()),
         // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
-        resumeUrl: buildResumeUrl(abandonHref),
+        resumeUrl: buildResumeUrl(),
         referrer: document.referrer,
 
-        elapsedMinutes: abandonTimeoutMinutes,
-        designComplete: sessionStorage.getItem('awDTGlassReached') === 'true',
+        ...(abandonReasonRef.current === 'timeout' && {
+          elapsedMinutes: abandonTimeoutMinutes,
+        }),
+        // elapsedMinutes: abandonTimeoutMinutes,
+        designComplete:
+          sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true',
       },
     };
 
-    // console.log('[CDP] Design Tool ABANDON:', payload);
-    event(payload).catch((err) => console.error('[CDP] Abandon error', err));
+    event(payload)
+      .then(() => console.log('[CDP] Design Tool ABANDON:', payload))
+      .catch((err) => console.error('[CDP] Abandon error', err));
 
     // Clear the Timer
     clearAbandonTimeout();
   };
+  // Send abandon event if user leaves the page before submitting the form
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      abandonReasonRef.current = 'navigation';
+      fireAbandonEvent();
+      setSessionStorageItems({
+        [StringConstants.AW.DesignTool.AbandonEventTriggered]: 'true',
+      });
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abandonTimeoutMinutes]);
   // ======= End Personalization Payload ==========
 
   return (

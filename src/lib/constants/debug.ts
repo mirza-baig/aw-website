@@ -21,7 +21,13 @@ export const Debug = {
   rules: debug(`${defaultNamespace}:rules`),
   onlinescheduling: debug(`${defaultNamespace}:onlinescheduling`),
   draftModeWorkaround: debug(`${defaultNamespace}:draft-mode-workaround`),
+  cdpIdentity: debug(`${defaultNamespace}:cdp-identity`),
   api: {
+    coveo: {
+      accessToken: debug(`${defaultNamespace}:api:coveo:access-token`),
+      sitemap: debug(`${defaultNamespace}:api:coveo:sitemap`),
+    },
+    shareARLink: debug(`${defaultNamespace}:api:share-ar-link`),
     customForms: {
       submitActions: {
         saveToDatabase: debug(

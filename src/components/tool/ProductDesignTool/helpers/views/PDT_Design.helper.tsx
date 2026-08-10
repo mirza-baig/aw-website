@@ -754,7 +754,8 @@ export const Design = (props: ProductDesignToolProps) => {
     );
 
     $refs.summaryModal.current?.classList.remove(theme.designSummary.containerHidden);
-
+    // For GTM tracking
+    globalThis.dispatchEvent(new CustomEvent('aw-raq-opened'));
     TagManager.dataLayer({
       dataLayer: {
         event: 'design_tool_get_quote',

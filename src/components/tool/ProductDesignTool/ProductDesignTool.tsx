@@ -36,6 +36,7 @@ function ProductDesignTool_Defualt(props: ProductDesignToolProps) {
           rendering.params = {
             ...(rendering.params ?? {}),
             FieldNames: 'ProductDesignTool',
+            IsDesignToolRAQ: 'true',
           };
         }
       });

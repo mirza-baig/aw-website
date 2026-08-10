@@ -56,6 +56,17 @@ export const SitecoreIds = {
                     },
                   },
                 },
+                EventActions: {
+                  Start: {
+                    Id: '{7F92D3A8-51FB-40F9-9B21-7B89161F99D1}',
+                  },
+                  Update: {
+                    Id: '{0ACAD4AB-B929-48E6-A128-486D51B37D33}',
+                  },
+                  Submit: {
+                    Id: '{A4F3E760-2815-49DB-A483-95FC2D553CA2}',
+                  },
+                },
               },
             },
           },

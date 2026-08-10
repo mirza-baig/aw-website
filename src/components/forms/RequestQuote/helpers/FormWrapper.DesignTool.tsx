@@ -10,6 +10,7 @@ import { Sitecore } from '.sitecore/AndersenWindows.model';
 type RequestQuoteClientProps = {
   fields: Sitecore.Forms.Custom.RequestAQuote.RequestAQuote['fields'];
   cardsPlaceholders?: Record<string, React.ReactNode>;
+  params?: Record<string, string>;
 };
 
 export function FormWrapper(props: Readonly<RequestQuoteClientProps>) {
@@ -25,6 +26,7 @@ export function FormWrapper(props: Readonly<RequestQuoteClientProps>) {
     fields: {
       ...(props?.fields ?? {}),
       _injectedFields,
+      params: props?.params,
     },
   };
 

@@ -3,8 +3,9 @@
 import { ComponentRendering, Text, useSitecore } from '@sitecore-content-sdk/nextjs';
 import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
-import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import SvgIcon, { IconTypes } from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
@@ -14,11 +15,193 @@ import { getEnum } from 'lib/utils/get-enum';
 import { useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
-import { JSX, useState } from 'react';
+import { JSX, ReactNode, useState } from 'react';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 type AWFooterProps = ComponentProps & Sitecore.Components.Navigation.Footer.Footer;
+
+// --- Helpers ---------------------------------------------------------------
+
+function findMenuByTitle(
+  navGroup: AWFooterProps[] | undefined,
+  title: string
+): AWFooterProps | undefined {
+  return navGroup?.find((nav) => nav?.fields?.menuTitle?.value === title);
+}
+
+function getMenuChildren(menu: AWFooterProps | undefined): AWFooterProps[] | null {
+  const children = menu?.fields?.children;
+  return Array.isArray(children) && children.length > 0 ? children : null;
+}
+
+function getDesktopNavGroupWidthClass(count: number): string {
+  if (count <= 5) {
+    return 'ml:w-[20%]';
+  }
+  if (count === 6) {
+    return 'ml:w-[33.333%]';
+  }
+  return 'ml:w-[25%]';
+}
+
+function replaceYearToken(text: string | undefined, year: string): string {
+  return text?.replace('{currentYear}', year) ?? '';
+}
+
+// --- Subcomponents ---------------------------------------------------------
+
+type AccordionProps = { title: string; children: ReactNode };
+
+function Accordion({ title, children }: Readonly<AccordionProps>): JSX.Element {
+  const [isOpen, setOpen] = useState(false);
+  const headerClass = isOpen
+    ? 'open [&_span]:after:-rotate-90 [&_span]:after:transition-all [&_span]:after:duration-100'
+    : '[&_span]:after:rotate-90 [&_span]:after:transition-all [&_span]:after:duration-100';
+  const bodyClass = isOpen
+    ? 'h-auto max-h-[9999px] overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(1,0,1,0)]'
+    : 'collapsed max-h-0 transition-[max-height] duration-[0.35s] ease-[cubic-bezier(0,1,0,1)]';
+
+  return (
+    <div>
+      <div
+        className={`border-t border-solid border-t-white py-xs ${headerClass}`}
+        onClick={() => setOpen(!isOpen)}
+      >
+        <span className="flex items-center justify-between text-small font-heavy uppercase leading-[14px] after:text-base after:content-['\276F'] ml:text-xxs ">
+          {title}
+        </span>
+      </div>
+      <div className={`accordion-item ${bodyClass}`}>
+        <div>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+type NavItemProps = { nav: AWFooterProps; linkClassName: string };
+
+function NavItem({ nav, linkClassName }: Readonly<NavItemProps>): JSX.Element | null {
+  const link = nav.fields?.navItemLink;
+  if (!link) {
+    return null;
+  }
+  return (
+    <li className="py-xxxs">
+      <LinkWrapper ctaSection="footer" field={link} className={linkClassName}>
+        {link.value.target === '_blank' && (
+          <SvgIcon icon="new-tab" className="ml-xxxs inline-flex" />
+        )}
+      </LinkWrapper>
+    </li>
+  );
+}
+
+function navItemKey(nav: AWFooterProps, fallback: string | number): string {
+  return (nav.fields?.navItemLink?.value?.href as string) || String(fallback);
+}
+
+type NavGroupProps = { menu: AWFooterProps };
+
+function NavGroupDesktop({ menu }: Readonly<NavGroupProps>): JSX.Element {
+  const children = menu.fields?.children ?? [];
+  return (
+    <>
+      <div className="mb-xxxs font-sans text-xxs font-heavy uppercase leading-none">
+        <Text tag={'span'} field={menu.fields?.navGroupTitle} />
+      </div>
+      <ul className="flex flex-col">
+        {children.map((nav: AWFooterProps, i: number) => (
+          <NavItem key={navItemKey(nav, i)} nav={nav} linkClassName="text-body hover:underline" />
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function NavGroupMobile({ menu }: Readonly<NavGroupProps>): JSX.Element {
+  const children = menu.fields?.children ?? [];
+  const title = (menu.fields?.navGroupTitle?.value ?? '') as string;
+  return (
+    <Accordion title={title}>
+      {children.length > 0 && (
+        <ul className="ease flex flex-col  transition-all duration-1000">
+          {children.map((nav: AWFooterProps, i: number) => (
+            <NavItem
+              key={navItemKey(nav, i)}
+              nav={nav}
+              linkClassName="text-small hover:underline"
+            />
+          ))}
+        </ul>
+      )}
+    </Accordion>
+  );
+}
+
+type SocialLinksProps = { items: AWFooterProps[]; isEE: boolean };
+
+function SocialLinks({ items, isEE }: Readonly<SocialLinksProps>): JSX.Element {
+  return (
+    <>
+      {items.map((menu, i) => {
+        const link = menu.fields?.navItemLink;
+        const icon = getEnum<IconTypes>(menu.fields?.navItemIcon);
+        if (!link?.value || !icon) {
+          return null;
+        }
+        const key = (link.value.href as string) || `social-${i}`;
+        return (
+          <div key={key} className="mr-xxs mt-xxxs">
+            {isEE ? (
+              <SvgIcon icon={icon} />
+            ) : (
+              <LinkWrapper ctaSection="footer" field={link}>
+                <SvgIcon icon={icon} />
+              </LinkWrapper>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+type PrivacyLinksProps = { items: AWFooterProps[] };
+
+function PrivacyLinks({ items }: Readonly<PrivacyLinksProps>): JSX.Element {
+  return (
+    <>
+      {items.map((menu, i) => {
+        const link = menu.fields?.navItemLink;
+        if (!link) {
+          return null;
+        }
+        const key = (link.value.href as string) || `privacy-${i}`;
+        return (
+          <span key={key}>
+            <LinkWrapper ctaSection="footer" className="text-body underline" field={link}>
+              {link.value.target === '_blank' && (
+                <SvgIcon icon="new-tab" className="ml-xxxs inline-flex" />
+              )}
+            </LinkWrapper>
+            {i < items.length - 1 && <span className="inline-flex md:px-xxxs"> | </span>}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
+function FooterConsentTrigger() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((window as any)?.truste) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).truste.eu.clickListener();
+  }
+}
+
+// --- Main component --------------------------------------------------------
 
 function AWFooter_Default(props: AWFooterProps): JSX.Element {
   const { fields } = getComponentServerProps(props.rendering) as AWFooterProps;
@@ -29,70 +212,28 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
   const trustArcCmId = process.env.NEXT_PUBLIC_AW_TRUSTARC_CMID ?? '';
   const showTrustArc = trustArcCmId && !page?.layout.sitecore.context.pageEditing;
 
-  const currentYear = new Date().getFullYear().toString();
-  const copyrightText = fields?.copyright?.value;
-  let textWithReplacedYear = copyrightText;
-  if (copyrightText?.includes('{currentYear}')) {
-    textWithReplacedYear = copyrightText.replace('{currentYear}', currentYear);
-  }
-
-  const navGroup = fields?.children;
-  const socialMenu =
-    navGroup?.length &&
-    navGroup.filter(function (nav: AWFooterProps) {
-      return nav?.fields?.menuTitle?.value === 'socialMenu';
-    });
-  const footerMenu =
-    navGroup?.length &&
-    navGroup.filter(function (nav: AWFooterProps) {
-      return nav.fields?.menuTitle?.value === 'footerMenu';
-    });
-  const privacyMenu =
-    navGroup?.length &&
-    navGroup.filter(function (nav: AWFooterProps) {
-      return nav.fields?.menuTitle?.value === 'privacyMenu';
-    });
-  let privacyMenuArray = privacyMenu?.length && privacyMenu[0].fields.children;
-  let socialMenuArray = socialMenu?.length && socialMenu[0].fields.children;
-  const footerMenuArray = footerMenu?.length && footerMenu[0].fields.children;
-  if (socialMenuArray == 0) {
-    socialMenuArray = null;
-  }
-  if (privacyMenuArray == 0) {
-    privacyMenuArray = null;
-  }
-  const Accordion = ({ title, children }: AWFooterProps) => {
-    const [isOpen, setOpen] = useState(false);
-    return (
-      <div>
-        <div
-          className={`border-t border-solid border-t-white py-xs ${
-            isOpen
-              ? 'open [&_span]:after:-rotate-90 [&_span]:after:transition-all [&_span]:after:duration-100'
-              : '[&_span]:after:rotate-90 [&_span]:after:transition-all [&_span]:after:duration-100'
-          }`}
-          onClick={() => setOpen(!isOpen)}
-        >
-          <span className="flex items-center justify-between text-small font-heavy uppercase leading-[14px] after:text-base after:content-['\276F'] ml:text-xxs ">
-            {title}
-          </span>
-        </div>
-        <div
-          className={`accordion-item ${
-            !isOpen
-              ? 'collapsed max-h-0 transition-[max-height] duration-[0.35s] ease-[cubic-bezier(0,1,0,1)]'
-              : 'h-auto max-h-[9999px] overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(1,0,1,0)]'
-          }`}
-        >
-          <div>{children}</div>
-        </div>
-      </div>
-    );
-  };
-
   if (!fields) {
     return <></>;
   }
+
+  const currentYear = new Date().getFullYear().toString();
+  const textWithReplacedYear = replaceYearToken(fields?.copyright?.value, currentYear);
+
+  const navGroup = fields?.children;
+  const socialMenuArray = getMenuChildren(findMenuByTitle(navGroup, 'socialMenu'));
+  const footerMenuArray = getMenuChildren(findMenuByTitle(navGroup, 'footerMenu'));
+  const privacyMenuArray = getMenuChildren(findMenuByTitle(navGroup, 'privacyMenu'));
+
+  const isExpandedFooterLayout = FeatureFlags.values.releaseFooterExpandedLayout === true;
+  const navGroupCount = footerMenuArray?.length ?? 0;
+  const desktopNavGroupWidthClass = getDesktopNavGroupWidthClass(navGroupCount);
+
+  const footerMenuContainerClass = isExpandedFooterLayout
+    ? 'flex w-full max-mmd:flex-col max-mmd:border-b max-mmd:border-solid max-mmd:border-b-white mmd:flex-wrap mmd:gap-y-l ml:shrink ml:grow ml:basis-0'
+    : 'flex w-full max-ml:flex-col max-ml:border-b max-ml:border-solid max-ml:border-b-white ml:shrink ml:grow ml:basis-0';
+  const footerMenuItemClass = isExpandedFooterLayout
+    ? `flex flex-col mmd:pr-xxs mmd:max-ml:w-[33.333%] ${desktopNavGroupWidthClass}`
+    : 'flex flex-col ml:w-[20%] ml:pr-xxs';
 
   return (
     <div
@@ -101,6 +242,7 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
     >
       <div className="px-m ml:max-w-screen-lg lg:mx-auto">
         <div className="flex flex-col flex-wrap ml:flex-row">
+          {/* Left column: tagline, copyright, social */}
           <div className="flex flex-col max-ml:order-4 max-ml:mt-l ml:w-[16.6%] ml:basis-[16.6%] ml:pr-xxs">
             <div className="mb-s font-sans text-xs font-heavy uppercase max-ml:hidden ">
               <Text tag={'h3'} field={fields.tagLine} />
@@ -109,90 +251,28 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
               <Text field={{ value: textWithReplacedYear }} />
             </div>
             <div className="flex flex-wrap max-ml:order-1 max-ml:mb-s">
-              {socialMenuArray &&
-                socialMenuArray.map((menu: AWFooterProps, index: number) => {
-                  return (
-                    menu.fields?.navItemLink.value &&
-                    getEnum(menu.fields?.navItemIcon) && (
-                      <div key={index} className="mr-xxs mt-xxxs">
-                        {isEE ? (
-                          <SvgIcon icon={getEnum(menu.fields?.navItemIcon)} />
-                        ) : (
-                          <LinkWrapper ctaSection="footer" field={menu.fields?.navItemLink}>
-                            <SvgIcon icon={getEnum(menu.fields?.navItemIcon)} />
-                          </LinkWrapper>
-                        )}
-                      </div>
-                    )
-                  );
-                })}
+              {socialMenuArray && <SocialLinks items={socialMenuArray} isEE={isEE} />}
             </div>
           </div>
+
+          {/* Right column: nav groups */}
           <div className="flex flex-col max-ml:order-1 ml:w-[83.4%] ml:basis-[83.4%] ml:pl-xxs">
             <div className="mb-l font-sans text-sm-s font-heavy uppercase ml:hidden">
               <Text tag={'h3'} field={fields.tagLine} />
             </div>
-            <div className="flex w-full max-ml:flex-col max-ml:border-b max-ml:border-solid max-ml:border-b-white ml:shrink ml:grow ml:basis-0">
-              {footerMenuArray &&
-                footerMenuArray.map((menu: AWFooterProps, index: number) => {
-                  return (
-                    <div key={index} className="flex flex-col ml:w-[20%] ml:pr-xxs">
-                      {isDesktop ? (
-                        <>
-                          <div className="mb-xxxs font-sans text-xxs font-heavy uppercase leading-none">
-                            <Text tag={'span'} field={menu.fields?.navGroupTitle} />
-                          </div>
-                          <ul className={`flex flex-col`}>
-                            {menu.fields?.children.map((nav: AWFooterProps, index: number) => {
-                              return (
-                                nav.fields?.navItemLink && (
-                                  <li key={index} className="py-xxxs">
-                                    <LinkWrapper
-                                      ctaSection="footer"
-                                      field={nav.fields?.navItemLink}
-                                      className="text-body hover:underline"
-                                    >
-                                      {nav.fields?.navItemLink.value.target === '_blank' && (
-                                        <SvgIcon icon="new-tab" className="ml-xxxs inline-flex" />
-                                      )}
-                                    </LinkWrapper>
-                                  </li>
-                                )
-                              );
-                            })}
-                          </ul>
-                        </>
-                      ) : (
-                        <Accordion title={menu.fields?.navGroupTitle.value as string}>
-                          {menu.fields && menu.fields.children.length && (
-                            <ul className={`ease flex flex-col  transition-all duration-1000`}>
-                              {menu.fields?.children.map((nav: AWFooterProps, index: number) => {
-                                return (
-                                  nav.fields?.navItemLink && (
-                                    <li key={index} className="py-xxxs ">
-                                      <LinkWrapper
-                                        ctaSection="footer"
-                                        field={nav.fields?.navItemLink}
-                                        className="text-small hover:underline"
-                                      >
-                                        {nav.fields?.navItemLink.value.target === '_blank' && (
-                                          <SvgIcon icon="new-tab" className="ml-xxxs inline-flex" />
-                                        )}
-                                      </LinkWrapper>
-                                    </li>
-                                  )
-                                );
-                              })}
-                            </ul>
-                          )}
-                        </Accordion>
-                      )}
-                    </div>
-                  );
-                })}
+            <div className={footerMenuContainerClass}>
+              {footerMenuArray?.map((menu: AWFooterProps, i: number) => {
+                const key = (menu.fields?.navGroupTitle?.value as string) || `nav-${i}`;
+                return (
+                  <div key={key} className={footerMenuItemClass}>
+                    {isDesktop ? <NavGroupDesktop menu={menu} /> : <NavGroupMobile menu={menu} />}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
+          {/* Bottom row: logo */}
           <div className="mt-l flex flex-col max-ml:order-3 max-ml:mb-l ml:w-[16.6%] ml:basis-[16.6%] ml:pr-xxs">
             {fields?.logoCTA?.value?.href !== '' ? (
               <LinkWrapper ctaSection="footer" field={fields.logoCTA}>
@@ -210,34 +290,17 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
               />
             )}
           </div>
+
+          {/* Bottom row: privacy caption + legal links */}
           <div className="mt-l flex flex-col max-ml:order-3 ml:w-[83.4%] ml:basis-[83.4%] ml:pl-xxs">
             <div className="mb-s flex w-full text-body ml:mb-xxs">
               <Text tag={'h3'} field={fields.privacyCaption} />
             </div>
             <div className="w-full flex-wrap max-ml:text-body md:flex">
-              {privacyMenuArray &&
-                privacyMenuArray.map((menu: AWFooterProps, index: number) => {
-                  return (
-                    menu.fields?.navItemLink && (
-                      <span key={index}>
-                        <LinkWrapper
-                          ctaSection="footer"
-                          className="text-body underline"
-                          field={menu.fields?.navItemLink}
-                        >
-                          {menu.fields?.navItemLink.value.target === '_blank' && (
-                            <SvgIcon icon="new-tab" className="ml-xxxs inline-flex" />
-                          )}
-                        </LinkWrapper>
-                        {index < privacyMenuArray.length - 1 && (
-                          <span className="inline-flex md:px-xxxs"> | </span>
-                        )}
-                      </span>
-                    )
-                  );
-                })}
+              {privacyMenuArray && <PrivacyLinks items={privacyMenuArray} />}
             </div>
           </div>
+
           {showTrustArc && (
             <button className="flex underline" onClick={FooterConsentTrigger}>
               Cookie Preferences
@@ -251,13 +314,7 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
 
 export const Default = withDatasourceCheck(AWFooter_Default);
 
-function FooterConsentTrigger() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any)?.truste) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).truste.eu.clickListener();
-  }
-}
+// --- Server props ----------------------------------------------------------
 
 type IntegratedGraphQl = IntegratedGraphQlResult<{
   item: {

@@ -11,6 +11,7 @@ import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
 import { getHeadingLevel } from 'lib/utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
+import useExperienceEditor from 'lib/utils/use-experience-editor';
 
 import { HeroTwoColumnTheme } from './helpers/HeroTwoColumn.theme';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -19,8 +20,10 @@ type HeroTwoColumnProps = ComponentProps & Sitecore.Components.Hero.HeroTwoColum
 
 function HeroTwoColumn_Default(props: HeroTwoColumnProps) {
   const { themeData } = useTheme(HeroTwoColumnTheme);
+  const isEE = useExperienceEditor();
 
-  if (!props.fields) {
+  // Always render in edit mode so Sitecore field editors appear
+  if (!props.fields && !isEE) {
     return null;
   }
 

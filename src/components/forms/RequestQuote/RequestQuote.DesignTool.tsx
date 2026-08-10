@@ -14,6 +14,7 @@ function RequestQuote_DesignTool(props: RequestQuoteProps) {
   return (
     <FormWrapper
       fields={props.fields}
+      params={props.params}
       cardsPlaceholders={{
         newConstruction: (
           <AppPlaceholder
