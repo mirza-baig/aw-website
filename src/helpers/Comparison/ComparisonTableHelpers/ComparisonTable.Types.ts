@@ -30,6 +30,29 @@ export type ComparisonSeriesChartFields = {
   seriesDestinationCta?: Field<boolean>;
 };
 
+/**
+ * Fields the "within series" compare chart adds on top of the series chart's
+ * (WithinSeriesChart.tsx — reader picks Windows/Doors and a series, columns
+ * become that series' products). Local augmentation until they are added to the
+ * AW_ComparisonSeriesTable Sitecore template and
+ * `.sitecore/AndersenWindows.model.ts` regenerates with real typed fields.
+ */
+export type WithinSeriesChartFields = {
+  /** Opts a datasource into the within-series layout. Off leaves today's charts untouched. */
+  enableWithinSeriesLayout?: Field<boolean>;
+  /** Label beside the switcher. Defaults to "Select Windows or Doors to compare:". */
+  windowsDoorsToggleLabel?: Field<string>;
+  /** Tab labels, defaulting to "Windows" / "Doors". */
+  windowsToggleLabel?: Field<string>;
+  doorsToggleLabel?: Field<string>;
+  /** Text on the chosen series card. Defaults to "SELECTED: SEE BELOW". */
+  seriesSelectedText?: Field<string>;
+  /** Show or hide the trailing CTA column. */
+  showFinalCTAColumn?: Field<boolean>;
+  /** Destinations for the per-product CTAs (PDP, design tool, series, RAQ); first three win. */
+  productLinkDestinationCTAs?: Item[];
+};
+
 export type CategroyBarProps = {
   title: string | undefined;
   cta: LinkFieldValue | undefined;

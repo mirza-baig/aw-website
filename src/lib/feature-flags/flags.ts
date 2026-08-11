@@ -55,6 +55,20 @@ export const releaseRaqWebToLeadFetchMethod = flag<boolean>({
   ],
 });
 
+// Release: Within Series Compare Chart
+export const releaseWithinSeriesCompareChart = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-within-series-compare-chart`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Renders the "within series" compare chart (WithinSeriesChart) for AW_ComparisonSeriesTable datasources: a Windows/Doors switcher and a series selection row above a chart whose columns are the products that make up the selected series. Takes precedence over the redesigned series chart when both are on.',
+  defaultValue: true,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+
 // Release: Redesigned Series Compare Chart
 export const releaseRedesignedSeriesCompareChart = flag<boolean>({
   key: `${FLAG_KEY_PREFIX}release-redesigned-series-compare-chart`,

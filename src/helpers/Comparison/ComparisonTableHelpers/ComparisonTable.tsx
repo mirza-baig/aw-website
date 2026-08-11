@@ -23,16 +23,22 @@ import {
   getComparisonObject,
   groupProductStyles,
 } from './ComparisonTable.helper';
-import { CategoryDataProps, ComparisonSeriesChartFields } from './ComparisonTable.Types';
+import {
+  CategoryDataProps,
+  ComparisonSeriesChartFields,
+  WithinSeriesChartFields,
+} from './ComparisonTable.Types';
 import { ComparisonTitles } from './ComparisonTitles';
 import { Selector } from './Selector';
 import { SubCategoryTitle } from './SubCategoryTitle';
+import { WithinSeriesChart } from './WithinSeriesChart';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 export type ComparisonTableSeriesProps = ComponentProps &
   Omit<Sitecore.Components.Product.ComparisonTable.ComparisonSeriesTable, 'fields'> & {
     fields?: Sitecore.Components.Product.ComparisonTable.ComparisonSeriesTable['fields'] &
-      ComparisonSeriesChartFields;
+      ComparisonSeriesChartFields &
+      WithinSeriesChartFields;
   };
 
 export const ComparisonTable = (
@@ -115,6 +121,18 @@ export const ComparisonTable = (
   }, [selectedProductStyleIndex]);
   if (!originalComparisonObject || !props.fields) {
     return <></>;
+  }
+
+  // "Within series" compare chart: the reader picks Windows or Doors and a
+  // series, and the columns become the products that make up that series.
+  // Checked before the redesigned layout so a datasource opting into this one
+  // wins. Gated by `releaseWithinSeriesCompareChart` for flag-only previews.
+  if (
+    !isProductComparison &&
+    ((props.fields as WithinSeriesChartFields).enableWithinSeriesLayout?.value ||
+      props.page.customProps.featureFlags.releaseWithinSeriesCompareChart)
+  ) {
+    return <WithinSeriesChart {...(props as ComparisonTableSeriesProps)} />;
   }
 
   // Redesigned series compare chart. Gated by the `releaseRedesignedSeriesCompareChart`
