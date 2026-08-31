@@ -211,7 +211,7 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
   const [colorSwatches, setColorSwatches] = useState<ProductSwatch[] | undefined>();
   const isEE = useExperienceEditor();
 
-  const { siteInfo } = useWebsiteContext();
+  const { siteInfo, featureFlags } = useWebsiteContext();
   // Add the bazaarvoice script
   useBVScript({ environment, theme: themeName });
 
@@ -371,11 +371,13 @@ export function ProductIntroClient(props: ProductIntroProps): JSX.Element {
 
   return (
     <>
-      <Script
-        id=""
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
-      />
+      {!featureFlags.releaseSchemaOrgGraph && (
+        <Script
+          id=""
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
+        />
+      )}
       <Component variant="lg" dataComponent="product/productintro" {...props}>
         {/* Favourite - Always render in edit mode so Sitecore field editors appear */}
         {(showFavorite || isEE) && (

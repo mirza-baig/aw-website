@@ -116,7 +116,7 @@ function MetaLocator_Default(props: MetaLocatorProps) {
       };
 
       setSessionStorageItems({
-        [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
+        [StringConstants.AW.WTB.ActiveJourneyKey]: JSON.stringify({
           journey: StringConstants.AW.WTB.JourneyName,
           prevPath: globalThis.location.pathname,
           eventType: StringConstants.AW.WTB.AbandonEventType,
@@ -132,7 +132,7 @@ function MetaLocator_Default(props: MetaLocatorProps) {
   const clearAbandon = useCallback(() => {
     clearAbandonTimeout();
     clearSessionStorageItems([
-      StringConstants.AW.ActiveJourneyKey,
+      StringConstants.AW.WTB.ActiveJourneyKey,
       StringConstants.AW.WTB.AbandonPayloadKey,
       StringConstants.AW.WTB.AbandonEventTriggered,
     ]);

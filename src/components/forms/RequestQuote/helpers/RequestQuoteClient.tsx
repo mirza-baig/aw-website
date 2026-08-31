@@ -54,7 +54,7 @@ type UserType = 'homeowner' | 'professional';
 
 // Session keys
 const RAQ_SESSION_KEYS = [
-  StringConstants.AW.ActiveJourneyKey,
+  StringConstants.AW.RequestQuote.ActiveJourneyKey,
   StringConstants.AW.RequestQuote.AbandonPayloadKey,
   StringConstants.AW.RequestQuote.StartTimeKey,
   StringConstants.AW.RequestQuote.SubmittedKey,
@@ -188,7 +188,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     });
 
     setSessionStorageItems({
-      [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
+      [StringConstants.AW.RequestQuote.ActiveJourneyKey]: JSON.stringify({
         journey: StringConstants.AW.RequestQuote.JourneyName,
         prevPath: globalThis.location.pathname,
         eventType: StringConstants.AW.RequestQuote.AbandonEventType,

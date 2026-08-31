@@ -30,13 +30,6 @@ export type ComparisonSeriesChartFields = {
   seriesDestinationCta?: Field<boolean>;
 };
 
-/**
- * Fields the "within series" compare chart adds on top of the series chart's
- * (WithinSeriesChart.tsx — reader picks Windows/Doors and a series, columns
- * become that series' products). Local augmentation until they are added to the
- * AW_ComparisonSeriesTable Sitecore template and
- * `.sitecore/AndersenWindows.model.ts` regenerates with real typed fields.
- */
 export type WithinSeriesChartFields = {
   /** Opts a datasource into the within-series layout. Off leaves today's charts untouched. */
   enableWithinSeriesLayout?: Field<boolean>;

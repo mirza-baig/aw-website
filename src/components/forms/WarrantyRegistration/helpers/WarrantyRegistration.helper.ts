@@ -74,18 +74,31 @@ export const warrantyRegistrationValidationSchema = {
           if (productType === 'Storm Doors') {
             return schema
               .required('This field is required')
-              .test('serialnumber', 'Invalid Serial Number', (value, { createError }) => {
-                return new Promise((resolve, reject) => {
-                  debouncedValidateSerialNumber(
-                    value,
-                    () => resolve(true),
-                    () =>
-                      reject(
-                        createError({ message: 'The serial number you entered was not found.' })
-                      )
-                  );
-                });
-              });
+              .matches(/^\d+$/, 'Serial number must contain digits only')
+              .test(
+                'serialnumber',
+                'The serial number you entered was not found.',
+                (value, { createError, path }) => {
+                  // Skip API call if value is empty or non-numeric
+                  if (!value || !/^\d+$/.test(value)) {
+                    return true;
+                  }
+
+                  return new Promise((resolve) => {
+                    debouncedValidateSerialNumber(
+                      value,
+                      () => resolve(true),
+                      () =>
+                        resolve(
+                          createError({
+                            path,
+                            message: 'The serial number you entered was not found.',
+                          })
+                        )
+                    );
+                  });
+                }
+              );
           } else {
             return schema;
           }
@@ -125,7 +138,7 @@ const validateStormDoorSerialNumber = async (value: string): Promise<boolean> =>
 
   const data = await response.json();
 
-  return data.error_message.includes('Success');
+  return data?.error_message === 'Success';
 };
 
 export const windowsTypes = [

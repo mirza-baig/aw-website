@@ -1,8 +1,7 @@
 import { event } from '@sitecore-content-sdk/events';
-import { StringConstants } from 'lib/constants/string-constants';
 
-export const firePageNavAbandonEvent = () => {
-  const rawJourney = sessionStorage.getItem(StringConstants.AW.ActiveJourneyKey);
+export const firePageNavAbandonEvent = (journeyKey: string) => {
+  const rawJourney = sessionStorage.getItem(journeyKey);
   if (!rawJourney || rawJourney === 'undefined') {
     return;
   }

@@ -1,4 +1,5 @@
 import { ComponentProps } from 'lib/component-props';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import Script from 'next/script';
 
@@ -17,18 +18,22 @@ function ProductSchema_Default(props: ProductSchemaProps) {
     name: props.fields?.productItem?.fields?.productName?.value ?? '',
     image: props.fields?.productItem?.fields?.productImage?.value?.src ?? '',
     description: props.fields?.productItem?.fields?.productDescription?.value ?? '',
-    brand1: {
+    brand: {
       '@type': 'Brand',
       name: props.fields?.brandName?.fields?.Value.value ?? '',
     },
   };
   return (
-    <Script
-      id=""
-      type="application/ld+json"
-      strategy="beforeInteractive"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
-    />
+    <>
+      {!FeatureFlags.values.releaseSchemaOrgGraph && (
+        <Script
+          id=""
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
+        />
+      )}
+    </>
   );
 }
 

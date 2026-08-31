@@ -42,10 +42,9 @@ export async function POST(req: NextRequest): Promise<Response> {
   validateSerialNumberURL.searchParams.append('id', id);
 
   const response = await fetch(validateSerialNumberURL.toString(), requestOptions);
-
   const data = await response.json();
 
-  return Response.json(JSON.stringify(data), { status: 200 });
+  return Response.json(data, { status: 200 });
 }
 
 const getSerialNumberLetterCode = (sSerialNumber: string) => {
@@ -73,16 +72,6 @@ const getSerialNumberInteger = (sSerialNumber: string) => {
   return retVal;
 };
 
-const isNumeric = (str: string) => {
-  try {
-    Number.parseFloat(str);
-  } catch {
-    return false;
-  }
-  return true;
-};
+const isNumeric = (str: string) => /^\d+$/.test(str);
 
-const isLetter = (str: string) => {
-  const c = str[0] as unknown as number;
-  return Number.isNaN(c);
-};
+const isLetter = (str: string) => /^[A-Za-z]/.test(str);

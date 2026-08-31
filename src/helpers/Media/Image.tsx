@@ -1,5 +1,4 @@
 import { Image as JSSImage, ImageField } from '@sitecore-content-sdk/nextjs';
-import { useTheme } from 'lib/context/ThemeContext';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
@@ -40,10 +39,9 @@ const Image = ({
   focus = 'center',
   generateSchemaMarkup = true,
 }: ImageProps): JSX.Element => {
-  const { themeName } = useTheme();
   const isEE = useExperienceEditor();
   const isNormalMode = useNormalMode();
-  const { siteInfo } = useWebsiteContext();
+  const { siteInfo, featureFlags } = useWebsiteContext();
   // If we're in EE, we still want to render the image for editing, even when it's empty.
   if (!image?.value?.src && !isEE) {
     return <></>;
@@ -71,15 +69,14 @@ const Image = ({
 
   return (
     <>
-      {generateSchemaMarkup &&
-        themeName === 'aw' && ( // Include the generateSchemaMarkup check
-          <Script
-            id=""
-            strategy="beforeInteractive"
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScriptImage) }}
-          />
-        )}
+      {!featureFlags.releaseSchemaOrgGraph && generateSchemaMarkup && (
+        <Script
+          id=""
+          strategy="beforeInteractive"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScriptImage) }}
+        />
+      )}
       {isNormalMode ? (
         <NextImage
           src={getMediaUrl(imageValue, MediaUrlType.Cdn, siteInfo!, environment)}

@@ -22,7 +22,7 @@ function Breadcrumb_Default(props: ComponentProps): JSX.Element {
   const pageItem = props.page.layout.sitecore.route as Sitecore.BaseTemplates.BasePage;
   const pageTitle = pageItem?.fields?.pageTitle?.value ?? undefined;
 
-  const { siteInfo, breadcrumbs = [] } = useWebsiteContext();
+  const { siteInfo, breadcrumbs = [], featureFlags } = useWebsiteContext();
   const publicUrl = siteInfo?.canonicalHostName ?? siteInfo?.targetHostName ?? '';
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -227,12 +227,14 @@ function Breadcrumb_Default(props: ComponentProps): JSX.Element {
 
   return (
     <>
-      <Script
-        id=""
-        strategy="beforeInteractive"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {!featureFlags.releaseSchemaOrgGraph && (
+        <Script
+          id=""
+          strategy="beforeInteractive"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       {breadcrumbs.length > 1 && (
         <div
           className={classNames(

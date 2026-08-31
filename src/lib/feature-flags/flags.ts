@@ -55,14 +55,14 @@ export const releaseRaqWebToLeadFetchMethod = flag<boolean>({
   ],
 });
 
-// Release: Within Series Compare Chart
-export const releaseWithinSeriesCompareChart = flag<boolean>({
-  key: `${FLAG_KEY_PREFIX}release-within-series-compare-chart`,
+// Release: Schema.org Graph (new centralised JSON-LD; suppresses legacy per-component scripts)
+export const releaseSchemaOrgGraph = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-schema-org-graph`,
   adapter: vercelAdapter(),
   identify,
   description:
-    'Renders the "within series" compare chart (WithinSeriesChart) for AW_ComparisonSeriesTable datasources: a Windows/Doors switcher and a series selection row above a chart whose columns are the products that make up the selected series. Takes precedence over the redesigned series chart when both are on.',
-  defaultValue: true,
+    'Enables the new centralised SchemaOrgGraph JSON-LD output and suppresses the legacy per-component JSON-LD scripts (PageSchemaOrg, OrganizationSchema, WebsiteSchema, ProductSchema, etc.).',
+  defaultValue: false,
   options: [
     { value: true, label: 'Released' },
     { value: false, label: 'Pending' },
@@ -77,6 +77,34 @@ export const releaseRedesignedSeriesCompareChart = flag<boolean>({
   description:
     'Renders the redesigned card-based series compare chart (ComparisonSeriesChart) instead of the legacy AW_ComparisonSeriesTable layout.',
   defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+
+// Release: robots.txt Vercel production check
+export const releaseRobotsVercelProductionCheck = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-robots-vercel-production-check`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Gates the VERCEL_ENV === "production" check in the robots.txt route. When enabled robots.txt only allows crawling on Vercel production deployments. When disabled (default), the environment/role configuration alone determines the result.',
+  defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+
+// Release: Within Series Compare Chart
+export const releaseWithinSeriesCompareChart = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-within-series-compare-chart`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Renders the "within series" compare chart (WithinSeriesChart) for AW_ComparisonSeriesTable datasources: a Windows/Doors switcher and a series selection row above a chart whose columns are the products that make up the selected series. Takes precedence over the redesigned series chart when both are on.',
+  defaultValue: true,
   options: [
     { value: true, label: 'Released' },
     { value: false, label: 'Pending' },

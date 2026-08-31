@@ -49,7 +49,6 @@ export default function SendPersonalizeEvent(props: Props) {
 
   const abandonTimeoutMinutes = Number(datasource?.cdpInactivityMinutes?.value ?? 15);
   const abandonTimeoutMs = abandonTimeoutMinutes * 60 * 1000; // Convert minutes to milliseconds
-
   useEffect(() => {
     if (!eventType) {
       console.warn(
@@ -79,7 +78,7 @@ export default function SendPersonalizeEvent(props: Props) {
       sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormTimeout);
       sessionStorage.removeItem(FormsConstants.AW.Form.CCPFormCompleted);
 
-      sessionStorage.removeItem(StringConstants.AW.ActiveJourneyKey);
+      sessionStorage.removeItem(StringConstants.AW.GFBForm.ActiveJourneyKey);
       sessionStorage.removeItem(StringConstants.AW.GFBForm.AbandonPayloadKey);
     };
     const fireAbandonEvent = (isInactivity = false) => {
@@ -137,6 +136,7 @@ export default function SendPersonalizeEvent(props: Props) {
         // START - Set the Abandon session
         const storedAbandonPayload = getAbandonPayload();
         setAbandonSession({
+          activeJourneyKey: StringConstants.AW.GFBForm.ActiveJourneyKey,
           journeyName: StringConstants.AW.GFBForm.JourneyName, //datasource?.journeyName?.value,
           abandonEventType,
           abandonPayloadKey: StringConstants.AW.GFBForm.AbandonPayloadKey,

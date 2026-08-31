@@ -11,7 +11,7 @@ type OrganizationSchemaProps = ComponentProps &
   Sitecore.Components.Seo.OrganizationSchema.OrganizationSchema;
 
 function OrganizationSchema_Default(props: OrganizationSchemaProps) {
-  const { siteInfo } = useWebsiteContext();
+  const { siteInfo, featureFlags } = useWebsiteContext();
 
   if (!props.fields) {
     return <></>;
@@ -36,12 +36,16 @@ function OrganizationSchema_Default(props: OrganizationSchemaProps) {
   };
 
   return (
-    <Script
-      id=""
-      type="application/ld+json"
-      strategy="beforeInteractive"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
-    />
+    <>
+      {!featureFlags.releaseSchemaOrgGraph && (
+        <Script
+          id=""
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
+        />
+      )}
+    </>
   );
 }
 

@@ -28,6 +28,9 @@ export function RbAConsultRequestClient(props: RbAConsultRequestClientProps) {
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [resultData, setResultData] = useState<ResultsData | null>(null);
 
+  const ppcTrackingPhoneNumberKey = 'ppctrackingphonenumber';
+  const defaultPpcTrackingPhoneNumber = '888-834-6062';
+
   function AddScore() {
     const percentile = (Number(resultData?.reviewRating) / 5) * 100;
     const myElement = document.querySelector('#starRating') as HTMLElement;
@@ -49,8 +52,12 @@ export function RbAConsultRequestClient(props: RbAConsultRequestClientProps) {
     } else {
       let html = myElement.outerHTML;
       for (const key in resultData) {
+        let value = resultData[key as keyof ResultsData];
+        if (key.toLowerCase() === ppcTrackingPhoneNumberKey && !value) {
+          value = defaultPpcTrackingPhoneNumber;
+        }
         const re = new RegExp('{{' + key + '}}', 'gi');
-        html = html.replace(re, resultData[key as keyof ResultsData]);
+        html = html.replace(re, value);
       }
       myElement.outerHTML = html;
     }
@@ -59,7 +66,7 @@ export function RbAConsultRequestClient(props: RbAConsultRequestClientProps) {
   function ReplaceTokens() {
     document.title = resultData?.name ?? 'Andersen Windows | Renewal by Andersen';
     const main = document.querySelectorAll(
-      '#main section:not([data-component="rbaConsultRequest"])'
+      'header, #main section:not([data-component="rbaConsultRequest"])'
     );
     main.forEach(ReplaceKeyValues);
   }

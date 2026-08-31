@@ -30,7 +30,7 @@ export async function handler(): Promise<Response> {
     if (!tokenResponse.ok) {
       const details = await tokenResponse.json();
       return Response.json(
-        { error: 'bmc - Failed to fetch config access token', details },
+        { error: 'Failed to fetch config access token', details },
         { status: tokenResponse.status }
       );
     }

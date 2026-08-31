@@ -13,7 +13,7 @@ import { decryptEcidEdge } from 'lib/salesforce/communities/ecid-decrypt-edge/ec
 import { NextRequest, NextResponse } from 'next/server';
 import config from 'sitecore.config';
 
-const SALESFORCE_PROVIDER_NAME = 'AW_SALESFORCE';
+const SALESFORCE_PROVIDER_NAME = 'AW_SF_LEAD_OR_CONTACT_ID';
 
 /**
  * Cookie set by Sitecore analytics to flag bot requests.

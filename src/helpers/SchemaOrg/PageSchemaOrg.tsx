@@ -7,7 +7,11 @@ import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 export const PageSchemaOrg = () => {
   const { page } = useSitecore();
-  const { siteInfo, requestedPath } = useWebsiteContext();
+  const { siteInfo, requestedPath, featureFlags } = useWebsiteContext();
+
+  if (featureFlags.releaseSchemaOrgGraph) {
+    return null;
+  }
 
   const pageItem = page.layout.sitecore.route as Sitecore.BaseTemplates.BasePage;
 

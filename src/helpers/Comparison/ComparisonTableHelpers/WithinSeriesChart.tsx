@@ -1,21 +1,5 @@
 'use client';
 
-/***
- * "Within series" compare chart.
- *
- * Where ComparisonSeriesChart compares whole series side by side, this chart
- * answers "what products make up this series?": the reader picks Windows or
- * Doors, picks a series from the card row, and the columns become the products
- * that series offers in that half of the catalogue.
- *
- * Rendered by ComparisonTable only when the datasource opts in (or the
- * `releaseWithinSeriesCompareChart` flag is on), so the existing series and
- * product compare experiences are untouched.
- *
- * Disabling no-explicit-any for the whole file: series/product items arrive as
- * loosely-typed layout-service payloads, as in the sibling comparison helpers.
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
 import Button from 'helpers/Button/Button';
@@ -28,7 +12,7 @@ import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { environment } from 'startup/environment';
 
 import { ComparisonSeriesChartFields, WithinSeriesChartFields } from './ComparisonTable.Types';
@@ -44,22 +28,27 @@ import {
   BUCKET_KEYS,
   BucketKey,
   buildLegendRows,
-  collectSwatchCollectionIds,
   describeProductLinkDestinations,
-  DESTINATION_DEFAULTS,
   getAvailableBuckets,
   getBucketProducts,
-  getDestinationHref,
   getInteriorColorsComment,
   getProductTitle,
   getSeriesImage,
   getSeriesLabel,
   makeTcText,
-  MAX_PRODUCT_LINK_DESTINATIONS,
   seriesHasProducts,
   slugify,
   TableConfigFields,
 } from './WithinSeriesChart.helper';
+import {
+  buildProductCTAs,
+  useCenteredCardIndex,
+  useDestinationDiagnostics,
+  useDismissOnOutsideClick,
+  useGrabScroll,
+  useHashSelection,
+  useResolvedSwatchCollections,
+} from './WithinSeriesChart.hooks';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 type ComparisonSeriesTableSitecore =
@@ -73,7 +62,6 @@ export type WithinSeriesChartProps = ComponentProps &
   };
 
 type CTATier = 'primary' | 'secondary' | 'tertiary';
-const CTA_TIERS: CTATier[] = ['primary', 'secondary', 'tertiary'];
 
 type SwatchPopover = {
   swatches: Array<{ src?: string; alt?: string }>;
@@ -100,156 +88,26 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
 
   const scrollableSectionRef = useRef<HTMLDivElement>(null);
   const swatchPopoverRef = useRef<HTMLDivElement | null>(null);
-  const hashAppliedRef = useRef(false);
 
   const [selectedBucket, setSelectedBucket] = useState<BucketKey>('windows');
   const [selectedSeriesIndex, setSelectedSeriesIndex] = useState(0);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [resolvedSwatchCollections, setResolvedSwatchCollections] = useState<Record<string, any>>(
-    {}
-  );
   const [swatchPopover, setSwatchPopover] = useState<SwatchPopover | null>(null);
 
   const seriesList = ((props.fields as any)?.seriesToCompare ?? []) as any[];
 
-  // Swatch collections come back from the layout service as unresolved
-  // references (single-hop limit), so re-resolve them over GraphQL — same
-  // endpoint the product compare chart uses.
-  useEffect(() => {
-    const ids = collectSwatchCollectionIds(seriesList);
-    if (ids.length === 0) {
-      return undefined;
-    }
+  const resolvedSwatchCollections = useResolvedSwatchCollections(
+    seriesList,
+    props?.rendering?.dataSource
+  );
 
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch('/api/aw/product-compare-chart/resolve-swatches', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ ids, language: 'en' }),
-        });
-        if (!res.ok) {
-          console.warn('[WithinSeriesChart] resolve-swatches failed:', res.status);
-          return;
-        }
-        const json = (await res.json()) as { results?: Record<string, any> };
-        if (cancelled || !json?.results) {
-          return;
-        }
-        const next: Record<string, any> = {};
-        for (const [id, value] of Object.entries(json.results)) {
-          if (value && Array.isArray(value.fields?.swatches) && value.fields.swatches.length > 0) {
-            next[id] = value;
-          }
-        }
-        if (Object.keys(next).length > 0) {
-          setResolvedSwatchCollections((prev) => ({ ...prev, ...next }));
-        }
-      } catch (err) {
-        console.warn('[WithinSeriesChart] resolve-swatches error:', err);
-      }
-    })();
+  const dismissSwatchPopover = useCallback(() => setSwatchPopover(null), []);
+  useDismissOnOutsideClick(!!swatchPopover, swatchPopoverRef, dismissSwatchPopover);
 
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props?.rendering?.dataSource]);
-
-  useEffect(() => {
-    if (!swatchPopover) {
-      return undefined;
-    }
-    const handleDocClick = (e: MouseEvent) => {
-      if (swatchPopoverRef.current && !swatchPopoverRef.current.contains(e.target as Node)) {
-        setSwatchPopover(null);
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setSwatchPopover(null);
-      }
-    };
-    const timer = globalThis.setTimeout(() => {
-      document.addEventListener('mousedown', handleDocClick);
-      document.addEventListener('keydown', handleKey);
-    }, 0);
-    return () => {
-      globalThis.clearTimeout(timer);
-      document.removeEventListener('mousedown', handleDocClick);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [swatchPopover]);
-
-  // Grab-and-pull horizontal scrolling, the pointer equivalent of the arrow
-  // buttons. Drags that start on a link or button are left alone so the card
-  // CTAs still click through, and smooth scrolling is suspended mid-drag so the
-  // cards track the cursor instead of easing after it.
-  useEffect(() => {
-    const container = scrollableSectionRef.current;
-    if (!container) {
-      return undefined;
-    }
-
-    let dragging = false;
-    let startX = 0;
-    let startScrollLeft = 0;
-
-    const handlePointerDown = (e: PointerEvent) => {
-      if (e.button !== 0 || (e.target as HTMLElement)?.closest('a, button')) {
-        return;
-      }
-      dragging = true;
-      startX = e.clientX;
-      startScrollLeft = container.scrollLeft;
-      container.style.scrollBehavior = 'auto';
-      container.classList.add('cursor-grabbing', 'select-none');
-    };
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!dragging) {
-        return;
-      }
-      container.scrollLeft = startScrollLeft - (e.clientX - startX);
-    };
-
-    const handlePointerUp = () => {
-      if (!dragging) {
-        return;
-      }
-      dragging = false;
-      container.style.scrollBehavior = '';
-      container.classList.remove('cursor-grabbing', 'select-none');
-    };
-
-    container.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerUp);
-
-    return () => {
-      container.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, []);
-
-  // Track which card is centred so the mobile dots stay in sync.
-  useEffect(() => {
-    const container = scrollableSectionRef.current;
-    if (!container || !isMobile) {
-      return undefined;
-    }
-    const handleScroll = () => {
-      const children = Array.from(container.children) as HTMLElement[];
-      const index = children.findIndex((child) => child.offsetLeft >= container.scrollLeft - 1);
-      setActiveCardIndex(index === -1 ? 0 : index);
-    };
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [isMobile]);
+  useGrabScroll(scrollableSectionRef);
+  const [activeCardIndex, setActiveCardIndex] = useCenteredCardIndex(
+    scrollableSectionRef,
+    isMobile
+  );
 
   const availableBuckets = getAvailableBuckets(seriesList);
   const activeBucket: BucketKey = availableBuckets.includes(selectedBucket)
@@ -263,23 +121,10 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
     .filter(({ item }) => seriesHasProducts(item, activeBucket));
 
   // ── URL hash (#100-series-windows) → initial selection ──
-  if (!hashAppliedRef.current && seriesList.length > 0) {
-    hashAppliedRef.current = true;
-    const hash = globalThis.location?.hash?.replace('#', '') ?? '';
-    if (hash) {
-      for (const bucket of availableBuckets) {
-        const matchIndex = seriesList.findIndex(
-          (item) =>
-            seriesHasProducts(item, bucket) && slugify(getSeriesLabel(item, bucket)) === hash
-        );
-        if (matchIndex !== -1) {
-          setSelectedBucket(bucket);
-          setSelectedSeriesIndex(matchIndex);
-          break;
-        }
-      }
-    }
-  }
+  useHashSelection(seriesList, availableBuckets, (bucket, index) => {
+    setSelectedBucket(bucket);
+    setSelectedSeriesIndex(index);
+  });
 
   const activeEntry =
     visibleSeries.find((entry) => entry.index === selectedSeriesIndex) ?? visibleSeries[0];
@@ -298,44 +143,14 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
   const productLinkDestinations = destinationReport.rendered;
 
   // A card silently missing a button is hard to diagnose from content alone, so
-  // report the three ways a destination disappears: it matched no known
+  // the hook logs the three ways a destination disappears: it matched no known
   // destination, it fell past the three-button cap, or the product carries no
   // link for it.
-  useEffect(() => {
-    const { authored, rendered, unrecognized, overflow } = destinationReport;
-    if (authored.length === 0) {
-      return;
-    }
-    if (unrecognized.length > 0) {
-      console.warn(
-        `[WithinSeriesChart] product link destination(s) not recognised and dropped: ${unrecognized
-          .map((entry) => `"${entry}"`)
-          .join(', ')}. Expected something matching PDP, design tool, series or RAQ.`
-      );
-    }
-    if (overflow.length > 0) {
-      console.warn(
-        `[WithinSeriesChart] ${authored.length} destinations authored — only the first ` +
-          `${MAX_PRODUCT_LINK_DESTINATIONS} render (primary, secondary, tertiary); ` +
-          `dropped: ${overflow.join(', ')}.`
-      );
-    }
-    const firstProduct = products[0];
-    if (firstProduct) {
-      const unresolved = rendered.filter(
-        (destination) => !getDestinationHref(destination, firstProduct, activeSeries)
-      );
-      if (unresolved.length > 0) {
-        console.warn(
-          `[WithinSeriesChart] no link found on "${getProductTitle(firstProduct, activeSeriesLabel)}" ` +
-            `for destination(s): ${unresolved.join(', ')} — those buttons will not render.`
-        );
-      }
-    }
-    // Re-checked per series/bucket rather than per render; the report itself is
-    // derived from props and stable between datasource changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props?.rendering?.dataSource, activeBucket, activeSeries?.id]);
+  useDestinationDiagnostics(destinationReport, products, activeSeries, activeSeriesLabel, [
+    props?.rendering?.dataSource,
+    activeBucket,
+    activeSeries?.id,
+  ]);
 
   const writeHash = (series: any, bucket: BucketKey) => {
     const slug = slugify(getSeriesLabel(series, bucket));
@@ -368,40 +183,8 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
   const handleSwatchOverflow: SwatchOverflowHandler = (swatches, origin) =>
     setSwatchPopover({ swatches, top: origin.top, left: origin.left });
 
-  /**
-   * One button per authored destination, tiered by the order the author put
-   * them in: first → primary, second → secondary, third → tertiary. Tiers are
-   * assigned after dropping destinations with no resolvable href, so a product
-   * missing (say) a design tool link still gets a primary button rather than a
-   * gap. With nothing authored, falls back to a single "Explore …" primary.
-   */
-  const buildProductCTAs = (
-    productItem: any
-  ): Array<{ label: string; href: string; tier: CTATier }> => {
-    if (productLinkDestinations.length === 0) {
-      const fallbackHref =
-        productItem?.fields?.productDetailPageLink?.value?.href ??
-        getDestinationHref('designTool', productItem, activeSeries) ??
-        activeSeries?.fields?.seriesLink?.value?.href;
-      if (!fallbackHref) {
-        return [];
-      }
-      return [
-        { label: `Explore ${activeSeriesLabel}`.trim(), href: fallbackHref, tier: 'primary' },
-      ];
-    }
-
-    return productLinkDestinations
-      .map((destination) => {
-        const definition = DESTINATION_DEFAULTS[destination];
-        return {
-          label: tcText(definition.labelKey) || definition.defaultLabel(activeSeriesLabel),
-          href: getDestinationHref(destination, productItem, activeSeries),
-        };
-      })
-      .filter((cta): cta is { label: string; href: string } => !!cta.href)
-      .map((cta, index) => ({ ...cta, tier: CTA_TIERS[index] ?? 'tertiary' }));
-  };
+  const buildCTAs = (productItem: any) =>
+    buildProductCTAs(productItem, productLinkDestinations, activeSeries, activeSeriesLabel, tcText);
 
   if (!props.fields || seriesList.length === 0) {
     return <></>;
@@ -440,7 +223,7 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
   const selectedText =
     props.fields.seriesSelectedText?.value || tcText('seriesSelectedText') || DEFAULT_SELECTED_TEXT;
   const showFinalColumn = !!(
-    props.fields.showFinalCTAColumn?.value ?? (props.fields as any)?.showFinalColumnCTA?.value
+    props.fields.seriesDestinationCta?.value ?? (props.fields as any)?.seriesDestinationCta?.value
   );
   const finalColumnLink =
     (props.fields as any)?.exploreAllSeries?.value ?? props.fields.finalColumnCTA?.value;
@@ -523,35 +306,45 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
                 )}
               </div>
 
-              {legendRows.map((row) => (
-                <div
-                  key={row.key}
-                  className={classNames(
-                    'flex flex-col justify-center border-b border-[#CCC] p-[20px] font-sans!',
-                    row.kind === 'section' ? sectionHeightClass : rowHeightClass,
-                    row.kind === 'row' && row.zebra && 'bg-[#FCFAFA]',
-                    isMobile ? (row.kind === 'section' ? 'text-[10px]' : 'text-[9px]') : 'text-base'
-                  )}
-                >
-                  <span
-                    className={row.kind === 'section' ? 'font-bold uppercase tracking-wide' : ''}
+              {legendRows.map((row) => {
+                let textSizeClass: string;
+                if (!isMobile) {
+                  textSizeClass = 'text-base';
+                } else if (row.kind === 'section') {
+                  textSizeClass = 'text-[10px]';
+                } else {
+                  textSizeClass = 'text-[9px]';
+                }
+                return (
+                  <div
+                    key={row.key}
+                    className={classNames(
+                      'flex flex-col justify-center border-b border-[#CCC] p-[20px] font-sans!',
+                      row.kind === 'section' ? sectionHeightClass : rowHeightClass,
+                      row.kind === 'row' && row.zebra && 'bg-[#FCFAFA]',
+                      textSizeClass
+                    )}
                   >
-                    {row.label}
-                  </span>
-                  {row.cta && (
-                    <a
-                      href={row.cta.href}
-                      target={row.cta.target || undefined}
-                      rel={row.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                      className={`mt-0.5 inline-block font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${
-                        isMobile ? 'text-[8px]' : 'text-xs'
-                      }`}
+                    <span
+                      className={row.kind === 'section' ? 'font-bold uppercase tracking-wide' : ''}
                     >
-                      {row.cta.text}
-                    </a>
-                  )}
-                </div>
-              ))}
+                      {row.label}
+                    </span>
+                    {row.cta && (
+                      <a
+                        href={row.cta.href}
+                        target={row.cta.target || undefined}
+                        rel={row.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
+                        className={`mt-0.5 inline-block font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${
+                          isMobile ? 'text-[8px]' : 'text-xs'
+                        }`}
+                      >
+                        {row.cta.text}
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* ── Product cards for the selected series ── */}
@@ -707,7 +500,7 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
                           isMobile ? 'mt-1' : 'mt-4'
                         }`}
                       >
-                        {buildProductCTAs(productItem).map((cta) => (
+                        {buildCTAs(productItem).map((cta) => (
                           <a
                             key={`${cta.label}-${cta.href}`}
                             href={cta.href}
@@ -722,7 +515,6 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
                     </div>
                   );
                 })}
-
                 {/* ── Final CTA column ── */}
                 {showFinalColumn && finalColumnLink?.href && (
                   <div
@@ -740,7 +532,10 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
                       style={{ minHeight: isMobile ? 100 : 320 }}
                     >
                       <span className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
-                        {finalColumnLink.text || `Explore all ${activeSeriesLabel}`}
+                        Explore all
+                      </span>
+                      <span className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
+                        Series
                       </span>
                       <span
                         className={`inline-flex items-center justify-center rounded-full border border-[#E0E0E0] ${

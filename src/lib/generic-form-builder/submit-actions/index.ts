@@ -8,9 +8,9 @@ import { SaveToDatabase } from './actions/save-to-database';
 import { SendEmail } from './actions/send-email';
 import { SendGtmEvent } from './actions/send-gtm-event';
 import { SendPersonalizeEvent } from './actions/send-personalize-event';
+import { SendPersonalizeIdentify } from './actions/send-personalize-identify';
 import { SFMCTransactionalMessagingSendEmail } from './actions/sfmc-transactional-messaging-send-email';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
-
 export type SubmitActionProps<T> = {
   submitAction: T & {
     id: string;
@@ -60,7 +60,8 @@ map.set('{5D7539C5-2604-43EF-B78B-E303081D4751}', SaveToDatabase);
 map.set('{EDBD20E6-0A0D-40D6-9C07-B60047452657}', SendEmail);
 map.set('{6233DDBB-1C52-4429-B417-D87AD9F4CD52}', SendGtmEvent);
 map.set('{E4CD7119-60DB-4196-8316-658B3A1A33AA}', SFMCTransactionalMessagingSendEmail);
-map.set('{EF145B4E-1090-4654-9DE7-FC3240130235}', SendPersonalizeEvent); // Default to SendEmail if no template ID provided
+map.set('{EF145B4E-1090-4654-9DE7-FC3240130235}', SendPersonalizeEvent);
+map.set('{43BDBC96-1680-48D4-BB82-FB34D14117FC}', SendPersonalizeIdentify); // Default to SendEmail if no template ID provided
 
 export const submitActionFactory = (
   submitAction: Sitecore.BaseTemplates.BaseSubmitAction & {

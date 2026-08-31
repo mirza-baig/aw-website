@@ -19,6 +19,7 @@ export const Debug = {
   featureToggle: debug(`${defaultNamespace}:feature-toggle`),
   personalization: debug(`${defaultNamespace}:personalization`),
   rules: debug(`${defaultNamespace}:rules`),
+  schemaOrgGraph: debug(`${defaultNamespace}:schema-org-graph`),
   onlinescheduling: debug(`${defaultNamespace}:onlinescheduling`),
   draftModeWorkaround: debug(`${defaultNamespace}:draft-mode-workaround`),
   cdpIdentity: debug(`${defaultNamespace}:cdp-identity`),

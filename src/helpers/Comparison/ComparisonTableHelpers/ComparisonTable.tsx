@@ -125,8 +125,7 @@ export const ComparisonTable = (
 
   // "Within series" compare chart: the reader picks Windows or Doors and a
   // series, and the columns become the products that make up that series.
-  // Checked before the redesigned layout so a datasource opting into this one
-  // wins. Gated by `releaseWithinSeriesCompareChart` for flag-only previews.
+
   if (
     !isProductComparison &&
     ((props.fields as WithinSeriesChartFields).enableWithinSeriesLayout?.value ||

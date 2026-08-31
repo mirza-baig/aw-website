@@ -9,6 +9,7 @@ import {
 import { geolocation } from '@vercel/functions';
 import { DraftModeWorkaroundMiddleware } from 'lib/middleware/draft-mode-workaround-middleware';
 import { MediaRedirectsMiddleware } from 'lib/middleware/media-redirects-middleware';
+import { SitecoreCDPIdentityMiddleware } from 'lib/middleware/sitecore-cdp-identity-middleware';
 import { type NextRequest } from 'next/server';
 import scConfig from 'sitecore.config';
 import { environment } from 'startup/environment';
@@ -114,6 +115,11 @@ export default function proxy(req: NextRequest) {
     skip: () => environment.isPreview() || environment.isLocal(), // Redirects don't work against a CM instance
   });
 
+  const identity = new SitecoreCDPIdentityMiddleware({
+    sites,
+    skip: () => false,
+  });
+
   const draftModeWorkaround = new DraftModeWorkaroundMiddleware({
     sites,
     skip: () => !environment.isPreview(),
@@ -125,6 +131,7 @@ export default function proxy(req: NextRequest) {
     redirects,
     mediaRedirects,
     personalize,
+    identity,
     draftModeWorkaround
   ).exec(req);
 }

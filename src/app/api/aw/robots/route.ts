@@ -1,4 +1,5 @@
 import { SiteResolver } from '@sitecore-content-sdk/nextjs';
+import { releaseRobotsVercelProductionCheck } from 'lib/feature-flags/flags';
 import { AWGraphQLRobotsService } from 'lib/robots/aw-graphql-robots-service';
 import sitecoreClient from 'lib/sitecore-client';
 import { getHostNameFromRequest } from 'lib/utils/nextjs-utils/get-host-name-from-request';
@@ -14,8 +15,20 @@ const DISALLOW = 'User-agent: *\nDisallow: /';
 export async function GET(req: NextRequest): Promise<Response> {
   const headers = { 'Content-Type': 'text/plain' };
 
+  // Gate the vercel production check behind a feature flag in case the vercel
+  // environment code is not what was documented.
+  let useVercelProductionCheck = false;
+  try {
+    useVercelProductionCheck = await releaseRobotsVercelProductionCheck();
+  } catch (error) {
+    console.error('Failed to resolve robots.txt Vercel production check feature flag', error);
+  }
+
   // Disallow robots in lower environments and preview sites
-  const isProductionWww = environment.isProduction() && environment.isWww();
+  const isProductionWww =
+    environment.isProduction() &&
+    environment.isWww() &&
+    (!useVercelProductionCheck || environment.isVercelProduction());
   if (!isProductionWww) {
     return new Response(DISALLOW, { headers });
   }

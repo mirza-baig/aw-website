@@ -21,7 +21,7 @@ type WebsiteSchemaType = {
 type WebsiteSchemaProps = ComponentProps & Sitecore.Components.Seo.WebsiteSchema.WebsiteSchema;
 
 function WebsiteSchema_Default(props: WebsiteSchemaProps) {
-  const { siteInfo } = useWebsiteContext();
+  const { siteInfo, featureFlags } = useWebsiteContext();
 
   if (!siteInfo?.name) {
     return <></>;
@@ -48,12 +48,16 @@ function WebsiteSchema_Default(props: WebsiteSchemaProps) {
   }
 
   return (
-    <Script
-      id=""
-      type="application/ld+json"
-      strategy="beforeInteractive"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
-    />
+    <>
+      {!featureFlags.releaseSchemaOrgGraph && (
+        <Script
+          id=""
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScript) }}
+        />
+      )}
+    </>
   );
 }
 

@@ -19,6 +19,8 @@ import classNames from 'classnames';
 import { WebsiteStaticState } from 'lib/website/website-state';
 import { SetFeatureFlags } from 'lib/feature-flags/SetFeatureFlags';
 import { DemoFeatureFlag } from 'lib/feature-flags/DemoFeatureFlag';
+import { SchemaOrgGraph } from 'lib/schema-org-graph/SchemaOrgGraph';
+import { AbandonRouteTracker } from 'helpers/Personalize/AbandonRouteTracker';
 
 interface LayoutProps {
   page: Page & { customProps: WebsiteStaticState };
@@ -57,6 +59,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
         'app.role': awClientConfig.app.role,
       }}
     >
+      <SchemaOrgGraph page={page} />
       <SetFeatureFlags values={page.customProps.featureFlags} />
       <ApmErrorBoundary disableSuspense={true}>
         <Scripts />
@@ -86,6 +89,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
                 <TypeKit />
                 <BeforeAfterScript />
                 <PageSchemaOrg />
+                <AbandonRouteTracker />
                 <header>
                   <div id="header">
                     {route && (

@@ -1,14 +1,3 @@
-/***
- * Cell renderers for the "within series" compare chart.
- *
- * A cell resolves its value from the product item first and the owning series
- * second (`pickRaw`), then renders whichever shape that value turns out to be:
- * price level, swatches, materials, named product lists, or plain text/HTML.
- *
- * Disabling no-explicit-any for the whole file for the same reason as
- * WithinSeriesChart.helper.ts — these are untyped layout-service payloads.
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 

@@ -1,7 +1,6 @@
 'use client';
 import { Field, Image as JSSImage, ImageField, Item } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
-import { useTheme } from 'lib/context/ThemeContext';
 import { getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint } from 'lib/utils/get-screen-type';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
@@ -185,10 +184,9 @@ const ImageWrapper = ({
 }: ImageWrapperProps): JSX.Element => {
   const isMobile = useIsMobile(null);
 
-  const { themeName } = useTheme();
   const isEE = useExperienceEditor();
   const isNormalMode = useNormalMode();
-  const { siteInfo } = useWebsiteContext();
+  const { siteInfo, featureFlags } = useWebsiteContext();
 
   if (!image?.value?.src && !isEE) {
     return <></>;
@@ -296,14 +294,13 @@ const ImageWrapper = ({
 
   return (
     <>
-      {generateSchemaMarkup && themeName === 'aw' && (
+      {!featureFlags.releaseSchemaOrgGraph && generateSchemaMarkup && (
         <Script
           id=""
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJsonScriptImage) }}
         />
       )}
-
       <div
         className={classNames(
           'relative',

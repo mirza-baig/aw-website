@@ -32,9 +32,16 @@ const IsRoutableProductId = (productId: string) => {
  * fragment and into the query string. Use it for any link that leaves the browser — CDP payloads,
  * emails, anything else that may be rebuilt along the way.
  *
+ * Optional stepOverride to override the attribute index that would otherwise be
+ * read from the fragment. This is for bug ticket AWEB-603 where the resume link should always be
+ * the summary step after the glass step is reached.
+ *
  * Returns the URL unchanged when there is no route in the fragment to preserve.
  */
-export function buildResumeUrl(href: string = globalThis.location?.href ?? ''): string {
+export function buildResumeUrl(
+  href: string = globalThis.location?.href ?? '',
+  stepOverride?: number
+): string {
   const { option, attributeIndex } = GetUrlParts(href);
 
   if (!option) {
@@ -45,7 +52,10 @@ export function buildResumeUrl(href: string = globalThis.location?.href ?? ''): 
     const url = new URL(href, ParseBase);
 
     url.searchParams.set(ResumeProductParam, option);
-    url.searchParams.set(ResumeStepParam, attributeIndex ?? '0');
+    url.searchParams.set(
+      ResumeStepParam,
+      stepOverride === undefined ? (attributeIndex ?? '0') : String(stepOverride)
+    );
     url.hash = '';
 
     return url.toString();

@@ -1,8 +1,11 @@
 export const StringConstants = {
   AW: {
-    ActiveJourneyKey: 'awActiveJourney',
+    Common: {
+      ActiveJourneyKeyPrefix: 'awActiveJourney-',
+    },
     DesignTool: {
       JourneyName: 'design-tool',
+      ActiveJourneyKey: 'awActiveJourney-design-tool',
       StartEventType: 'AW:DESIGN_TOOL_START',
       UpdateEventType: 'AW:DESIGN_TOOL_UPDATE',
       AbandonEventType: 'AW:DESIGN_TOOL_ABANDON',
@@ -16,6 +19,7 @@ export const StringConstants = {
     },
     WTB: {
       JourneyName: 'where-to-buy',
+      ActiveJourneyKey: 'awActiveJourney-where-to-buy',
       MapPopupOpenEventType: 'AW:WTB_MAP_POPUP_OPEN',
       ContactClickEventType: 'AW:WTB_POPUP_CONTACT_CLICK',
       AbandonEventType: 'AW:WTB_ABANDON',
@@ -25,6 +29,7 @@ export const StringConstants = {
     },
     RequestQuote: {
       JourneyName: 'request-a-quote',
+      ActiveJourneyKey: 'awActiveJourney-request-a-quote',
       StartEventType: 'AW:FORM_RAQ_START',
       StepCompleteEventType: 'AW:FORM_RAQ_STEP_COMPLETE',
       SubmitEventType: 'AW:FORM_RAQ_SUBMIT',
@@ -38,6 +43,7 @@ export const StringConstants = {
     },
     GFBForm: {
       JourneyName: 'gfb-form',
+      ActiveJourneyKey: 'awActiveJourney-gfb-form',
       AbandonEventTriggered: 'awGFBAbandonEventTriggered',
       AbandonPayloadKey: 'awGFBAbandonPayload',
     },

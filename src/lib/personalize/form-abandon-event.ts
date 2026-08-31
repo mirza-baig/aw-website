@@ -1,5 +1,4 @@
 import { FormsConstants } from 'lib/constants/forms-constants';
-import { StringConstants } from 'lib/constants/string-constants';
 import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
 
 import { buildPersonalizePayload } from './build-personalize-payload';
@@ -32,6 +31,7 @@ export const createAbandonPayload = ({
 };
 
 type SetAbandonSessionProps = {
+  activeJourneyKey?: string;
   journeyName?: string;
   abandonEventType?: string;
   abandonPayloadKey?: string;
@@ -40,13 +40,14 @@ type SetAbandonSessionProps = {
 };
 
 export const setAbandonSession = ({
+  activeJourneyKey,
   journeyName,
   abandonEventType,
   abandonPayloadKey,
   abandonEventTriggered,
   payload,
 }: SetAbandonSessionProps) => {
-  if (!abandonPayloadKey) {
+  if (!activeJourneyKey || !abandonPayloadKey) {
     return;
   }
 
@@ -56,7 +57,7 @@ export const setAbandonSession = ({
   }
 
   setSessionStorageItems({
-    [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
+    [activeJourneyKey]: JSON.stringify({
       journey: journeyName,
       prevPath: globalThis.location.pathname,
       eventType: abandonEventType,

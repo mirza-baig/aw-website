@@ -225,7 +225,7 @@ describe('lib > middleware > SitecoreCDPIdentityMiddleware', () => {
         channel: 'WEB',
         currency: 'USD',
         language: 'EN',
-        identifiers: [{ provider: 'AW_SALESFORCE', id: 'CONTACT_123' }],
+        identifiers: [{ provider: 'AW_SF_LEAD_OR_CONTACT_ID', id: 'CONTACT_123' }],
       });
     });
 

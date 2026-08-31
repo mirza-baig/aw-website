@@ -1,16 +1,3 @@
-/***
- * Data helpers for the "within series" compare chart (WithinSeriesChart.tsx).
- *
- * That chart answers "what products make up this series?", so — unlike the
- * side-by-side series chart — its columns are product items pulled from the
- * selected series' `windowsProductTypes` / `doorsProductTypes` collections.
- * Everything here is pure so the chart component stays presentational.
- *
- * Disabling no-explicit-any for the whole file: series/product items arrive as
- * loosely-typed layout-service payloads whose shape varies per template, the
- * same way the sibling comparison helpers treat them.
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Field } from '@sitecore-content-sdk/nextjs';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
@@ -69,8 +56,8 @@ export const MAX_PRODUCT_LINK_DESTINATIONS = 3;
 export const slugify = (value: string): string =>
   value
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replaceAll(/[^a-z0-9]+/g, '-')
+    .replaceAll(/(^-+)|(-+$)/g, '');
 
 // ── Series → products ──────────────────────────────────────────────────────
 
@@ -432,7 +419,7 @@ export const normalizeDestinationKey = (
   if (!raw) {
     return undefined;
   }
-  const key = raw.toLowerCase().replace(/[\s_-]+/g, '');
+  const key = raw.toLowerCase().replaceAll(/[\s_-]+/g, '');
 
   if (key.includes('designtool') || key.includes('design')) {
     return 'designTool';
@@ -463,7 +450,8 @@ export const DESTINATION_DEFAULTS: Record<
   },
   seriesLanding: {
     labelKey: 'productLinkSeriesLandingText',
-    defaultLabel: (seriesTitle) => `Explore ${seriesTitle}`.trim(),
+    defaultLabel: (seriesTitle) =>
+      `Explore ${seriesTitle}`.trim().split(' ').slice(0, -1).join(' '),
   },
   requestAQuote: {
     labelKey: 'productLinkRequestAQuoteText',
@@ -540,9 +528,10 @@ export type ProductLinkDestinationReport = {
  * leaving an author guessing.
  */
 export const describeProductLinkDestinations = (fields: any): ProductLinkDestinationReport => {
-  const items = ((fields?.productLinkDestinationCTAs as any[] | undefined) ??
+  const items =
+    (fields?.productLinkDestinationCTAs as any[] | undefined) ??
     (fields?.productLinkDestinations as any[] | undefined) ??
-    []) as any[];
+    [];
 
   const authored: string[] = [];
   const recognized: ProductLinkDestinationKey[] = [];

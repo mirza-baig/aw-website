@@ -1,7 +1,5 @@
 // Global
 import ImageWrapper from 'helpers/Media/ImageWrapper';
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
 import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from 'src/lib/context/ThemeContext';
 
@@ -22,10 +20,6 @@ export const HeaderLogo = ({
 }: DesignToolHeaderLogoProps) => {
   const { themeData } = useTheme(HeaderLogoTheme());
   const theme = themeData as HeaderLogoThemeSubType;
-  const pathname = usePathname(); // e.g. "/design-tool"
-  const searchParams = useSearchParams(); // URLSearchParams
-  // Build a single string that mimics asPath
-  const asPath = `${pathname ?? ''}${searchParams?.toString() ? `?${searchParams}` : ''}`;
 
   const showHeader = () => {
     const header = document.querySelector('header #header');
@@ -38,8 +32,8 @@ export const HeaderLogo = ({
   };
 
   return !navigationVisible ? (
-    <Link
-      href={asPath}
+    <button
+      type="button"
       className={theme.classes.logoLink}
       title="Show Navigation"
       aria-label="Show Navigation"
@@ -50,7 +44,7 @@ export const HeaderLogo = ({
         imageLayout="intrinsic"
         additionalDesktopClasses={theme.classes.imageWrapper}
       ></ImageWrapper>
-    </Link>
+    </button>
   ) : (
     <></>
   );

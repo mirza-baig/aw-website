@@ -2,6 +2,7 @@
 import { ComponentRendering } from '@sitecore-content-sdk/nextjs';
 import config from 'aw.config.server';
 import { ComponentProps } from 'lib/component-props';
+import { loader } from 'lib/feature-flags/loader';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
@@ -45,9 +46,34 @@ type IntegratedGraphQl = IntegratedGraphQlResult<{
   };
 }>;
 
+async function fetchBazaarvoiceRating(productId: string, featureFlags: any) {
+  if (featureFlags.releaseSchemaOrgGraph) {
+    return null;
+  }
+  try {
+    const sanitizeProductId = productId.replaceAll(/\s/g, '');
+    const apiKey = config.bazaarvoice.apiKey;
+    const baseUrl = config.bazaarvoice.apiUrl;
+
+    const apiUrl = `${baseUrl}${apiKey}&Filter=ProductId:${sanitizeProductId}&Include=Products,Comments&Stats=Reviews`;
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(`Bazaarvoice API error: ${response.status}`);
+    }
+    const directReview = await response.json();
+    const ratingData = directReview?.Includes?.Products?.[sanitizeProductId];
+    return ratingData ?? null;
+  } catch (error) {
+    console.error('Error fetching direct Bazaarvoice review:', error);
+    return null;
+  }
+}
+
 async function getComponentServerProps(rendering: ComponentRendering) {
   let result: any = {};
   const productReviewStaticProps: { staticProductReview?: any; awAggregateRating?: any } = {};
+
+  const featureFlags = await loader();
 
   // First part
   if (rendering.fields !== undefined && 'data' in rendering.fields) {
@@ -75,23 +101,10 @@ async function getComponentServerProps(rendering: ComponentRendering) {
     const awAggregateRating = productItem?.fields?.bazaarvoiceProductId?.value?.trim();
 
     if (awAggregateRating) {
-      try {
-        const sanitizeProductId = awAggregateRating.replace(/\s/g, '');
-        const apiKey = config.bazaarvoice.apiKey;
-        const baseUrl = config.bazaarvoice.apiUrl;
-
-        const apiUrl = `${baseUrl}${apiKey}&Filter=ProductId:${sanitizeProductId}&Include=Products,Comments&Stats=Reviews`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error(`Bazaarvoice API error: ${response.status}`);
-        }
-        const directReview = await response.json();
-        const ratingData = directReview?.Includes?.Products?.[sanitizeProductId];
-        productReviewStaticProps.awAggregateRating = ratingData ?? null;
-      } catch (error) {
-        console.error('Error fetching direct Bazaarvoice review:', error);
-        productReviewStaticProps.awAggregateRating = null;
-      }
+      productReviewStaticProps.awAggregateRating = await fetchBazaarvoiceRating(
+        awAggregateRating,
+        featureFlags
+      );
     } else {
       console.warn('No valid productId found.');
       productReviewStaticProps.awAggregateRating = null;

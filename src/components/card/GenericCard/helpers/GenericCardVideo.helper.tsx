@@ -9,6 +9,7 @@ import { getJsonLD, isVideoItem, playStopVideo } from 'helpers/Media/VideoUtils'
 import ModalWrapper from 'helpers/ModalWrapper/ModalWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import Script from 'next/script';
 import { useState } from 'react';
@@ -49,7 +50,7 @@ const VideoCard = ({ desktopVideoDisplayStyle, ...props }: VideoCardProps) => {
   if (desktopVideoDisplayStyle === 'in-line' && currentScreenWidth > getBreakpoint('md')) {
     return (
       <>
-        {jsonLD && (
+        {!FeatureFlags.values.releaseSchemaOrgGraph && jsonLD && (
           <Script
             id=""
             type="application/ld+json"
@@ -68,7 +69,7 @@ const VideoCard = ({ desktopVideoDisplayStyle, ...props }: VideoCardProps) => {
   if (desktopVideoDisplayStyle === 'in-modal' || currentScreenWidth <= getBreakpoint('md')) {
     return (
       <>
-        {jsonLD && (
+        {!FeatureFlags.values.releaseSchemaOrgGraph && jsonLD && (
           <Script
             id=""
             strategy="beforeInteractive"

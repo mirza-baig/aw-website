@@ -86,7 +86,7 @@ export class SendPersonalizeEvent extends BaseSubmitAction<Sitecore.BaseTemplate
           FormsConstants.AW.Form.CCPFormExperienceId,
 
           // Remove the active journey so no event is fired after a successful submit.
-          StringConstants.AW.ActiveJourneyKey,
+          StringConstants.AW.GFBForm.ActiveJourneyKey,
           StringConstants.AW.GFBForm.AbandonPayloadKey,
         ]);
       }

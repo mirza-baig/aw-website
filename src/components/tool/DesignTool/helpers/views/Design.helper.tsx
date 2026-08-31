@@ -5,6 +5,7 @@ import { SliderRefType, SliderType, SliderWrapper } from 'helpers/SliderWrapper/
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { StringConstants } from 'lib/constants/string-constants';
 import { useAsPath } from 'lib/hooks/use-as-path';
+import { setAbandonSession as setAbandonSessionHelper } from 'lib/personalize/form-abandon-event';
 import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
 import Link from 'next/link';
 // Removing for temporary fix of using history: import { useRouter } from 'next/navigation';
@@ -259,6 +260,12 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     // Reset Abandon Event TIMER ON USER INTERACTION
     startOrResetAbandonTimer();
+    // Keep stored payload resumeUrl in sync with the URL query params written by updateSettings.
+    if (getDesignStarted()) {
+      fireDesignUpdate();
+    } else {
+      fireDesignStart();
+    }
   };
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -275,6 +282,12 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     // Reset Abandon Event TIMER ON USER INTERACTION
     startOrResetAbandonTimer();
+    // Keep stored payload resumeUrl in sync with the URL query params written by updateSettings.
+    if (getDesignStarted()) {
+      fireDesignUpdate();
+    } else {
+      fireDesignStart();
+    }
   };
 
   const updateVisibleImage = (imageSide: number) => {
@@ -332,8 +345,6 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
   };
 
   const nextAttribute = () => {
-    fireDesignProgress();
-
     const urlParts = GetUrlParts(asPath);
     const queryPart = urlParts.query ? `?${urlParts.query}` : '';
     const newPath = `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex + 1}`;
@@ -344,10 +355,12 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     // Back button should leave the tool entirely.
     globalThis.history.pushState(null, '', newPath);
+
+    // Push URL first so setAbandonSession captures the step the user is navigating TO.
+    fireDesignProgress();
   };
 
   const previousAttribute = () => {
-    fireDesignProgress();
     const urlParts = GetUrlParts(asPath);
     const queryPart = urlParts.query ? `?${urlParts.query}` : '';
 
@@ -369,6 +382,8 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
         `${urlParts.pathName}${queryPart}#/${urlParts.option}/${attributeIndex - 1}`
       );
     }
+    // Push URL first so setAbandonSession captures the step the user is navigating TO.
+    fireDesignProgress();
   };
 
   const toggleMobileMenu = () => {
@@ -746,6 +761,10 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     progressBarRef.current = progressBar;
   }, [progressBar]);
 
+  const getStepCount = () => {
+    return viewModel?.attributes?.length ?? progressBarRef?.current?.length ?? 1;
+  };
+
   const getBasePayload = (currentIndex?: number) => {
     const params = getQueryParams();
     type SelectedOption = { title: string; value: string };
@@ -780,7 +799,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       interiorColor: extractColor(params.frameColor || getSelectedValue('Interior Color')),
       exteriorColor: extractColor(params.frameColorExt || getSelectedValue('Exterior Door Color')),
       // Number of steps
-      totalNumberOfSteps: progressBarRef.current?.length ? progressBarRef.current.length - 1 : 0,
+      totalNumberOfSteps: getStepCount() - 1,
     };
   };
   const abandonTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -808,27 +827,48 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       fireAbandonEvent();
     }, abandonTimeoutMs);
   };
+  const getResumeUrl = () => {
+    const glassReachedInStorage =
+      sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true';
+
+    // Check if the current step is Glass right now
+    const currentIndex = getCurrentAttributeIndex();
+    const currentStepTitle = progressBar?.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (item: any) => item.startIndex === currentIndex
+    )?._title;
+    const glassReachedNow = currentStepTitle === 'Glass';
+
+    const glassReached = glassReachedInStorage || glassReachedNow;
+    // Using length rather than length -1 because some steps have 2 attributes and
+    // length-1 sometimes lands on the second attribute of the last step, which is not the Summary step.
+    const summaryIndex = getStepCount() - 1;
+
+    // When glass has been reached, resume should land on Summary regardless of current step.
+    return buildResumeUrl(undefined, glassReached && summaryIndex > 0 ? summaryIndex : undefined);
+  };
+
   // For Page Nav Abandon Event
-  const getAbandonPayload = () => ({
-    ...getBasePayload(getCurrentAttributeIndex()),
-    // Fragment-free so it survives email and link tracking, see resume-url.ts
-    resumeUrl: buildResumeUrl(),
-    referrer: document.referrer,
-    designComplete:
-      sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true',
-  });
+  const getAbandonPayload = () => {
+    const glassReached =
+      sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true';
+
+    return {
+      ...getBasePayload(getCurrentAttributeIndex()),
+      resumeUrl: getResumeUrl(),
+      referrer: document.referrer,
+      designComplete: glassReached,
+    };
+  };
   const setAbandonSession = () => {
-    setSessionStorageItems({
-      [StringConstants.AW.ActiveJourneyKey]: JSON.stringify({
-        journey: StringConstants.AW.DesignTool.JourneyName,
-        prevPath: globalThis.location.pathname, // pass the currentPath here
-        eventType: StringConstants.AW.DesignTool.AbandonEventType,
-        payloadKey: StringConstants.AW.DesignTool.AbandonPayloadKey,
-      }),
-      [StringConstants.AW.DesignTool.AbandonPayloadKey]: JSON.stringify(getAbandonPayload()),
+    setAbandonSessionHelper({
+      activeJourneyKey: StringConstants.AW.DesignTool.ActiveJourneyKey,
+      journeyName: StringConstants.AW.DesignTool.JourneyName,
+      abandonEventType: StringConstants.AW.DesignTool.AbandonEventType,
+      abandonPayloadKey: StringConstants.AW.DesignTool.AbandonPayloadKey,
+      abandonEventTriggered: StringConstants.AW.DesignTool.AbandonEventTriggered,
+      payload: getAbandonPayload(),
     });
-    // Remove session whenever there is activeJourney
-    clearSessionStorageItems([StringConstants.AW.DesignTool.AbandonEventTriggered]);
   };
   // START Event - US #311
   const fireDesignStart = () => {
@@ -845,6 +885,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       ext: {
         ...getBasePayload(getCurrentAttributeIndex()),
         referrer: document.referrer,
+        resumeUrl: getResumeUrl(),
       },
     };
 
@@ -870,6 +911,10 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       setSessionStorageItems({
         [StringConstants.AW.DesignTool.GlassReachedKey]: 'true',
       });
+      // Refresh the stored abandon payload now that GlassReachedKey is true,
+      // so a navigation-away abandon fires with designComplete=true and resumeUrl→Summary.
+
+      setAbandonSession();
     }
   }, [attributeIndex, progressBar]);
 
@@ -882,7 +927,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       ext: {
         ...getBasePayload(getCurrentAttributeIndex()),
         // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
-        resumeUrl: buildResumeUrl(),
+        resumeUrl: getResumeUrl(),
         // Attribute selections info from URL
         changedAttribute: changedAttribute || '', //gtmItemHeader
         changedValue: changedValue || '', //gtmItemDetail
@@ -927,7 +972,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
         experienceId: experienceId,
 
         // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
-        resumeUrl: buildResumeUrl(),
+        resumeUrl: getResumeUrl(),
       },
     };
 
@@ -937,7 +982,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
 
     clearSessionStorageItems([
       // Abandon Event sessions
-      StringConstants.AW.ActiveJourneyKey,
+      StringConstants.AW.DesignTool.ActiveJourneyKey,
       StringConstants.AW.DesignTool.AbandonPayloadKey,
       StringConstants.AW.DesignTool.AbandonEventTriggered,
       // Design Tool Sessions
@@ -954,29 +999,47 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       return;
     }
     abandonFiredRef.current = true;
+
+    let sitecoreCdpExtensionData;
+    const storedPayload = sessionStorage.getItem(StringConstants.AW.DesignTool.AbandonPayloadKey);
+    if (storedPayload) {
+      try {
+        sitecoreCdpExtensionData = JSON.parse(storedPayload);
+      } catch (e) {
+        console.error('[CDP] Error parsing stored abandon payload', e);
+      }
+    }
+
+    if (sitecoreCdpExtensionData) {
+      // Ensure referrer is current and designComplete is updated from storage
+      sitecoreCdpExtensionData.referrer = document.referrer;
+      sitecoreCdpExtensionData.designComplete =
+        sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true';
+    } else {
+      // Fallback to generating it, though it might be incomplete if viewModel is gone
+      sitecoreCdpExtensionData = {
+        ...getBasePayload(getCurrentAttributeIndex()),
+        resumeUrl: getResumeUrl(),
+        referrer: document.referrer,
+        designComplete:
+          sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true',
+      };
+    }
+
+    if (abandonReasonRef.current === 'timeout') {
+      sitecoreCdpExtensionData.elapsedMinutes = abandonTimeoutMinutes;
+    }
+
     const payload = {
       type: StringConstants.AW.DesignTool.AbandonEventType,
       channel: 'WEB',
       language: 'EN',
-      ext: {
-        ...getBasePayload(getCurrentAttributeIndex()),
-        // Resume link — fragment-free so it survives email and link tracking, see resume-url.ts
-        resumeUrl: buildResumeUrl(),
-        referrer: document.referrer,
-
-        ...(abandonReasonRef.current === 'timeout' && {
-          elapsedMinutes: abandonTimeoutMinutes,
-        }),
-        // elapsedMinutes: abandonTimeoutMinutes,
-        designComplete:
-          sessionStorage.getItem(StringConstants.AW.DesignTool.GlassReachedKey) === 'true',
-      },
+      ext: sitecoreCdpExtensionData,
     };
 
     event(payload)
       .then(() => console.log('[CDP] Design Tool ABANDON:', payload))
       .catch((err) => console.error('[CDP] Abandon error', err));
-
     // Clear the Timer
     clearAbandonTimeout();
   };
@@ -993,6 +1056,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
+      clearAbandonTimeout();
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

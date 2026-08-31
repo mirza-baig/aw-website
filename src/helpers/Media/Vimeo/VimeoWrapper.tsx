@@ -2,6 +2,7 @@
 import { Field, ImageField } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { normalizeSitecoreDateStringFormattedWithTime } from 'lib/utils/string-utils/normalize-sitecore-date-string-formatted-with-time';
 import Script from 'next/script';
@@ -80,7 +81,7 @@ const VimeoWrapper = (videoItem: VimeoProps): JSX.Element => {
   }
   return (
     <>
-      {videoItem.includeSEOSchemaForVimeoYouTube && (
+      {videoItem.includeSEOSchemaForVimeoYouTube && !FeatureFlags.values.releaseSchemaOrgGraph && (
         <Script
           id=""
           strategy="beforeInteractive"
