@@ -3,7 +3,7 @@
 import { FormsConstants } from 'lib/constants/forms-constants';
 import { StringConstants } from 'lib/constants/string-constants';
 import { firePageNavAbandonEvent } from 'lib/personalize/page-navigation-abandon-event';
-import { clearSessionStorageItems } from 'lib/utils/session-storage';
+import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -33,7 +33,6 @@ const JOURNEY_SESSION_KEYS: Record<string, string[]> = {
   [StringConstants.AW.GFBForm.JourneyName]: [
     StringConstants.AW.GFBForm.ActiveJourneyKey,
     StringConstants.AW.GFBForm.AbandonPayloadKey,
-    StringConstants.AW.GFBForm.AbandonEventTriggered,
     FormsConstants.AW.Form.CCPFormStep,
     FormsConstants.AW.Form.CCPFormTimeout,
     FormsConstants.AW.Form.CCPFormCompleted,
@@ -46,7 +45,6 @@ const JOURNEY_ABANDON_TRIGGERED_KEYS: Record<string, string> = {
   [StringConstants.AW.RequestQuote.JourneyName]:
     StringConstants.AW.RequestQuote.AbandonEventTriggered,
   [StringConstants.AW.WTB.JourneyName]: StringConstants.AW.WTB.AbandonEventTriggered,
-  [StringConstants.AW.GFBForm.JourneyName]: StringConstants.AW.GFBForm.AbandonEventTriggered,
 };
 
 interface JourneyData {

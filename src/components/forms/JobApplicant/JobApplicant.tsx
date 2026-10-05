@@ -16,7 +16,7 @@ import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import SvgIcon, { IconTypes } from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import useExperienceEditor from 'lib/utils/use-experience-editor';

@@ -6,7 +6,7 @@ import config from 'aw.config.client';
 import Component, { ComponentBackgroundVariants } from 'helpers/Component/Component';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX } from 'react';
 

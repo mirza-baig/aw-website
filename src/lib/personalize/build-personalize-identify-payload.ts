@@ -7,8 +7,28 @@ type AttributeItem = {
 
 type BuildIdentifyPayloadInput = {
   formValues: FormikValues;
-  attributes: AttributeItem[];
+  extensionData: AttributeItem[];
+  /**
+   * Attribute items sourced from the submit action fields (same AW_FieldAttribute
+   * template as extensionData). Mapped into the base level of the payload.
+   */
+  fieldData?: AttributeItem[];
 };
+
+const toAttributeRecord = (
+  attributes: AttributeItem[]
+): Record<string, string | boolean | number> =>
+  attributes.reduce(
+    (acc, attribute) => {
+      if (!attribute.key) {
+        return acc;
+      }
+
+      acc[attribute.key] = attribute.value ?? '';
+      return acc;
+    },
+    {} as Record<string, string | boolean | number>
+  );
 
 const normalizePostalCode = (postalCode: string): string => {
   const value = postalCode.trim();
@@ -21,31 +41,27 @@ const normalizePostalCode = (postalCode: string): string => {
 };
 
 export function buildPersonalizeIdentifyPayload(input: BuildIdentifyPayloadInput) {
-  const extensionData = input.attributes.reduce(
-    (acc, attribute) => {
-      if (!attribute.key) {
-        return acc;
-      }
-
-      acc[attribute.key] = attribute.value ?? '';
-      return acc;
-    },
-    {} as Record<string, string | boolean | number>
+  const extensionData = toAttributeRecord(input.extensionData);
+  const fieldData = toAttributeRecord(input.fieldData ?? []);
+  const lastName = String(fieldData?.lastName ?? extensionData.AWLastName ?? '').trim();
+  const email = String(fieldData?.email ?? extensionData.AWEmail ?? '').trim();
+  const zipCode = normalizePostalCode(
+    String(fieldData?.postalCode ?? extensionData.AWZipCode ?? '').trim()
   );
-  const lastName = String(extensionData.AWLastName ?? '').trim();
-  const email = String(extensionData.AWEmail ?? '').trim();
-  const zipCode = normalizePostalCode(String(extensionData.AWZipCode ?? '').trim());
+
   if (!lastName || !email || !zipCode) {
-    console.warn('[CDP] Missing required identify fields: AWLastName, AWEmail or AWZipCode');
+    console.warn('[CDP] Missing required identify fields: Last Name, Email or Zip Code');
     return null;
   }
   const awContactKey = `${lastName}|${zipCode}|${email}`.toLowerCase();
 
-  extensionData.AWcontactKey = awContactKey;
-  extensionData.AWLastName = lastName;
-  extensionData.AWEmail = email;
-  extensionData.AWZipCode = zipCode;
-  return {
+  extensionData.contactKey = awContactKey;
+  extensionData.lastName = lastName;
+  extensionData.email = email;
+  extensionData.zipCode = zipCode;
+  extensionData.brand = 'AW';
+
+  const payload = {
     channel: 'WEB',
     language: 'EN',
     identifiers: [
@@ -54,6 +70,9 @@ export function buildPersonalizeIdentifyPayload(input: BuildIdentifyPayloadInput
         id: awContactKey,
       },
     ],
+    ...fieldData, // spread fieldData directly on the payload because Sitecore CDP expects this for certain fields.
     extensionData,
   };
+
+  return payload;
 }

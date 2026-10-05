@@ -5,8 +5,9 @@ import Headline from 'helpers/Headline/Headline';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import RichTextWrapper from 'helpers/RichTextWrapper/RichTextWrapper';
 import { useTheme } from 'lib/context/ThemeContext';
-import { EnumField, getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { useState } from 'react';
 
 import BodyCopy from '../BodyCopy/BodyCopy';

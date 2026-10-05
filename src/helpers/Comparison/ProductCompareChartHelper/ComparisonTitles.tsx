@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames';
+import environment from 'lib/environment';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import SvgIcon from 'src/helpers/SvgIcon/SvgIcon';
-import { environment } from 'startup/environment';
 
 import { SeriesTitle } from './ComparisonTable.Types';
 import { ProductCardDot } from './ProductCardDot';

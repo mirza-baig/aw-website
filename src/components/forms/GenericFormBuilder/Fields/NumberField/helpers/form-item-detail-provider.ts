@@ -4,7 +4,7 @@ import {
 } from 'lib/generic-form-builder/utils/load-utils/form-item-detail';
 import { getNumberValidatonSchema } from 'lib/generic-form-builder/utils/validation-utils/get-validation-schema';
 import { ProvidedValues } from 'lib/generic-form-builder/value-providers';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { lazy, Schema } from 'yup';
 

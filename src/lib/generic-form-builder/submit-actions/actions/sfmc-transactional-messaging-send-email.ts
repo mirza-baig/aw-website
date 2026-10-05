@@ -1,6 +1,6 @@
 import { FormikValues } from 'formik';
 import { getFieldNameForAttribute } from 'lib/generic-form-builder/utils/get-field-name-for-attribute';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { createUUID } from 'lib/utils/string-utils/create-uuid';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 

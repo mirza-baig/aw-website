@@ -5,7 +5,7 @@ import { AndNode } from 'lib/coveo/expressions/query-nodes/and-node';
 import { FieldNode } from 'lib/coveo/expressions/query-nodes/field-node';
 import { QueryNodeOperator } from 'lib/coveo/expressions/query-nodes/query-node-operator';
 import { VoidNode } from 'lib/coveo/expressions/query-nodes/void-node';
-import { SitecoreId } from 'lib/utils/sitecore-utils/sitecore-id';
+import { SitecoreId } from 'lib/types/sitecore-id';
 import { describe, expect, test } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 

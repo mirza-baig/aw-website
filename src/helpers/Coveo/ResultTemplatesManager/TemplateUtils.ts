@@ -1,6 +1,7 @@
 import { XupDynamicResultItem } from 'components/listing/XupCardCollectionDynamic/helpers/XupCardCollectionDynamic.Template.helper';
 import { LayoutType } from 'lib/coveo/utils';
-import { EnumField, getEnum } from 'lib/utils/get-enum';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 

@@ -1,12 +1,12 @@
 import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import environment from 'lib/environment';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import { AddSeriesCard } from './AddSeriesCard';
 import { SeriesTitle } from './ComparisonTable.Types';

@@ -6,6 +6,6 @@ import { normalizeGuid } from './normalize-guid';
  * @param guid2 The second guid
  * @returns Whether the two are equal
  */
-export const guidEquals = (guid1: string | undefined, guid2: string | undefined) => {
+export function guidEquals(guid1: string | undefined, guid2: string | undefined) {
   return normalizeGuid(guid1) === normalizeGuid(guid2);
-};
+}

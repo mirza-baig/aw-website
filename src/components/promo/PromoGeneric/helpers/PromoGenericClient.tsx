@@ -12,7 +12,7 @@ import { MediaPrimaryStaticProps } from 'helpers/Media/types';
 import PriceLevel from 'helpers/PriceLevel/PriceLevel';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, PropsWithChildren } from 'react';
 
 import { PromoGenericTheme } from './PromoGeneric.theme';

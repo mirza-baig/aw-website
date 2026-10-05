@@ -8,7 +8,7 @@ import Headline from 'helpers/Headline/Headline';
 import { LayoutValue } from 'helpers/Media/types';
 import { Subheadline } from 'helpers/Subheadline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
-import { getScaledImageShortSideUrl } from 'lib/utils/photo-item-utils';
+import { getScaledImageShortSideUrl } from 'lib/utils/get-scaled-image-short-side-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';

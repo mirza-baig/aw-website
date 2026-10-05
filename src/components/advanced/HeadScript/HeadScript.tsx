@@ -1,15 +1,15 @@
 'use client';
 
 import { ComponentProps } from 'lib/component-props';
-import { getEnum } from 'lib/utils/get-enum';
-import { isValidForEnvironment } from 'lib/utils/is-valid-for-environment';
+import environment from 'lib/environment';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { isValidForEnvironment } from 'lib/utils/sitecore-utils/is-valid-for-environment';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { createUUID } from 'lib/utils/string-utils/create-uuid';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import Script, { ScriptProps } from 'next/script';
 import { JSX, useMemo } from 'react';
-import { environment } from 'startup/environment';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
@@ -25,7 +25,9 @@ function HeadScript_Default(props: HeadScriptProps): JSX.Element | null {
   const type = fields?.type?.value ?? 'text/javascript';
   const src = fields?.src?.value ?? '';
   const body = fields?.htmlBody?.value ?? '';
-  const strategy = getEnum<ScriptProps['strategy']>(fields?.strategy) ?? 'beforeInteractive';
+  // Change the default to afterInteractive because beforeInteractive blocks hydration until the script loads/errors,
+  // which can cause issues with scripts that are auto-blocked or deferred.
+  const strategy = getEnum<ScriptProps['strategy']>(fields?.strategy) ?? 'afterInteractive';
   //Leaving this to be implemented in the future to inject the comments.
   //const name = fields?.name?.value;
   //const beginCommment = document.createComment(` Begin ${name} Script `);

@@ -3,7 +3,8 @@
 import { event as trackEvent } from '@sitecore-content-sdk/events';
 import Component from 'helpers/Component/Component';
 import { StringConstants } from 'lib/constants/string-constants';
-import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
+import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
+import { setSessionStorageItems } from 'lib/utils/client-storage-utils/set-session-storage-items';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { useCallback, useEffect, useRef } from 'react';
 

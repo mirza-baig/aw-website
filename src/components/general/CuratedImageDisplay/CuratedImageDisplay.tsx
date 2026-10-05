@@ -16,8 +16,8 @@ import { SliderRefType, SliderType } from 'helpers/SliderWrapper/SliderWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import React, { JSX, useRef, useState } from 'react';
 

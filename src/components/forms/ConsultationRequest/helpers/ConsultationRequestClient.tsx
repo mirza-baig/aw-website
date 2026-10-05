@@ -3,8 +3,8 @@
 import { ComponentPropsCollection } from '@sitecore-content-sdk/nextjs';
 import config from 'aw.config.client';
 import { GenericFormBuilderClient } from 'components/forms/GenericFormBuilder/GenericFormBuilder/helpers/GenericFormBuilderClient';
-import { getEnum } from 'lib/utils/get-enum';
-import { useExternalScript } from 'lib/utils/use-external-script';
+import { useExternalScript } from 'lib/utils/react-utils/use-external-script';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { ReactNode } from 'react';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';

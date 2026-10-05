@@ -9,12 +9,11 @@
  *
  * @example
  * // Returns "/-/media/image.jpg"
- * removeCdnHostName("https://edge.sitecorecloud.io/andersencorporation-prod/-/media/image.jpg");
+ * removeCdnHostName("https://edge.sitecorecloud.io/andersencorporation-prod/media/image.jpg");
  *
  * // Returns the original URL
  * removeCdnHostName("https://othercdn.com/media/image.jpg");
  */
-
 export function removeCdnHostName(url: string | undefined): string {
   if (url == undefined) {
     return '';

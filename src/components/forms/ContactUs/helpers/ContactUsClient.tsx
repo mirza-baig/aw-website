@@ -1,5 +1,6 @@
 'use client';
 
+import { identity } from '@sitecore-content-sdk/events';
 import config from 'aw.config.client';
 import classNames from 'classnames';
 import { Formik, FormikValues } from 'formik';
@@ -42,6 +43,7 @@ export function ContactUsClient(props: ContactUsProps) {
   const searchParams = useSearchParams();
   const [showThankYou, setShowThankYou] = useState(false);
   const [isButtonEnabled, setIsButtonEnabled] = useState(true);
+
   const getHiddenFieldValue = (): string => {
     const hiddenField = document.querySelector('input[name="website"]') as HTMLInputElement;
     return hiddenField?.value;
@@ -261,6 +263,50 @@ export function ContactUsClient(props: ContactUsProps) {
     return mappedValues;
   };
 
+  // --------------- Sitecore Personalize: Identity -------------
+  // Called once from onSubmit after a successful lead submission.
+  const fireIdentify = (values: FormikValues) => {
+    const email = values['email']?.trim();
+
+    const lastName = values['last_name'] ?? '';
+    const postalCode = values['zip'] ?? '';
+    const awContactKey = `${lastName}|${postalCode}|${email}`;
+    const isHomeowner = values['about'] === 'homeowner';
+    const userType = isHomeowner ? 'Homeowner' : 'Professional';
+
+    let city = '';
+    let state = '';
+    let street = '';
+    let country = '';
+    if (userType === 'Professional') {
+      city = values['city'] ?? '';
+      state = values['state'] ?? '';
+      street = values['address1'] ?? '';
+      country = isHomeowner ? 'USA' : (values['country'] ?? '');
+    }
+
+    const identifyPayload = {
+      type: 'IDENTITY',
+      language: 'EN',
+      identifiers: [{ provider: 'AW_CONTACT_KEY', id: awContactKey }],
+      email,
+      firstName: values['first_name'] ?? '',
+      lastName,
+      mobile: values['mobile'] ?? '',
+      postalCode: postalCode,
+      city: city,
+      state: state,
+      street: street ? [street] : [],
+      country: country,
+      extensionData: {
+        brand: 'AW',
+        userType,
+        typeOfBusiness: values['trades'] ?? '',
+      },
+    };
+    identity(identifyPayload).catch(console.debug);
+  };
+
   return (
     <section
       data-component="forms/contactus"
@@ -309,6 +355,7 @@ export function ContactUsClient(props: ContactUsProps) {
                       user_type: values['about'] === 'homeowner' ? 'Homeowner' : values['trades'],
                     },
                   });
+                  fireIdentify(values);
                   setIsButtonEnabled(true);
                   setShowThankYou(true);
                 }

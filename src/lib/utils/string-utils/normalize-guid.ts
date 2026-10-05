@@ -1,6 +1,9 @@
 /**
- * Normalizes a guid format so they can be compared as strings.
+ * Normalizes a GUID so it can be compared as a string.
+ *
+ * @param guid The optional GUID string to normalize.
+ * @returns The lowercased alphanumeric GUID, or an empty string when omitted.
  */
-export const normalizeGuid = (guid?: string): string => {
+export function normalizeGuid(guid?: string): string {
   return guid?.toLowerCase().replace(/[^A-Za-z0-9]+/g, '') ?? '';
-};
+}

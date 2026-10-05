@@ -14,7 +14,7 @@ import SvgIcon from 'helpers/Media/SvgIcon';
 import { MediaPrimaryStaticProps } from 'helpers/Media/types';
 import Subheadline from 'helpers/Subheadline/Subheadline';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import Link from 'next/link';
 import { JSX } from 'react';
 

@@ -1,6 +1,8 @@
+'use client';
+
 import { Item } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX } from 'react';
 
 import Button from '../Button/Button';

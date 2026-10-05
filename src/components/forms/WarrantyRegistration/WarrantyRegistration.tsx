@@ -27,11 +27,11 @@ import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { FormsConstants } from 'lib/constants/forms-constants';
 import { useTheme } from 'lib/context/ThemeContext';
+import environment from 'lib/environment';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useBVScript } from 'lib/utils/use-bv-script';
 import { useState } from 'react';
 import { ProductByBVIdQueryResult } from 'src/app/api/aw/bazaarvoice-product-by-bvid/product-by-bv-id-service';
-import { environment } from 'startup/environment';
 import * as Yup from 'yup';
 
 import ProductFields from './helpers/ProductFields.helper';

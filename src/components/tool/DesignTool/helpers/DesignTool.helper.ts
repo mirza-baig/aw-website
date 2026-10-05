@@ -152,6 +152,7 @@ export const MapProduct = (
       series: productItemFields?.productSeries?.fields?.productTypeName,
       productType: productItemFields?.productType?.fields?.productTypeName,
       category: productItemFields?.productName,
+      productFullName: productItemFields?.productFullName?.value,
       productId: productItemFields?.productId?.value,
       renoworksKey: productItemFields?.renoworksKey?.value?.toLowerCase(),
       cost: productItemFields?.priceLevel,

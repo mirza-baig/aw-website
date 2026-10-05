@@ -3,7 +3,7 @@ import { ButtonProps } from 'helpers/Button/types';
 import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import SvgIcon, { IconTypes } from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX } from 'react';
 type HelperButtonProps = Omit<ButtonProps, 'variant'>;
 

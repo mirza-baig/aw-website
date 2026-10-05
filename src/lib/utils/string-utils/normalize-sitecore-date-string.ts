@@ -1,4 +1,10 @@
-export const normalizeSitecoreDateString = (date: string): string => {
+/**
+ * Formats a Sitecore date string as `YYYY-MM-DDTHH:mm:ss`.
+ *
+ * @param date A Sitecore date in `YYYYMMDDTHHmmssZ` format, optionally without `Z`.
+ * @returns The normalized date string in the format `YYYY-MM-DDTHH:mm:ss`, or `Invalid Date` for invalid input.
+ */
+export function normalizeSitecoreDateString(date: string): string {
   // For fields that don't contain
   if (date.charAt(15) !== 'Z') {
     date = `${date}Z`;
@@ -12,4 +18,4 @@ export const normalizeSitecoreDateString = (date: string): string => {
   }
 
   return date.replace(/(\w{4})(\w{2})(\w{5})(\w{2})(\w{2})/, '$1-$2-$3:$4:$5');
-};
+}

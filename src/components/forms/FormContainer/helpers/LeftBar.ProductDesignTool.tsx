@@ -11,7 +11,7 @@ import { MediaPrimary } from 'helpers/Media';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { useTheme } from 'lib/context/ThemeContext';
 import { useRenoworks } from 'lib/renoworks/renoworks-context';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import NextLink from 'next/link';
 import { JSX, useContext } from 'react';
 

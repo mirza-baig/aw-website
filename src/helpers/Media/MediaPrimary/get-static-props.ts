@@ -4,7 +4,7 @@ import { isVideoItem } from '../VideoUtils';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 type MediaPrimaryProps = Sitecore.FieldSets.ImagePrimary &
-  Sitecore.FieldSets.ImagePrimaryCaption &
+  PartialFields<Sitecore.FieldSets.ImagePrimaryCaption> &
   Sitecore.FieldSets.VideoPrimary;
 
 export async function getStaticProps(props: MediaPrimaryProps): Promise<MediaStaticProps> {

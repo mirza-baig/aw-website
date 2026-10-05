@@ -1,7 +1,7 @@
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { checkHostNameInMediaURL } from 'lib/coveo/utils';
 import { getLastModifiedDate } from 'lib/coveo/utils/get-lastmod';
-import { decimalToFraction } from 'lib/utils/dimension-conversion';
+import { decimalToFraction } from 'lib/utils/string-utils/decimal-to-fraction';
 
 import {
   getCheckboxField,

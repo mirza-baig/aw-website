@@ -5,11 +5,14 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
 import { AWViewModelBuilder } from './awviewmodelbuilder';
 import { ViewModel } from './designtool';
+import { buildVisualizerUrl, RenoworksProductConfig } from './product-config';
+import { RenoworksKeyUsage, RenoworksProductSide } from './renoworks';
 import { StormdoorViewModelBuilder } from './stormdoorviewmodelbuilder';
 
 export type AttributeParameters = { [name: string]: string };
@@ -18,6 +21,8 @@ export type RenoworksContextType = {
   viewModel: ViewModel | undefined;
   setProductAttributes: (parameters: AttributeParameters) => void;
   product: RenoworksProduct;
+  productConfig: RenoworksProductConfig | undefined;
+  visualizerUrl: string | undefined;
 };
 
 export const RenoworksContext = createContext<RenoworksContextType | undefined>(undefined);
@@ -67,6 +72,17 @@ export type RenoworksProps = {
   apiConfig: RenoworksApiConfig;
   pageSize?: number;
   pathMapper?: (path: string) => AttributeParameters;
+  visualizerHandshakeUrlEnabled?: boolean;
+};
+const toPlainSettings = (encoded: string): string => {
+  if (!encoded) {
+    return '';
+  }
+  try {
+    return decodeURIComponent(encoded.replaceAll('+', ' '));
+  } catch {
+    return encoded;
+  }
 };
 
 export const Renoworks = ({
@@ -74,10 +90,11 @@ export const Renoworks = ({
   apiConfig,
   pageSize,
   pathMapper,
+  visualizerHandshakeUrlEnabled = false,
   children,
 }: PropsWithChildren<RenoworksProps>) => {
   const [viewModel, setViewModel] = useState<ViewModel | undefined>();
-  const asPath = useAsPath().replace(/\+/g, '%20'); // router.asPath didn't encode spaces as '+', but rather '%20', so we need to replace them back
+  const asPath = useAsPath().replaceAll('+', '%20'); // router.asPath didn't encode spaces as '+', but rather '%20', so we need to replace them back
   const setProductAttributes = useCallback(
     (attributes: AttributeParameters) => {
       const viewModelBuilder = IsStormDoor(product.renoworksKey.toLowerCase())
@@ -110,11 +127,66 @@ export const Renoworks = ({
     setProductAttributes(attributes);
   }, [asPath, pathMapper, setProductAttributes]);
 
-  return (
-    <RenoworksContext.Provider value={{ viewModel, setProductAttributes, product }}>
-      {children}
-    </RenoworksContext.Provider>
+  const productConfig = useMemo<RenoworksProductConfig | undefined>(() => {
+    if (!visualizerHandshakeUrlEnabled) {
+      return undefined;
+    }
+
+    const key = product?.renoworksKey;
+    const psv = viewModel?.renoworksResult?.productSettingValues;
+
+    if (!key || !psv) {
+      return undefined;
+    }
+    if (IsStormDoor(key.toLowerCase())) {
+      return undefined;
+    }
+
+    const interior = psv.toRenoworks(
+      RenoworksProductSide.Interior,
+      RenoworksKeyUsage.ProductOptions
+    );
+    const exterior = psv.toRenoworks(
+      RenoworksProductSide.Exterior,
+      RenoworksKeyUsage.ProductOptions
+    );
+
+    if (!interior?.settings || !exterior?.settings) {
+      return undefined;
+    }
+
+    return {
+      exterior: {
+        rwd: `exterior/${key}_EXT.rwd`,
+        settings: toPlainSettings(exterior.settings),
+      },
+      interior: {
+        rwd: `interior/${key}_INT.rwd`,
+        settings: toPlainSettings(interior.settings),
+      },
+    };
+  }, [viewModel, product, visualizerHandshakeUrlEnabled]);
+
+  const visualizerUrl = useMemo<string | undefined>(() => {
+    if (!productConfig) {
+      return undefined;
+    }
+    try {
+      return buildVisualizerUrl(productConfig);
+    } catch (err) {
+      // Missing env var or invalid pair — log and keep the URL undefined so
+      // consumers can decide how to fall back.
+      console.warn('[Renoworks] Failed to build visualizer URL', err);
+      return undefined;
+    }
+  }, [productConfig]);
+
+  const contextValue = useMemo(
+    () => ({ viewModel, setProductAttributes, product, productConfig, visualizerUrl }),
+    [viewModel, setProductAttributes, product, productConfig, visualizerUrl]
   );
+
+  return <RenoworksContext.Provider value={contextValue}>{children}</RenoworksContext.Provider>;
 };
 
 export const useRenoworks = () => {

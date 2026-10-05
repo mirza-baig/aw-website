@@ -1,18 +1,18 @@
 import { PersonalizeGeoData } from '@sitecore-content-sdk/nextjs';
 import {
   AppRouterMultisiteProxy,
+  BotTrackingProxy,
   defineProxy,
   LocaleProxy,
   PersonalizeProxy,
   RedirectsProxy,
 } from '@sitecore-content-sdk/nextjs/proxy';
 import { geolocation } from '@vercel/functions';
-import { DraftModeWorkaroundMiddleware } from 'lib/middleware/draft-mode-workaround-middleware';
+import environment from 'lib/environment';
 import { MediaRedirectsMiddleware } from 'lib/middleware/media-redirects-middleware';
 import { SitecoreCDPIdentityMiddleware } from 'lib/middleware/sitecore-cdp-identity-middleware';
-import { type NextRequest } from 'next/server';
+import { NextFetchEvent, type NextRequest } from 'next/server';
 import scConfig from 'sitecore.config';
-import { environment } from 'startup/environment';
 
 import { routing } from './i18n/routing';
 import sites from '.sitecore/sites.json';
@@ -29,7 +29,7 @@ function extractGeoDataCb(req: NextRequest): PersonalizeGeoData {
   return geo;
 }
 
-export default function proxy(req: NextRequest) {
+export default function proxy(req: NextRequest, event: NextFetchEvent) {
   // LocaleProxy and AppRouterMultisiteProxy must always run for App Router routing
   const locale = new LocaleProxy({
     /**
@@ -120,19 +120,21 @@ export default function proxy(req: NextRequest) {
     skip: () => false,
   });
 
-  const draftModeWorkaround = new DraftModeWorkaroundMiddleware({
+  const botTracking = new BotTrackingProxy({
+    ...scConfig.api.edge,
     sites,
-    skip: () => !environment.isPreview(),
+    fetchEvent: event,
+    skip: () => false,
   });
 
   return defineProxy(
+    botTracking,
     locale,
     multisite,
     redirects,
     mediaRedirects,
     personalize,
-    identity,
-    draftModeWorkaround
+    identity
   ).exec(req);
 }
 

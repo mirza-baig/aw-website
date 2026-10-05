@@ -1,3 +1,5 @@
+'use client';
+
 import { BannerType } from 'lib/website/sticky-banner';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 

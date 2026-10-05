@@ -12,13 +12,13 @@ import { Spinner } from 'helpers/Spinner';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
+import environment from 'lib/environment';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useBVScript } from 'lib/utils/use-bv-script';
 import { ToggleFavoriteAction } from 'lib/website/favorite-products/actions';
 import { useFavoriteProducts } from 'lib/website/favorite-products/use-favorite-products';
 import Link from 'next/link';
 import { JSX, MouseEvent, useEffect, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import { FavoriteProductsTheme } from './helpers/FavoriteProducts.theme';
 import { NoResults } from './helpers/NoResults.helper';

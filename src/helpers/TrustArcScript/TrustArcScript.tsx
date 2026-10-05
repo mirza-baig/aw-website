@@ -1,5 +1,6 @@
 'use client';
 import { useSitecore } from '@sitecore-content-sdk/nextjs';
+import awClientConfig from 'aw.config.client';
 import { JSX, useEffect } from 'react';
 
 const TrustArcHeaderSnippet = (trustArcCmId: string) => {
@@ -45,7 +46,7 @@ const TrustArcHeaderSnippet = (trustArcCmId: string) => {
 
 export const TrustArcScript = (): JSX.Element => {
   const { page } = useSitecore();
-  const trustArcCmId = process.env.NEXT_PUBLIC_AW_TRUSTARC_CMID ?? '';
+  const trustArcCmId = awClientConfig.trustArc.cmid;
   const showTrustArc = trustArcCmId && !page?.layout.sitecore.context.pageEditing;
 
   useEffect(() => {

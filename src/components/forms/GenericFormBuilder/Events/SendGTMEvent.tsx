@@ -1,8 +1,9 @@
 'use client';
 
+import { FormsConstants } from 'lib/constants/forms-constants';
 import { resolveAttributeValue } from 'lib/tracking/resolve-attribute-value';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import TagManager from 'react-gtm-module';
 
 type AttributeItem = {
@@ -39,45 +40,72 @@ type Props = {
 export default function SendGTMEvent(props: Props) {
   const datasource = props.fields?.data?.Datasource;
   const gtmEventName = datasource?.gtmEventName?.value;
-  useEffect(() => {
-    if (!gtmEventName) {
-      console.warn('[GTM] No event name specified');
-      return;
-    }
-    const attributeParams = (datasource?.children?.results ?? []).reduce(
-      (acc, attribute) => {
-        const key = attribute.key?.value;
 
-        if (isNullOrWhitespace(key)) {
-          return acc;
-        }
-        // Constant Attribute
-        const value = attribute.constantValue?.value
-          ? resolveAttributeValue(attribute.constantValue.value, key)
-          : attribute.constantText?.value;
+  const pushEvent = useCallback(
+    (source: string) => {
+      if (!gtmEventName) {
+        console.warn('[GTM] No event name specified');
+        return;
+      }
+      const attributeParams = (datasource?.children?.results ?? []).reduce(
+        (acc, attribute) => {
+          const key = attribute.key?.value;
 
-        if (value !== undefined) {
-          acc[key] = value;
-        }
-        /* Field Attribute not handled as its the start event and we don't have the form values yet.
+          if (isNullOrWhitespace(key)) {
+            return acc;
+          }
+          // Constant Attribute
+          const value = attribute.constantValue?.value
+            ? resolveAttributeValue(attribute.constantValue.value, key)
+            : attribute.constantText?.value;
+
+          if (value !== undefined) {
+            acc[key] = value;
+          }
+          /* Field Attribute not handled as its the start event and we don't have the form values yet.
            The field attributes will be handled in the submit action. */
 
-        return acc;
-      },
-      {} as Record<string, unknown>
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
+
+      const payload = {
+        event: gtmEventName,
+        ...attributeParams,
+      };
+
+      TagManager.dataLayer({
+        dataLayer: payload,
+      });
+
+      console.log(`[GTM] ${source}:`, payload);
+    },
+    [datasource, gtmEventName]
+  );
+
+  useEffect(() => {
+    pushEvent('Initial Load Event');
+  }, [pushEvent, props.formValues]);
+
+  // The same form can be re-opened in a modal, which mounts a new form instance without a page load.
+  useEffect(() => {
+    function handleFormOpenedInModal() {
+      pushEvent('Modal Open Event');
+    }
+
+    document.addEventListener(
+      FormsConstants.Enterprise.formOpenedInModalEvent,
+      handleFormOpenedInModal
     );
 
-    const payload = {
-      event: gtmEventName,
-      ...attributeParams,
+    return () => {
+      document.removeEventListener(
+        FormsConstants.Enterprise.formOpenedInModalEvent,
+        handleFormOpenedInModal
+      );
     };
-
-    TagManager.dataLayer({
-      dataLayer: payload,
-    });
-
-    console.log('[GTM] Initial Load Event:', payload);
-  }, [gtmEventName, datasource, props.formValues]);
+  }, [pushEvent]);
 
   return null;
 }

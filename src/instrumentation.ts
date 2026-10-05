@@ -1,4 +1,4 @@
-import { BatchLogRecordProcessor, LogRecordProcessor } from '@opentelemetry/sdk-logs';
+// import { BatchLogRecordProcessor, LogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { MetricReader, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { registerOTel } from '@vercel/otel';
@@ -12,7 +12,7 @@ export async function register() {
   if (!started) {
     started = true;
     let traceExporter: SpanExporter | undefined;
-    const logRecordProcessors: LogRecordProcessor[] = [];
+    // const logRecordProcessors: LogRecordProcessor[] = [];
     const metricReaders: MetricReader[] = [];
 
     // Register Application Insights exporter if connection string is provided
@@ -24,7 +24,7 @@ export async function register() {
         'Registering OpenTelemetry with Application Insights',
         config.applicationInsights
       );
-      const { AzureMonitorTraceExporter, AzureMonitorMetricExporter, AzureMonitorLogExporter } =
+      const { AzureMonitorTraceExporter, AzureMonitorMetricExporter } =
         await import('@azure/monitor-opentelemetry-exporter');
 
       const params = {
@@ -40,11 +40,11 @@ export async function register() {
         })
       );
 
-      logRecordProcessors.push(
-        new BatchLogRecordProcessor(new AzureMonitorLogExporter(params), {
-          maxExportBatchSize: 100,
-        })
-      );
+      // logRecordProcessors.push(
+      //   new BatchLogRecordProcessor(new AzureMonitorLogExporter(params), {
+      //     maxExportBatchSize: 100,
+      //   })
+      // );
     }
 
     registerOTel({

@@ -9,13 +9,16 @@ import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
 import { useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { roundToEigth } from 'lib/utils/number-utils/round-to-digth';
+import { RoundingDirections } from 'lib/utils/number-utils/rounding-directions';
+import { truncate } from 'lib/utils/number-utils/truncate';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiArrowLeft } from 'react-icons/fi';
 import { IoMdDownload } from 'react-icons/io';
 import { useReactToPrint } from 'react-to-print';
-import * as AWNumberUtil from 'src/lib/utils/number-utils/aw-number-utils';
+import { decimalToEigth } from 'src/lib/utils/number-utils/decimal-to-eigth';
 
 import CalculatorResult from './MultiSlideCalculatorResult.helper';
 import { MultiSlideSizingCalculatorTheme } from './MultiSlideSizingCalculator.theme';
@@ -314,24 +317,24 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
   ) => {
     if (panelStyle === 'thermally') {
       if (sillOptions === 'Standard On-Floor Drainage' || sillOptions === 'None') {
-        return AWNumberUtil.truncate(unitHeight - 3.066, 3);
+        return truncate(unitHeight - 3.066, 3);
       }
       if (sillOptions === 'Tile Track') {
-        return AWNumberUtil.truncate(unitHeight - 2.613, 3);
+        return truncate(unitHeight - 2.613, 3);
       }
       if (sillOptions === 'Low Profile') {
-        return AWNumberUtil.truncate(unitHeight - 2.181, 3);
+        return truncate(unitHeight - 2.181, 3);
       }
     }
     // nonThermally
     if (sillOptions === 'Standard On-Floor Drainage' || sillOptions === 'None') {
-      return AWNumberUtil.truncate(unitHeight - 2.908, 3);
+      return truncate(unitHeight - 2.908, 3);
     }
     if (sillOptions === 'Tile Track') {
-      return AWNumberUtil.truncate(unitHeight - 2.455, 3);
+      return truncate(unitHeight - 2.455, 3);
     }
     if (sillOptions === 'Low Profile') {
-      return AWNumberUtil.truncate(unitHeight - 2.023, 3);
+      return truncate(unitHeight - 2.023, 3);
     }
   };
 
@@ -356,7 +359,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
             backStileOffset -
             interlockPairOffset * (numberPanels - 1)) /
           numberPanels;
-        return AWNumberUtil.truncate(railLength, 3);
+        return truncate(railLength, 3);
       }
       // pocketing
       railLength =
@@ -367,7 +370,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
           lockStileOffset -
           interlockPairOffset * numberPanels) /
         (numberPanels + 1);
-      return AWNumberUtil.truncate(railLength, 3);
+      return truncate(railLength, 3);
     }
 
     if (stackingDirection === 'Double Active' && configuration === 'stacking') {
@@ -378,7 +381,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
           2 * lockStileOffset -
           interlockPairOffset * (numberPanels - 1)) /
         numberPanels;
-      return AWNumberUtil.truncate(railLength, 3);
+      return truncate(railLength, 3);
     }
 
     // 2-Way
@@ -391,14 +394,14 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
           biPartPairOffset -
           interlockPairOffset * (numberPanels - 2)) /
         numberPanels;
-      return AWNumberUtil.truncate(railLength, 3);
+      return truncate(railLength, 3);
     }
 
     // pocketing
     railLength =
       (unitWidth - biPartPairOffset - interlockPairOffset * numberPanels - 2 * pocketOffsetTemp) /
       (numberPanels + 2);
-    return AWNumberUtil.truncate(railLength, 3);
+    return truncate(railLength, 3);
   };
 
   // Unit Height => Rough Opening Height
@@ -635,7 +638,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
   const calculateFrameDepth = (stackingDirection: any, configuration: any, numberPanels: any) => {
     const trackCount = calculateTrackCount(stackingDirection, configuration, numberPanels);
 
-    return AWNumberUtil.truncate(trackCount * 1.75, 3);
+    return truncate(trackCount * 1.75, 3);
   };
 
   const calculateIntermediatePanelWidth = (
@@ -666,7 +669,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
       intermediatePanelWidth = calculateWidth();
     }
 
-    return AWNumberUtil.truncate(intermediatePanelWidth, 3);
+    return truncate(intermediatePanelWidth, 3);
   };
 
   const calculateLeadPanelWidth = (
@@ -674,7 +677,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
     lockStileOffset: any,
     interlockStileOffset: any
   ) => {
-    return AWNumberUtil.truncate(railLength + lockStileOffset + interlockStileOffset, 3);
+    return truncate(railLength + lockStileOffset + interlockStileOffset, 3);
   };
 
   const calculatePocketDepth = (
@@ -733,11 +736,11 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
     );
     const stationaryPanelWidth =
       stackingDirection != 'Double Active' && configuration === 'stacking'
-        ? AWNumberUtil.truncate(railLength + backStileOffset + interlockStileOffset, 3)
+        ? truncate(railLength + backStileOffset + interlockStileOffset, 3)
         : 0;
     const exteriorPanelWidth =
       stackingDirection === 'Double Active'
-        ? AWNumberUtil.truncate(railLength + lockStileOffset + interlockStileOffset, 3)
+        ? truncate(railLength + lockStileOffset + interlockStileOffset, 3)
         : 0;
 
     const maxPanelWidthArray = [
@@ -747,7 +750,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
       exteriorPanelWidth,
     ];
     // eslint-disable-next-line prefer-spread
-    return AWNumberUtil.truncate(Math.max.apply(Math, maxPanelWidthArray), 3);
+    return truncate(Math.max.apply(Math, maxPanelWidthArray), 3);
   };
 
   const getMinHeight = (panelStyle: any, sillOptions: any) => {
@@ -794,7 +797,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
 
     let feet = Math.floor(whole / 12);
     let inches = whole % 12;
-    let fraction = AWNumberUtil.decimalToEigth(number, { roundingDirection: roundingDirection });
+    let fraction = decimalToEigth(number, { roundingDirection: roundingDirection });
 
     // Handle overflow if we rounded up
     if (fraction === '1') {
@@ -832,13 +835,9 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
     if (Number.isNaN(+number)) {
       return String(number);
     } else {
-      const rounded = AWNumberUtil.roundToEigth(number, AWNumberUtil.roundingDirections.closest);
-      // console.log(AWNumberUtil.roundingDirections.closest, rounded)
+      const rounded = roundToEigth(number);
       const mm = rounded * 25.4;
-      const formatted = convertToFeetInchesAndFraction(
-        rounded,
-        AWNumberUtil.roundingDirections.closest
-      );
+      const formatted = convertToFeetInchesAndFraction(rounded, RoundingDirections.closest);
       return formatted + '<br>' + ' (' + String(mm.toFixed(3)) + 'mm)';
     }
   };
@@ -1075,7 +1074,8 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
     );
 
     // Panel Height
-    panelHeight_temp = calculatePanelHeightFromUnitHeight(unitHeight_temp, panelStyle, sillOptions);
+    panelHeight_temp =
+      calculatePanelHeightFromUnitHeight(unitHeight_temp, panelStyle, sillOptions) ?? 0;
 
     // Jamb Depth (same as frame depth on the spreadsheet)
     jambDepth_temp = calculateFrameDepth(stackingDirection, configuration, numberPanels);
@@ -1084,7 +1084,7 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
     // Pocket Width
     pocketWidth_temp =
       configuration === 'pocketing'
-        ? railLength + interlockStileOffset + pocketOffset_temp + 0.375
+        ? (railLength ?? 0) + interlockStileOffset + pocketOffset_temp + 0.375
         : 0;
 
     roughOpeningPocketWidth_temp = roughOpeningWidth_temp - pocketWidth_temp;
@@ -1269,11 +1269,11 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
 
       const minFormattedHeight = convertToFeetInchesAndFraction(
         minHeight_temp,
-        AWNumberUtil.roundingDirections.up
+        RoundingDirections.up
       );
       const maxFormattedHeight = convertToFeetInchesAndFraction(
         maxHeight_temp,
-        AWNumberUtil.roundingDirections.down
+        RoundingDirections.down
       );
 
       if (height < minHeight_temp) {
@@ -1317,11 +1317,11 @@ export const StepSizingCalculator = (props: any): JSX.Element => {
 
       const minFormattedWidth = convertToFeetInchesAndFraction(
         minWidth_temp,
-        AWNumberUtil.roundingDirections.up
+        RoundingDirections.up
       );
       const maxFormattedWidth = convertToFeetInchesAndFraction(
         maxWidth_temp,
-        AWNumberUtil.roundingDirections.down
+        RoundingDirections.down
       );
 
       const minMessage = 'Please enter a value greater than or equal to ' + minFormattedWidth + '.';

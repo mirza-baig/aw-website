@@ -1,8 +1,8 @@
 import { Item } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import { ThemeFile } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
-import { getImagePosition } from 'lib/utils/get-image-position';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { getImagePosition } from 'lib/utils/sitecore-utils/get-image-position';
 
 const getPosition = (pos: Item): string => {
   const imagePosition = getImagePosition('right', pos);

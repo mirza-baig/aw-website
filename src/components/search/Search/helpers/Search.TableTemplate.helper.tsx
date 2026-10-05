@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { ResultLink } from 'helpers/Coveo/ResultList/ResultLink';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { getFieldsToInclude } from 'lib/coveo';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 

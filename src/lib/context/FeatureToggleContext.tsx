@@ -1,3 +1,5 @@
+'use client';
+
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 
 export const useFeatureToggles = () => {

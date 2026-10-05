@@ -8,7 +8,7 @@ import { ComponentProps } from 'lib/component-props';
 import { OnlineSchedulingConstants } from 'lib/constants/online-scheduling';
 import { useModalIdContext } from 'lib/context/GenericModalIDContext';
 import { FormFieldProps } from 'lib/custom-forms/FormFieldProps';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import React, { JSX, useEffect, useRef, useState } from 'react';
 

@@ -1,6 +1,6 @@
 import { Result } from '@coveo/headless';
 import { Field, Item } from '@sitecore-content-sdk/nextjs';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { getResultItemIndex } from '../Coveo/ResultTemplatesManager/TemplateUtils';
 import { PhotoItemWithDetailProps } from './PhotoItemWithDetail';

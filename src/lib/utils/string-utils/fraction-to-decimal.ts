@@ -1,5 +1,11 @@
-export const fractionToDecimal = (fraction: string): string => {
-  // Split the input fraction string into parts using the space and double quotation mark as the separator
+/**
+ * Converts a whole or mixed fractional measurement string to a decimal string.
+ *
+ * @param fraction A measurement such as `92"`, `92 1/2"`, or `92 1/16"`.
+ * @returns The measurement converted to a decimal string without the trailing quote.
+ */
+export function fractionToDecimal(fraction: string): string {
+  // Split the input fraction string into parts using the space as the separator
   const parts: string[] = fraction.split(' ');
 
   // If there is only one part, it means there is no fraction part, so parse and return the float value of that part
@@ -8,7 +14,7 @@ export const fractionToDecimal = (fraction: string): string => {
   }
 
   // Extract the whole part from the first part of the split
-  const wholePart: number = parseInt(parts[0]);
+  const wholePart: number = Number.parseInt(parts[0]);
 
   // Extract the fraction part from the second part of the split, and remove the double quotation mark
   const fractionPart: string = parts[1].replace('"', '');
@@ -18,7 +24,7 @@ export const fractionToDecimal = (fraction: string): string => {
 
   // Calculate and return the decimal value by adding the whole part to the fraction value
   return (wholePart + numerator / denominator).toString();
-};
+}
 
 // Example usage
 // console.log(fractionToDecimal('92"'), 'ToDecimal');

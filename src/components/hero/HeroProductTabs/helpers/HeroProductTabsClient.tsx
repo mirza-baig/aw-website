@@ -5,8 +5,8 @@ import classNames from 'classnames';
 import Component from 'helpers/Component/Component';
 import { SliderWrapper } from 'helpers/SliderWrapper';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { JSX, useEffect, useRef, useState } from 'react';
 import { TabList, Tabs } from 'react-tabs';
 

@@ -1,4 +1,4 @@
-import { Stack } from 'lib/utils/stack';
+import { Stack } from 'lib/types/stack';
 
 import { QueryNode } from '../expressions/query-nodes/query-node';
 import { TrueNode } from '../expressions/query-nodes/true-node';

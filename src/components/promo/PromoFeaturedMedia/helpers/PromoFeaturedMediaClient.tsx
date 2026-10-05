@@ -11,7 +11,7 @@ import { MediaPrimaryStaticProps } from 'helpers/Media/types';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { Subheadline } from 'helpers/Subheadline';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX } from 'react';
 

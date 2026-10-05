@@ -82,13 +82,6 @@ export default function SendPersonalizeEvent(props: Props) {
       sessionStorage.removeItem(StringConstants.AW.GFBForm.AbandonPayloadKey);
     };
     const fireAbandonEvent = (isInactivity = false) => {
-      const alreadyTriggered = sessionStorage.getItem(
-        StringConstants.AW.GFBForm.AbandonEventTriggered
-      );
-      if (alreadyTriggered === 'true') {
-        return;
-      }
-      sessionStorage.setItem(StringConstants.AW.GFBForm.AbandonEventTriggered, 'true');
       const storedAbandonPayload = getAbandonPayload();
       if (!storedAbandonPayload) {
         return;
@@ -140,7 +133,6 @@ export default function SendPersonalizeEvent(props: Props) {
           journeyName: StringConstants.AW.GFBForm.JourneyName, //datasource?.journeyName?.value,
           abandonEventType,
           abandonPayloadKey: StringConstants.AW.GFBForm.AbandonPayloadKey,
-          abandonEventTriggered: StringConstants.AW.GFBForm.AbandonEventTriggered,
           payload: storedAbandonPayload?.ext,
         });
 
@@ -160,12 +152,6 @@ export default function SendPersonalizeEvent(props: Props) {
     };
 
     const handleBeforeUnload = () => {
-      const alreadyTriggered = sessionStorage.getItem(
-        StringConstants.AW.GFBForm.AbandonEventTriggered
-      );
-      if (alreadyTriggered === 'true') {
-        return;
-      }
       const formStep = sessionStorage.getItem(FormsConstants.AW.Form.CCPFormStep);
       if (formStep) {
         sessionStorage.setItem('formReload', 'true');

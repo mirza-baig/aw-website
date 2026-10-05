@@ -10,7 +10,7 @@ import {
   isRuleIncludedInField,
   replacePlaceholders,
 } from 'lib/custom-forms/FormFieldUtils';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { useContext } from 'react';
 
 import { FieldWrapperTheme } from './FieldWrapper.Theme';

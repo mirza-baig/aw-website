@@ -1,6 +1,8 @@
+'use client';
+
 import { Text } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX } from 'react';
 

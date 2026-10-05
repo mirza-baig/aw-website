@@ -2,7 +2,7 @@
 import classNames from 'classnames';
 import { ButtonVariants } from 'helpers/Button/types';
 import { ThemeFile } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { BackgroundColor } from './ContentBlock.types';
 

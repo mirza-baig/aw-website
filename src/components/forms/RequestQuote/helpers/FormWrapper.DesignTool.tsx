@@ -2,6 +2,7 @@
 
 import { useRenoworks } from 'components/tool/DesignTool/helpers/js/renoworks-context';
 import { ShortDesignUrlContext } from 'components/tool/DesignTool/helpers/ShortDesignUrlContext';
+import { useVisualizationReferral } from 'lib/renoworks/visualization-referral-context';
 import { useContext } from 'react';
 
 import { RequestQuoteClient } from './RequestQuoteClient';
@@ -14,8 +15,9 @@ type RequestQuoteClientProps = {
 };
 
 export function FormWrapper(props: Readonly<RequestQuoteClientProps>) {
-  const { product } = useRenoworks();
+  const { product, visualizerUrl } = useRenoworks();
   const shortDesignUrl = useContext(ShortDesignUrlContext);
+  const referral = useVisualizationReferral();
 
   const _injectedFields = {
     DESIGNSPECS: shortDesignUrl,
@@ -26,6 +28,8 @@ export function FormWrapper(props: Readonly<RequestQuoteClientProps>) {
     fields: {
       ...(props?.fields ?? {}),
       _injectedFields,
+      renoworksVisualizerUrl: visualizerUrl,
+      visualizationReferral: referral,
       params: props?.params,
     },
   };

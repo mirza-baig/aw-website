@@ -7,7 +7,7 @@ import { MediaPrimaryStaticProps } from 'helpers/Media/types';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import StarRating from 'helpers/StarRating/StarRating';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { PromoReviewContentAuthoredTheme } from './PromoReviewContentAuthored.theme';
 import { Sitecore } from '.sitecore/AndersenWindows.model';

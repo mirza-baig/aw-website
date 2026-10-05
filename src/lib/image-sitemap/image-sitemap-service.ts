@@ -1,8 +1,8 @@
 import { SiteInfo } from '@sitecore-content-sdk/nextjs';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
+import environment from 'lib/environment';
 import { SearchQueryService } from 'lib/graphql/search-query-service';
 import { AWSitecoreClient } from 'lib/sitecore-client';
-import { environment } from 'startup/environment';
 import { create } from 'xmlbuilder2';
 
 const sitemapQuery = /* GraphQL */ `

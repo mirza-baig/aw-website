@@ -8,7 +8,7 @@ import { isVideoItem } from '../VideoUtils';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 export type ImagePrimaryProps = Sitecore.FieldSets.ImagePrimary &
-  Sitecore.FieldSets.ImagePrimaryCaption &
+  PartialFields<Sitecore.FieldSets.ImagePrimaryCaption> &
   Sitecore.FieldSets.VideoPrimary & {
     videoThumbnailImage?: ImageField;
     hideCaption?: boolean;

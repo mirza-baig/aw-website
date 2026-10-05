@@ -53,9 +53,4 @@ export class Environment {
   isWww(): boolean {
     return this.isRole(Roles.www);
   }
-
-  isVercelProduction(): boolean {
-    // Vercel should return one of three different VERCEL_ENV values: development, preview, and production.
-    return process.env.VERCEL_ENV?.toLowerCase() === 'production';
-  }
 }

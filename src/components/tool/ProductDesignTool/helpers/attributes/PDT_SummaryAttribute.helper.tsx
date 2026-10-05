@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ShortDesignUrlContext } from 'components/tool/DesignTool/helpers/ShortDesignUrlContext';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import environment from 'lib/environment';
 import { useAsPath } from 'lib/hooks/use-as-path';
 import { AttributeRendererProps, shortenUrl, SummaryViewModel } from 'lib/renoworks';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTheme } from 'src/lib/context/ThemeContext';
-import { shareServicesToExclude, useA2AScript } from 'src/lib/utils/use-a2a-script';
-import { useBVScript } from 'src/lib/utils/use-bv-script';
+import { shareServicesToExclude, useA2AScript } from 'src/lib/utils/react-utils/use-a2a-script';
+import { useBVScript } from 'src/lib/utils/react-utils/use-bv-script';
 import { useFavoriteDesigns } from 'src/lib/website/favorite-designs/use-favorite-designs';
-import { environment } from 'startup/environment';
 
 import { SummaryAttributeTheme, SummaryAttributeThemeSubType } from './PDT_SummaryAttribute.theme';
 
@@ -66,14 +66,22 @@ const SummaryAttribute = ({
     let cancelled = false;
 
     if (asPath) {
-      shortenUrl(document.location.href).then((response) => {
-        if (cancelled) {
-          return;
-        }
+      shortenUrl(document.location.href)
+        .then((response) => {
+          if (cancelled) {
+            return;
+          }
 
-        setShortDesignUrl(response.shortenedUrl);
-        setFavoriteText(getFavoriteText(response.shortenedUrl));
-      });
+          setShortDesignUrl(response.shortenedUrl);
+          setFavoriteText(getFavoriteText(response.shortenedUrl));
+        })
+        .catch((error) => {
+          if (cancelled) {
+            return;
+          }
+
+          console.error('[DesignSpecs] Failed to shorten design URL', error);
+        });
     }
 
     return () => {

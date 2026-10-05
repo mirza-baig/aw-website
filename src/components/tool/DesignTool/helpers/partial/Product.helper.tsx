@@ -3,10 +3,10 @@ import Image from 'helpers/Media/Image';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import RichTextWrapper from 'helpers/RichTextWrapper/RichTextWrapper';
 import { SliderWrapper } from 'helpers/SliderWrapper';
+import environment from 'lib/environment';
 import { useAsPath } from 'lib/hooks/use-as-path';
 import { useTheme } from 'src/lib/context/ThemeContext';
-import { useBVScript } from 'src/lib/utils/use-bv-script';
-import { environment } from 'startup/environment';
+import { useBVScript } from 'src/lib/utils/react-utils/use-bv-script';
 
 import { DesignToolProductProps } from '../DesignTool.types';
 import { GetUrlParts } from '../js/utils';

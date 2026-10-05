@@ -8,11 +8,12 @@ import {
   GenericFormBuilderContextState,
 } from 'helpers/GenericFormBuilder/GenericFormBuilderContext';
 import { Steps } from 'helpers/GenericFormBuilder/Steps';
+import { FormsConstants } from 'lib/constants/forms-constants';
 import { useTheme } from 'lib/context/ThemeContext';
 import { FormPage } from 'lib/generic-form-builder/form-props';
 import { buildForm } from 'lib/generic-form-builder/utils/load-utils/build-form';
+import { useSimpleReducer } from 'lib/utils/react-utils/use-simple-reducer';
 import { createUUID } from 'lib/utils/string-utils/create-uuid';
-import { useSimpleReducer } from 'lib/utils/use-simple-reducer';
 import { JSX, ReactNode, RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { FormTheme } from './GenericFormBuilder.theme';
@@ -43,6 +44,7 @@ type GenericFormBuilder = Sitecore.Forms.GenericFormBuilder.GenericFormBuilder &
 export function GenericFormBuilderClient(props: GenericFormBuilder): JSX.Element | null {
   const { themeData } = useTheme(FormTheme());
   const formRef = useRef<HTMLFormElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [formState, setFormState] = useSimpleReducer<FormState>({
     currentPage: 0,
     isErrorOnSubmit: false,
@@ -68,6 +70,24 @@ export function GenericFormBuilderClient(props: GenericFormBuilder): JSX.Element
   const handleFormFocus = useCallback(() => {
     setFormState({ isFormInteracted: true });
   }, [setFormState]);
+
+  const formName = props.fields?.formName?.value;
+
+  // Forms hosted in a modal are mounted on open, so page-load trackers never see them.
+  useEffect(
+    function NotifyFormOpenedInModal() {
+      if (formState.formPages == undefined || containerRef.current?.closest('dialog') == null) {
+        return;
+      }
+
+      document.dispatchEvent(
+        new CustomEvent(FormsConstants.Enterprise.formOpenedInModalEvent, {
+          detail: { formName },
+        })
+      );
+    },
+    [formState.formPages, formName]
+  );
 
   useEffect(() => {
     if (formState.formPages == undefined) {
@@ -147,6 +167,7 @@ export function GenericFormBuilderClient(props: GenericFormBuilder): JSX.Element
   return (
     <GenericFormBuilderContextProvider initialState={formContext}>
       <div
+        ref={containerRef}
         data-component="forms/form"
         className={classNames(themeData.classes.form, props.classes)}
       >

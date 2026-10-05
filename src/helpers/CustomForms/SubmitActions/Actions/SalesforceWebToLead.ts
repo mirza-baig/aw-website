@@ -4,7 +4,7 @@ import { translateFieldMappings } from 'lib/custom-forms/FormActions';
 import { FormProps } from 'lib/custom-forms/FormProps';
 import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getCookie } from 'lib/utils/client-storage-utils/get-cookie';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { BaseSubmitAction, BaseSubmitProps, ExecutionResult } from '../BaseSubmitAction';
 import { Sitecore } from '.sitecore/AndersenWindows.model';

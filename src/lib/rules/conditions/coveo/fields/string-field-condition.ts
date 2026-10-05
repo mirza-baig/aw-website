@@ -9,7 +9,7 @@ import { VoidNode } from 'lib/coveo/expressions/query-nodes/void-node';
 import { FutureResult } from 'lib/graphql/item-fetcher/future-result';
 import { getCoveoFieldName } from 'lib/rules/conditions/coveo/get-coveo-field-name';
 import { RuleContext } from 'lib/rules/rule-context';
-import { SitecoreId } from 'lib/utils/sitecore-utils/sitecore-id';
+import { SitecoreId } from 'lib/types/sitecore-id';
 import { isNullOrEmpty } from 'lib/utils/string-utils/is-null-or-empty';
 
 import { IConditionFactoryContext } from '../../condition-factory-context';

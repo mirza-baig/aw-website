@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { event, identity } from '@sitecore-content-sdk/events';
@@ -17,12 +18,16 @@ import ZippopotamusZipCode from 'helpers/CustomForms/ZippopotamusZIPCode';
 import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import Headline from 'helpers/Headline/Headline';
 import ModalWrapper from 'helpers/ModalWrapper/ModalWrapper';
+import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { FormsConstants } from 'lib/constants/forms-constants';
 import { StringConstants } from 'lib/constants/string-constants';
 import { useTheme } from 'lib/context/ThemeContext';
 import { FormsContext } from 'lib/custom-forms/FormContext';
+import { VisualizationReferralFields } from 'lib/renoworks/visualization-referral-context';
+import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
 import { getCookie } from 'lib/utils/client-storage-utils/get-cookie';
-import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
+import { setSessionStorageItems } from 'lib/utils/client-storage-utils/set-session-storage-items';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { useSearchParams } from 'next/navigation';
 import { JSX, useEffect, useRef, useState } from 'react';
 import TagManager from 'react-gtm-module';
@@ -45,7 +50,14 @@ import { Sitecore } from '.sitecore/AndersenWindows.model';
 import { formActionFactory } from '.sitecore/aw-form-action-factory';
 
 type RequestQuoteClientProps = {
-  fields: Sitecore.Forms.Custom.RequestAQuote.RequestAQuote['fields'];
+  fields: Sitecore.Forms.Custom.RequestAQuote.RequestAQuote['fields'] & {
+    renoworksVisualizerUrl?: string;
+    visualizationReferral?: VisualizationReferralFields;
+    _injectedFields?: {
+      DESIGNSPECS?: string;
+      DESIGNTOOLSERIES?: string;
+    };
+  };
   cardsPlaceholders?: Record<string, React.ReactNode>;
   params?: Record<string, string>;
 };
@@ -337,12 +349,18 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supplierValue]);
 
-  const pushFormInteraction = (step: number | 'final', formName = 'request_quote') => {
+  const pushFormInteraction = (
+    step: number | 'final',
+    formName = 'request_quote',
+    formAction?: 'previous'
+  ) => {
     TagManager.dataLayer({
       dataLayer: {
         event: 'form_interaction',
         form_name: formName,
         form_step_number: step,
+        // Only added for Previous clicks
+        ...(formAction && { form_action: formAction }),
       },
     });
   };
@@ -881,9 +899,10 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
       street: street ? [street] : [],
       country: country,
       extensionData: {
+        brand: 'AW',
         contactKey: awContactKey,
         userType,
-        proType: values['trades'] ?? '',
+        typeOfBusiness: values['trades'] ?? '',
       },
     };
     identity(identifyPayload).catch(console.debug);
@@ -1058,7 +1077,10 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                               icon="arrow"
                               type="button"
                               startWithIcon={true}
-                              onClick={() => updatePageIndex(-1)}
+                              onClick={() => {
+                                pushFormInteraction(pageIndex, 'request_quote', 'previous');
+                                updatePageIndex(-1);
+                              }}
                               className={classNames('mr-0!', buttonAlignment['left'])}
                             >
                               Previous
@@ -1137,6 +1159,70 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                           fields={{ body: props.fields?.thankYouText ?? '' }}
                         />
                       </div>
+                      {(() => {
+                        const url = props.fields.renoworksVisualizerUrl;
+                        const referral = props.fields.visualizationReferral;
+                        if (!url || !referral) {
+                          return null;
+                        }
+
+                        const imageSrc = referral.visualizationReferralImage?.value?.src;
+                        const imageAlt = referral.visualizationReferralImage?.value?.alt ?? '';
+                        const headline = referral.visualizationReferralHeadline?.value;
+                        const bodyField = referral.visualizationReferralBody;
+                        const ctaText = referral.visualizationCtaText?.value;
+
+                        if (!imageSrc && !headline && !bodyField?.value) {
+                          return null;
+                        }
+
+                        return (
+                          <div className="col-span-12 mb-l">
+                            <div className="flex flex-col overflow-hidden md:flex-row md:items-stretch">
+                              {imageSrc && (
+                                <div className="w-full md:w-1/2">
+                                  <img
+                                    src={imageSrc}
+                                    alt={imageAlt}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex w-full flex-col justify-start gap-4 bg-light-gray p-6 md:w-1/2 md:p-8">
+                                {headline && (
+                                  <h3 className="text-theme-text text-sm-m font-heavy md:text-m">
+                                    {headline}
+                                  </h3>
+                                )}
+                                {bodyField?.value && (
+                                  <RichTextWrapper
+                                    field={bodyField}
+                                    className="text-body text-black"
+                                  />
+                                )}
+                                {ctaText && url && (
+                                  <div className="mt-2">
+                                    <Button
+                                      field={{
+                                        value: {
+                                          text: ctaText,
+                                          href: url,
+                                          target: '_blank',
+                                          linktype: 'external',
+                                        },
+                                      }}
+                                      icon={referral.visualizationCtaIcon as never}
+                                      variant={getEnum(referral.visualizationCtaStyle)}
+                                      classes="w-fit"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {cardVariants.length > 0 &&
                         typeVariant &&
                         props.cardsPlaceholders?.[typeVariant] && (

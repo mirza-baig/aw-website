@@ -1,5 +1,6 @@
 import { AppPlaceholder, ComponentRendering } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
+import { releaseRenoworksVisualizerHandshakeUrl } from 'lib/feature-flags/flags';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
@@ -14,7 +15,7 @@ import componentMap from '.sitecore/component-map';
 
 type DesignToolProps = ComponentProps & Sitecore.Components.Tool.DesignTool.DesignTool;
 
-function DesignTool_Default(props: DesignToolProps): JSX.Element {
+async function DesignTool_Default(props: DesignToolProps): Promise<JSX.Element> {
   const placeholderKey = Object.keys(props.rendering.placeholders ?? {}).find((k) =>
     k.startsWith('designtool-')
   );
@@ -47,12 +48,14 @@ function DesignTool_Default(props: DesignToolProps): JSX.Element {
   });
 
   const { fields } = getComponentServerProps(props.rendering);
+  const visualizerHandshakeUrlEnabled = await releaseRenoworksVisualizerHandshakeUrl();
 
   return (
     <Suspense>
       <DesignToolClient
         fields={fields}
         rendering={props.rendering}
+        visualizerHandshakeUrlEnabled={visualizerHandshakeUrlEnabled}
         placeholder={
           <AppPlaceholder
             name={`designtool-${props.params?.DynamicPlaceholderId}`}

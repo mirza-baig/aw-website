@@ -10,7 +10,7 @@ import Headline from 'helpers/Headline/Headline';
 import ImagePrimary from 'helpers/Media/ImagePrimary';
 import { Subheadline } from 'helpers/Subheadline';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 

@@ -5,8 +5,8 @@ import classNames from 'classnames';
 import { Subheadline } from 'helpers/Subheadline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { JSX, ReactNode, useEffect, useState } from 'react';
 
 import { AccordionTheme } from './Accordion.theme';

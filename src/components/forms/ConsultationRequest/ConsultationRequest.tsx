@@ -2,7 +2,7 @@ import { ComponentProps } from 'lib/component-props';
 import { FormPlaceholder } from 'lib/generic-form-builder/components/FormPlaceholder';
 import { PageIndexWrapper } from 'lib/generic-form-builder/components/PageIndexWrapper';
 import { fetchComponentServerProps } from 'lib/generic-form-builder/utils/load-utils/fetch-component-server-props';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 
 import { ConsultationRequestClient } from './helpers/ConsultationRequestClient';

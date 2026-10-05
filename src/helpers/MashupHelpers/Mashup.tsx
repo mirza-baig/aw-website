@@ -4,7 +4,7 @@ import Headline from 'helpers/Headline/Headline';
 import SingleButton from 'helpers/SingleButton/SingleButton';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { FeaturedCard } from './FeaturedCard';
 import { MashupTheme } from './Mashup.theme';

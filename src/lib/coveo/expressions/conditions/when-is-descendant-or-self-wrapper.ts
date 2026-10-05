@@ -1,6 +1,6 @@
 import { WhenIsDescendantOrSelf } from 'lib/rules/conditions/sitecore/when-is-descendant-or-self';
 import { RuleContext } from 'lib/rules/rule-context';
-import { SitecoreId } from 'lib/utils/sitecore-utils/sitecore-id';
+import { SitecoreId } from 'lib/types/sitecore-id';
 
 import { CoveoFields } from '../../constants';
 import { QueryNodeOperator } from '../query-nodes/query-node-operator';

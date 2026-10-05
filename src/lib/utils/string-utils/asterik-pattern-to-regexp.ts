@@ -10,9 +10,14 @@ declare global {
 }
 
 /**
- * Converts a string pattern with asterisks as wildcards into a RegExp.
- * For example, "X*Y" would match "XY", "X123Y", "XabcY", etc.
- * The resulting RegExp is case-insensitive and matches the entire string.
+ * Converts an asterisk wildcard pattern into an anchored regular expression.
+ *
+ * `*` matches any sequence of characters; other pattern characters are escaped.
+ * Matching is case-sensitive unless an ignore-case flag is supplied.
+ *
+ * @param pattern The pattern text where `*` represents a wildcard.
+ * @param flags Optional RegExp flags as a flag string or `Flags` bitmask.
+ * @returns A regular expression that matches the entire input string.
  */
 export function asterikPatternToRegExp(pattern: string, flags?: string | Flags): RegExp {
   const flagsString = typeof flags === 'string' ? flags : flagsToFlagString(flags);

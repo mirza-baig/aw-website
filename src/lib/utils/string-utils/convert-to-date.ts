@@ -1,5 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function convertToDate(data: any): string {
+/**
+ * Converts a numeric timestamp to a local date string; otherwise returns the string representation of the value.
+ *
+ * @param data The value to convert. Numbers are interpreted as timestamps in milliseconds.
+ * @returns A local date formatted as `M/D/YYYY`, or `String(data)` for non-numeric values.
+ */
+export function convertToDate(data: unknown): string {
   if (typeof data == 'number') {
     const formatted = new Date(data);
 
@@ -8,6 +13,6 @@ export function convertToDate(data: any): string {
     const mm = formatted.getMonth() + 1;
     return `${mm}/${dd}/${yy}`;
   } else {
-    return data;
+    return String(data);
   }
 }

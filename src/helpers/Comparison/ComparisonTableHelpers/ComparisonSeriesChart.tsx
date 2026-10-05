@@ -7,15 +7,15 @@ import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
-import { getEnum } from 'lib/utils/get-enum';
+import environment from 'lib/environment';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import { useRef } from 'react';
-import { environment } from 'startup/environment';
 
 import { renderComparisonCellValue } from './CategoryRow';
 import { getComparisonObject } from './ComparisonTable.helper';

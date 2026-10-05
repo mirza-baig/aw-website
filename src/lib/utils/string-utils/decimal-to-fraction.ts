@@ -1,4 +1,10 @@
-export const decimalToFraction = (number: string) => {
+/**
+ * Converts a decimal number string to a mixed-number fraction string.
+ *
+ * @param number The decimal number represented as a string.
+ * @returns The whole number when no fractional part exists; otherwise, a mixed-number fraction or decimal fallback.
+ */
+export function decimalToFraction(number: string) {
   const parts = number.split('.');
 
   if (parts && (parts.length === 1 || (parts[1] && Number(parts[1]) <= 0))) {
@@ -42,7 +48,7 @@ export const decimalToFraction = (number: string) => {
       denominator += lowerDenominator;
     }
   }
-};
+}
 
 // Example usage
 // console.log(decimalToFraction('92.0'), 'ToFraction');

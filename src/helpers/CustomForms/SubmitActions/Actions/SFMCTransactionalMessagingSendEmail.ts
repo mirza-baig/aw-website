@@ -2,7 +2,7 @@ import { Field } from '@sitecore-content-sdk/nextjs';
 import { findFieldById } from 'lib/custom-forms/FormActions';
 import { FormFieldProps } from 'lib/custom-forms/FormFieldProps';
 import { getKeyValuePairList } from 'lib/custom-forms/FormFieldUtils';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { createUUID } from 'lib/utils/string-utils/create-uuid';
 
 import { BaseSubmitAction, BaseSubmitProps, ExecutionResult } from '../BaseSubmitAction';

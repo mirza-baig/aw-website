@@ -3,8 +3,9 @@ import { Field, Text } from '@sitecore-content-sdk/nextjs';
 import Button from 'helpers/Button/Button';
 import { ComponentProps } from 'lib/component-props';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
-import { getEnum } from 'lib/utils/get-enum';
+import environment from 'lib/environment';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
@@ -16,7 +17,6 @@ import { useEffect, useRef, useState } from 'react';
 import Disclaimer from 'src/helpers/DisclaimerText/DisclaimerText';
 import ModalWrapper from 'src/helpers/ModalWrapper/ModalWrapper';
 import SvgIcon from 'src/helpers/SvgIcon/SvgIcon';
-import { environment } from 'startup/environment';
 
 import {
   getComparisonObject,

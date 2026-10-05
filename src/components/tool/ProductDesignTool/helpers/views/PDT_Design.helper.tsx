@@ -400,12 +400,11 @@ export const Design = (props: ProductDesignToolProps) => {
 
       if (onSummaryStep && hasModalOrButton) {
         // Try calling the function directly first
-        handleDesignRequestQuoteModalOpen();
-
-        // Fallback: search for button and click it to be extra sure
-        const btn = document.getElementById('request_a_quote');
-        if (btn) {
-          btn.click();
+        if ($refs.summaryModal.current) {
+          handleDesignRequestQuoteModalOpen();
+        } else {
+          // Fallback only when the modal ref isn't available yet
+          document.getElementById('request_a_quote')?.click();
         }
 
         setisRAQ(false);

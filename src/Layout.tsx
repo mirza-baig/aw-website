@@ -2,7 +2,6 @@ import { JSX } from 'react';
 import { AppPlaceholder, DesignLibraryApp, Field, Page } from '@sitecore-content-sdk/nextjs';
 import awClientConfig from 'aw.config.client';
 import { BeforeAfterScript } from 'helpers/BeforeAfterScripts/BeforeAfterScripts';
-import { BoldOrangeScript } from 'helpers/BoldOrangeScript/BoldOrangeScript';
 import { GoogleTagManager } from 'helpers/GoogleTagManager/GoogleTagManager';
 import { PageSchemaOrg } from 'helpers/SchemaOrg/PageSchemaOrg';
 import { SkipLink } from 'helpers/SkipLink/SkipLink';
@@ -83,8 +82,10 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
                 staticState={page.customProps}
               >
                 <SourcingCookies />
-                <BoldOrangeScript />
-                <TrustArcScript />
+                {/* Legacy client-side TrustArc implementation: only used while the
+                    server-side Auto-Block flag is off. When the flag is on, the
+                    scripts are rendered server-side in the root layout's <head>. */}
+                {!page.customProps.featureFlags.releaseTrustArcAutoBlock && <TrustArcScript />}
                 <GoogleTagManager />
                 <TypeKit />
                 <BeforeAfterScript />

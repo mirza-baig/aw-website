@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Field } from '@sitecore-content-sdk/nextjs';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 
 /** The two product collections authored on every AW_Series item. */

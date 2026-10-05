@@ -4,7 +4,7 @@ import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { StringConstants } from 'lib/constants/string-constants';
 import { stopTimer } from 'lib/personalize/abandon-timer';
 import { buildPersonalizePayload } from 'lib/personalize/build-personalize-payload';
-import { clearSessionStorageItems } from 'lib/utils/session-storage';
+import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
 import { normalizeGuid } from 'lib/utils/string-utils/normalize-guid';
 
 import { ActionResult } from '..';
@@ -69,11 +69,6 @@ export class SendPersonalizeEvent extends BaseSubmitAction<Sitecore.BaseTemplate
       // STOP ABANDON TIMER, Clear session values on submit
       if (isSubmitEventType) {
         stopTimer();
-
-        // Mark abandon as already triggered to prevent double fire.
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem(StringConstants.AW.GFBForm.AbandonEventTriggered, 'true');
-        }
 
         clearSessionStorageItems([
           // Abandon Event sessions

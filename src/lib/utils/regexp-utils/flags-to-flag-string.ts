@@ -1,5 +1,11 @@
 import { Flags } from './flags';
 
+/**
+ * Converts a bitwise combination of regular expression flags to its string representation.
+ *
+ * @param flags The optional bitwise combination of regular expression flags.
+ * @returns The regular expression flag string in canonical order, or an empty string when no flags are provided.
+ */
 export function flagsToFlagString(flags?: Flags): string {
   if (flags == undefined) {
     return '';

@@ -7,7 +7,7 @@ import Headline from 'helpers/Headline/Headline';
 import SingleButton from 'helpers/SingleButton/SingleButton';
 import { Subheadline } from 'helpers/Subheadline';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, ReactNode } from 'react';
 
 import { CarouselTheme } from './Carousel.theme';

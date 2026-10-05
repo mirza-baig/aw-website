@@ -1,6 +1,6 @@
 import { vercelAdapter } from '@flags-sdk/vercel';
 import { dedupe, flag } from 'flags/next';
-import { environment } from 'startup/environment';
+import environment from 'lib/environment';
 
 /**
  * All aw-website feature flag keys must use this prefix
@@ -97,6 +97,20 @@ export const releaseRobotsVercelProductionCheck = flag<boolean>({
   ],
 });
 
+// Release: TrustArc Cookie Auto-Block (server-side head scripts)
+export const releaseTrustArcAutoBlock = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-trustarc-autoblock`,
+  adapter: vercelAdapter(),
+  identify,
+  description:
+    'Renders the TrustArc Auto-Block and Consent Manager scripts server-side at the top of the <head> (via next/script beforeInteractive in the root layout) so trackers are blocked before they fire. When disabled, the legacy client-side TrustArcScript implementation is used.',
+  defaultValue: false,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+
 // Release: Within Series Compare Chart
 export const releaseWithinSeriesCompareChart = flag<boolean>({
   key: `${FLAG_KEY_PREFIX}release-within-series-compare-chart`,
@@ -105,6 +119,18 @@ export const releaseWithinSeriesCompareChart = flag<boolean>({
   description:
     'Renders the "within series" compare chart (WithinSeriesChart) for AW_ComparisonSeriesTable datasources: a Windows/Doors switcher and a series selection row above a chart whose columns are the products that make up the selected series. Takes precedence over the redesigned series chart when both are on.',
   defaultValue: true,
+  options: [
+    { value: true, label: 'Released' },
+    { value: false, label: 'Pending' },
+  ],
+});
+// Release: Renoworks Visualizer Handshake URL
+export const releaseRenoworksVisualizerHandshakeUrl = flag<boolean>({
+  key: `${FLAG_KEY_PREFIX}release-renoworks-visualizer-handshake-url`,
+  adapter: vercelAdapter(),
+  identify,
+  description: 'RenoWorks Visualizer handshake URL.',
+  defaultValue: false,
   options: [
     { value: true, label: 'Released' },
     { value: false, label: 'Pending' },

@@ -20,7 +20,7 @@ import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-re
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
 import { startTimer } from 'lib/personalize/abandon-timer';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX, useState } from 'react';
 

@@ -7,8 +7,8 @@ import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
+import { useRecentlyViewed } from 'lib/utils/react-utils/use-recently-viewed';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useRecentlyViewed } from 'lib/utils/use-recently-viewed';
 import { useState } from 'react';
 
 import { RecentlyViewedDocumentsTheme } from './helpers/RecentlyViewedDocuments.theme';

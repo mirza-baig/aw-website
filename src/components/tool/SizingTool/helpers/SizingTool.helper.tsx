@@ -4,7 +4,8 @@ import classNames from 'classnames';
 import BodyCopy from 'helpers/BodyCopy/BodyCopy';
 import Headline from 'helpers/Headline/Headline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
-import { decimalToFraction, fractionToDecimal } from 'lib/utils/dimension-conversion';
+import { decimalToFraction } from 'lib/utils/string-utils/decimal-to-fraction';
+import { fractionToDecimal } from 'lib/utils/string-utils/fraction-to-decimal';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 import { SizingToolProps } from './SizingTool.types';

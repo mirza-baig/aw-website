@@ -1,7 +1,8 @@
 import { Result } from '@coveo/headless';
 import { ImageField } from '@sitecore-content-sdk/nextjs';
 import { extractURLParts, getFieldsToInclude, getResultItemIndex } from 'lib/coveo';
-import { EnumField, getEnum } from 'lib/utils/get-enum';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { convertToDate } from 'lib/utils/string-utils/convert-to-date';
 
 import { ImagePrimaryProps } from '../Media/ImagePrimary';

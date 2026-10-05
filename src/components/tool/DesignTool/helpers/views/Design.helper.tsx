@@ -6,7 +6,8 @@ import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { StringConstants } from 'lib/constants/string-constants';
 import { useAsPath } from 'lib/hooks/use-as-path';
 import { setAbandonSession as setAbandonSessionHelper } from 'lib/personalize/form-abandon-event';
-import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
+import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
+import { setSessionStorageItems } from 'lib/utils/client-storage-utils/set-session-storage-items';
 import Link from 'next/link';
 // Removing for temporary fix of using history: import { useRouter } from 'next/navigation';
 import React, { MouseEvent, useContext, useEffect, useState } from 'react';
@@ -709,13 +710,21 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
     let cancelled = false;
 
     if (asPath) {
-      shortenUrl(document.location.href).then((response) => {
-        if (cancelled) {
-          return;
-        }
+      shortenUrl(document.location.href)
+        .then((response) => {
+          if (cancelled) {
+            return;
+          }
 
-        setShortDesignUrl(response.shortenedUrl);
-      });
+          setShortDesignUrl(response.shortenedUrl);
+        })
+        .catch((error) => {
+          if (cancelled) {
+            return;
+          }
+
+          console.error('[DesignSpecs] Failed to shorten design URL', error);
+        });
     }
 
     return () => {
@@ -784,7 +793,7 @@ export const Design = ({ product, options, props }: DesignViewProps) => {
       // Product info
       productSeries: product?.series?.value,
       productType: product?.productType?.value,
-      productName: product?.name,
+      productName: product?.productFullName,
       productId: product?.productId,
       // Attribute selections info from URL
       attributeIndex: currentIndex,

@@ -7,7 +7,7 @@ import IconDropdownArrow from 'helpers/SvgIcon/icons/icon--dropdown-arrow';
 import { ComponentProps } from 'lib/component-props';
 import { useModalIdContext } from 'lib/context/GenericModalIDContext';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { MouseEvent } from 'react';
 

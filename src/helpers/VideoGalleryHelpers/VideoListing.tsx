@@ -9,8 +9,8 @@ import { SliderWrapper } from 'helpers/SliderWrapper';
 import { SliderRefType, SliderType } from 'helpers/SliderWrapper/SliderWrapper';
 import { useModalIdContext } from 'lib/context/GenericModalIDContext';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, useEffect, useRef, useState } from 'react';
 
 import Pagination from './Pagination.Helper';

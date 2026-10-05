@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import Headline from 'helpers/Headline/Headline';
 import MediaPrimary from 'helpers/Media/MediaPrimary/MediaPrimary';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX } from 'react';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';

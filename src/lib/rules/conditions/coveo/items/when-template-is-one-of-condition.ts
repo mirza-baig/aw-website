@@ -6,7 +6,7 @@ import { QueryNode } from 'lib/coveo/expressions/query-nodes/query-node';
 import { QueryNodeOperator } from 'lib/coveo/expressions/query-nodes/query-node-operator';
 import { VoidNode } from 'lib/coveo/expressions/query-nodes/void-node';
 import { RuleContext } from 'lib/rules/rule-context';
-import { SitecoreId } from 'lib/utils/sitecore-utils/sitecore-id';
+import { SitecoreId } from 'lib/types/sitecore-id';
 
 import { IConditionFactoryContext } from '../../condition-factory-context';
 import { WhenCondition } from '../../sitecore/when-condition';

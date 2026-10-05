@@ -11,7 +11,7 @@ import ImagePrimary from 'helpers/Media/ImagePrimary';
 import { Subheadline } from 'helpers/Subheadline';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX } from 'react';

@@ -2,7 +2,7 @@
 import { Field, ImageField, ImageFieldValue, Item, LinkField } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { itemInheritsBaseItem } from 'lib/utils/sitecore-utils/item-inherits-base-item';
 import { itemIsTemplate } from 'lib/utils/sitecore-utils/item-is-template';
 import { guidEquals } from 'lib/utils/string-utils/guid-equals';

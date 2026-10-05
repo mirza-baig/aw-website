@@ -1,15 +1,15 @@
 import { Item, Link, useSitecore } from '@sitecore-content-sdk/nextjs';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
+import environment from 'lib/environment';
 import { useAsPath } from 'lib/hooks/use-as-path';
 import { AttributeRendererProps } from 'lib/renoworks';
-import { shareServicesToExclude, useA2AScript } from 'lib/utils/use-a2a-script';
-import { useBVScript } from 'lib/utils/use-bv-script';
+import { shareServicesToExclude, useA2AScript } from 'lib/utils/react-utils/use-a2a-script';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
 import { useFavoriteDesigns } from 'lib/website/favorite-designs/use-favorite-designs';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DesignToolQueryItem } from 'src/app/api/aw/design-tool/design-tool-option-by-id/get-option-by-id';
-import { environment } from 'startup/environment';
 
 import { FilterForProduct, MapProduct, prepareDesignSelectionData } from '../DesignTool.helper';
 import { DesignToolProductProps } from '../DesignTool.types';
@@ -62,14 +62,22 @@ const SummaryAttribute = ({
     let cancelled = false;
 
     if (asPath) {
-      shortenUrl(document.location.href).then((response) => {
-        if (cancelled) {
-          return;
-        }
+      shortenUrl(document.location.href)
+        .then((response) => {
+          if (cancelled) {
+            return;
+          }
 
-        setShortDesignUrl(response.shortenedUrl);
-        setFavoriteText(getFavoriteText(response.shortenedUrl));
-      });
+          setShortDesignUrl(response.shortenedUrl);
+          setFavoriteText(getFavoriteText(response.shortenedUrl));
+        })
+        .catch((error) => {
+          if (cancelled) {
+            return;
+          }
+
+          console.error('[DesignSpecs] Failed to shorten design URL', error);
+        });
     }
 
     return () => {

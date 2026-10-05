@@ -5,6 +5,7 @@ import { WebsiteStaticState } from 'lib/website/website-state';
 import { JSX } from 'react';
 import { Graph, Thing } from 'schema-dts';
 
+import { getComponentFields } from './component-fields';
 import { componentFactory } from './component-registry';
 import { factory } from './factory';
 import { getAllRenderings } from './get-all-renderings';
@@ -120,15 +121,13 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
   const renderings = getAllRenderings(page.layout.sitecore.route?.placeholders);
   let graph = pagePluginGraph;
   for (const rendering of renderings) {
-    const componentPlugin: ComponentPlugin<unknown> | undefined = componentFactory(
-      rendering.componentName
-    );
-    if (componentPlugin) {
-      graph = await Promise.resolve(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        componentPlugin({ graph, rendering, fields: rendering.fields as any, page })
-      );
-    }
+    const componentPlugin: ComponentPlugin<unknown> = componentFactory(rendering.componentName);
+    graph = await componentPlugin({
+      graph,
+      rendering,
+      fields: getComponentFields(rendering.fields),
+      page,
+    });
   }
 
   const jsonLd: Graph = {

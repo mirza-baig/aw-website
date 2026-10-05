@@ -1,4 +1,4 @@
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import * as yup from 'yup';
 import { Schema } from 'yup';
 

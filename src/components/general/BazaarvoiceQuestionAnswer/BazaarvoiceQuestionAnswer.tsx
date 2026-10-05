@@ -6,10 +6,10 @@ import Headline from 'helpers/Headline/Headline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
+import environment from 'lib/environment';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useBVScript } from 'lib/utils/use-bv-script';
 import { useEffect, useRef, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import styles from './helpers/bazaarvoice-question-answer.module.css';
 import { BazaarvoiceQuestionAnswerTheme } from './helpers/BazaarvoiceQuestionAnswer.theme';

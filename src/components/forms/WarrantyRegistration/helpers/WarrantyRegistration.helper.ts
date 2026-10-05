@@ -1,5 +1,6 @@
 import { FormsConstants } from 'lib/constants/forms-constants';
 import { debounceFunction } from 'lib/utils/debounce-utils';
+import { getErrorMessage } from 'lib/utils/error-utils/get-error-message';
 import * as Yup from 'yup';
 
 export const warrantyRegistrationInitialValues = {
@@ -26,8 +27,7 @@ export const warrantyRegistrationInitialValues = {
 
 const zipValidationRegex: Record<string, string> = {
   USA: '^[0-9]{5}$',
-  Canada:
-    '^(?=.*\\d)(?=.*[a-zA-Z])[a-zA-Z\\d]{3} [a-zA-Z\\d]{3}$|^(?=.*\\d)(?=.*[a-zA-Z])[a-zA-Z\\d]{6}$',
+  Canada: String.raw`^(?=.*\d)(?=.*[a-zA-Z])[a-zA-Z\d]{3} [a-zA-Z\d]{3}$|^(?=.*\d)(?=.*[a-zA-Z])[a-zA-Z\d]{6}$`,
   Mexico: '^[0-9]{5}$',
 };
 
@@ -44,12 +44,12 @@ export const warrantyRegistrationValidationSchema = {
   city: Yup.string().required('This field is required'),
   state: Yup.string().required('This field is required'),
   zip: Yup.string().when('country', ([country], schema) => {
-    if (country !== 'Other') {
+    if (country === 'Other') {
+      return schema;
+    } else {
       return schema
         .required('This field is required')
         .matches(new RegExp(zipValidationRegex[country]), 'Please enter a valid zip code.');
-    } else {
-      return schema;
     }
   }),
   warranty_products: Yup.array()
@@ -57,17 +57,17 @@ export const warrantyRegistrationValidationSchema = {
       Yup.object().shape({
         producttype: Yup.string().required('Yoo! This field is required'),
         productseries: Yup.string().when('producttype', ([productType], schema) => {
-          if (productType !== 'Storm Doors') {
-            return schema.required('This field is required');
-          } else {
+          if (productType === 'Storm Doors') {
             return schema;
+          } else {
+            return schema.required('This field is required');
           }
         }),
         quantity: Yup.string().when('producttype', ([productType], schema) => {
-          if (productType !== 'Storm Doors') {
-            return schema.required('This field is required');
-          } else {
+          if (productType === 'Storm Doors') {
             return schema;
+          } else {
+            return schema.required('This field is required');
           }
         }),
         serialnumber: Yup.string().when('producttype', ([productType], schema) => {
@@ -111,14 +111,12 @@ export const warrantyRegistrationValidationSchema = {
 };
 
 const debouncedValidateSerialNumber = debounceFunction(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async (value: string, onSuccess: any, onError: any) => {
+  async (value: string, onSuccess: () => void, onError: (message?: string) => void) => {
     try {
       const isValid = await validateStormDoorSerialNumber(value);
       return isValid ? onSuccess() : onError();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      onError();
+      onError(getErrorMessage(error));
     }
   },
   500

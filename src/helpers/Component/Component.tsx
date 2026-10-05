@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { ApmErrorBoundary } from 'lib/apm/apm-error-boundary';
-import { EnumField, getEnum } from 'lib/utils/get-enum';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import { JSX } from 'react';
 

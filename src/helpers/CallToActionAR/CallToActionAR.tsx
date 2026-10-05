@@ -1,7 +1,7 @@
 import type { ModelViewerElement } from '@google/model-viewer';
 import classNames from 'classnames';
 import SvgIcon, { IconTypes } from 'helpers/SvgIcon/SvgIcon';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, useEffect, useRef, useState } from 'react';
 import { isDesktop } from 'react-device-detect';
 import { FaSms } from 'react-icons/fa';

@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { ResultLink } from 'helpers/Coveo/ResultList/ResultLink';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { getFieldsToInclude, getResultItemIndex } from 'lib/coveo';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import Image from 'next/image';
 import { useRef } from 'react';

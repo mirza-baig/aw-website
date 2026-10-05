@@ -17,12 +17,12 @@ import SingleButton from 'helpers/SingleButton/SingleButton';
 import { Subheadline } from 'helpers/Subheadline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
-import { useBVScript } from 'lib/utils/use-bv-script';
+import environment from 'lib/environment';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
 import React, { JSX, useEffect, useMemo, useRef, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import { ProductSwatch } from './product-swatch';
 import { ProductIntroTheme } from './ProductIntro.theme';

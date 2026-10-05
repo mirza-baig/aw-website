@@ -1,4 +1,4 @@
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import ButtonDarkBG from './buttons/btn--dark-bg';
 import ButtonLink from './buttons/btn--link';

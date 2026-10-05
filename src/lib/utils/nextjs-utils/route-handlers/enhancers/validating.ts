@@ -11,6 +11,22 @@ export type ValidatedAppRouteHandlerFn<T> = (
   ctx: AppRouteHandlerFnContext
 ) => AppRouteHandlerFnReturn;
 
+/**
+ * Creates an app route handler that extracts and validates request data before
+ * invoking the supplied handler.
+ *
+ * Validation runs with `abortEarly: false`, so all field errors are included in
+ * the 400 problem-details response. Extraction errors and non-validation errors
+ * are re-thrown.
+ *
+ * @typeParam T The type of the validated request data passed to `handler`.
+ * @param options The handler, schema, and extractor configuration.
+ * @param options.handler The handler invoked with validated data, the request, and route context.
+ * @param options.schema The Yup schema used to validate extracted data.
+ * @param options.extractor The function that extracts data from the incoming request.
+ * @returns An app route handler that performs extraction and validation before delegation.
+ * @throws Errors from extraction and errors that are not Yup validation errors.
+ */
 export function validating<T>({
   handler,
   schema,

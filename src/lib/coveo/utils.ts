@@ -11,10 +11,11 @@ import {
   SortOrder,
 } from '@coveo/headless';
 import { XupDynamicResultItem } from 'components/listing/XupCardCollectionDynamic/helpers/XupCardCollectionDynamic.Template.helper';
+import environment from 'lib/environment';
 import sitecoreClient from 'lib/sitecore-client';
-import { EnumField, getEnum } from 'lib/utils/get-enum';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
-import { environment } from 'startup/environment';
 
 import { currentAccessToken, renewAccessToken } from './access-token';
 import { Sitecore } from '.sitecore/AndersenWindows.model';

@@ -1,3 +1,9 @@
+/**
+ * Reads a cookie value from the browser document.
+ *
+ * @param cookieName The name of the cookie to retrieve.
+ * @returns The raw cookie value, or undefined when running server-side or when the cookie is not found.
+ */
 export function getCookie(cookieName: string): unknown {
   // SSR guard
   if (typeof document === 'undefined') {

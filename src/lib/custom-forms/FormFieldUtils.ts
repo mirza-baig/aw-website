@@ -3,7 +3,7 @@
 
 import { Field, Item } from '@sitecore-content-sdk/nextjs';
 import { formValueProviderFactory } from 'lib/generic-form-builder/value-providers';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import * as yup from 'yup';
 
 import { FormExtendedProps } from './FormExtendedProps';

@@ -1,3 +1,5 @@
+'use client';
+
 import { useSitecore } from '@sitecore-content-sdk/nextjs';
 
 /**

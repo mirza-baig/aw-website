@@ -4,7 +4,7 @@ import { Page } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import { FieldWrapper } from 'helpers/GenericFormBuilder/FieldWrapper';
 import { ComponentProps } from 'lib/component-props';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { JSX } from 'react';

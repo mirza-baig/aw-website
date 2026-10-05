@@ -9,7 +9,14 @@ type Options = {
   roundingDirection: RoundingDirections;
 };
 
-export const roundToEigth = (number: number, options: Options) => {
+/**
+ * Rounds a number to the nearest eighth fraction or in a specified direction.
+ *
+ * @param number The number to round.
+ * @param options Optional rounding direction options; defaults to closest.
+ * @returns The number rounded to the selected eighth fraction.
+ */
+export function roundToEigth(number: number, options?: Options): number {
   const whole = Math.floor(number);
   const decimal = number - whole;
 
@@ -32,4 +39,4 @@ export const roundToEigth = (number: number, options: Options) => {
   });
 
   return whole + eigths[0].decimal;
-};
+}

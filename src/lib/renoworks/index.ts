@@ -23,4 +23,4 @@ export type {
   RenoworksProductConfigurationDimensionMapping,
 } from './renoworks-context';
 export { Renoworks, RenoworksContext, useRenoworks } from './renoworks-context';
-export { shortenUrl } from './utils';
+export { shortenUrl } from './shorten-url';

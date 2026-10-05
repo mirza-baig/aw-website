@@ -6,6 +6,7 @@ import Button from 'helpers/Button/Button';
 import Disclaimer from 'helpers/DisclaimerText/DisclaimerText';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
+import environment from 'lib/environment';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
@@ -13,7 +14,6 @@ import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import { useCallback, useRef, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import { ComparisonSeriesChartFields, WithinSeriesChartFields } from './ComparisonTable.Types';
 import { ProductCell, SwatchOverflowHandler } from './WithinSeriesChart.cells';

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('startup/environment', () => ({
-  environment: {
+vi.mock('lib/environment', () => ({
+  default: {
     isPreview: vi.fn(),
     isProduction: vi.fn(),
   },
@@ -13,8 +13,8 @@ vi.mock('lib/sitecore-client', () => ({
   },
 }));
 
+import environment from 'lib/environment';
 import sitecoreClient from 'lib/sitecore-client';
-import { environment } from 'startup/environment';
 
 import { checkHostNameInMediaURL } from './utils';
 

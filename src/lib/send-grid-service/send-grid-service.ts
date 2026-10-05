@@ -1,6 +1,6 @@
 import sgMail from '@sendgrid/mail';
+import environment from 'lib/environment';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
-import { environment } from 'startup/environment';
 
 export interface SendEmailRequest {
   to: string[];

@@ -1,5 +1,6 @@
 import { FormsConstants } from 'lib/constants/forms-constants';
-import { clearSessionStorageItems, setSessionStorageItems } from 'lib/utils/session-storage';
+import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
+import { setSessionStorageItems } from 'lib/utils/client-storage-utils/set-session-storage-items';
 
 import { buildPersonalizePayload } from './build-personalize-payload';
 

@@ -1,5 +1,3 @@
-'use client';
-
 import { Field } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import Component from 'helpers/Component/Component';
@@ -8,48 +6,63 @@ import ImagePrimary from 'helpers/Media/ImagePrimary';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { Subheadline } from 'helpers/Subheadline';
 import { ComponentProps } from 'lib/component-props';
-import { useTheme } from 'lib/context/ThemeContext';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { DataSource } from 'lib/types/data-source';
+import { getClientComponentProps } from 'lib/utils/sitecore-utils/get-client-component-props';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
+import { getTheme } from 'lib/website/theme';
 import { JSX } from 'react';
 
 import { HeroFeaturedProductTheme } from './helpers/HeroFeaturedProduct.theme';
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
 
 type HeroFeaturedProductProps = ComponentProps &
-  Sitecore.Components.Hero.HeroFeaturedProduct.HeroFeaturedProduct;
+  DataSource<Sitecore.Components.Hero.HeroFeaturedProduct.HeroFeaturedProduct>;
 
 type SubheadingData = {
   [key: string]: Field<string>;
 };
 
-function HeroFeaturedProduct_Default(props: HeroFeaturedProductProps): JSX.Element {
+function HeroFeaturedProduct_Default(props: HeroFeaturedProductProps): JSX.Element | null {
   const { fields } = props;
 
-  const { themeData } = useTheme(HeroFeaturedProductTheme);
+  const themeData = getTheme(props.page.customProps.theme, HeroFeaturedProductTheme);
   const subheadingData: SubheadingData = {};
+  const isEE = !props.page.mode.isNormal;
 
-  if (!fields) {
-    return <></>;
+  // Always render in edit mode so Sitecore field editors appear
+  if (!fields && !isEE) {
+    return null;
   }
 
-  Object.keys(fields).forEach((key) => {
-    const typedKey = key as keyof typeof fields;
-    const field = fields[typedKey];
-    if (
-      key.startsWith('subheading') &&
-      field &&
-      'value' in field &&
-      typeof field.value === 'string'
-    ) {
-      subheadingData[key] = field;
-    }
-  });
+  if (fields) {
+    Object.keys(fields).forEach((key) => {
+      const typedKey = key as keyof typeof fields;
+      const field = fields?.[typedKey];
+      if (
+        key.startsWith('subheading') &&
+        field &&
+        'value' in field &&
+        typeof field.value === 'string'
+      ) {
+        subheadingData[key] = field as Field<string>;
+      }
+    });
+  }
 
   const primaryImageCaption: Field<string> =
-    'primaryImageCaption' in fields && fields.primaryImageCaption
+    fields && 'primaryImageCaption' in fields && fields.primaryImageCaption
       ? (fields.primaryImageCaption as Field<string>)
       : { value: '' };
+
+  const mediaFields = props.fields
+    ? {
+        primaryImage: props.fields?.primaryImage,
+        primaryImageMobile: props.fields?.primaryImageMobile,
+        primaryImageMobileFocusArea: props.fields?.primaryImageMobileFocusArea,
+        primaryImageCaption,
+      }
+    : undefined;
 
   return (
     <>
@@ -58,25 +71,24 @@ function HeroFeaturedProduct_Default(props: HeroFeaturedProductProps): JSX.Eleme
         backgroundVariant=""
         sectionWrapperClasses=""
         dataComponent="hero/herofeaturedproduct"
-        {...props}
+        {...getClientComponentProps(props)}
       >
         <div className={classNames('col-span-12', themeData.classes.productWrapper)}>
           <div className={themeData.classes.headingsWrapper}>
-            <Subheadline classes={themeData.classes.smallHeadline} useTag="h2" {...props} />
+            <Subheadline
+              classes={themeData.classes.smallHeadline}
+              useTag="h2"
+              {...getClientComponentProps(props)}
+            />
             <Headline
               classes={themeData.classes.largeHeadline}
               useTag={getHeadingLevel('h1', fields?.headlineLevel)}
-              {...props}
+              {...getClientComponentProps(props)}
             />
           </div>
           <div className={themeData.classes.imageWrapper}>
             <ImagePrimary
-              fields={{
-                primaryImage: fields.primaryImage,
-                primaryImageMobile: fields.primaryImageMobile,
-                primaryImageMobileFocusArea: fields.primaryImageMobileFocusArea,
-                primaryImageCaption: primaryImageCaption,
-              }}
+              fields={mediaFields}
               maxW="max-w-[592px]"
               additionalDesktopClasses={themeData.classes.additionalDesktopClasses}
               additionalMobileClasses={themeData.classes.additionalMobileClasses}
@@ -86,7 +98,12 @@ function HeroFeaturedProduct_Default(props: HeroFeaturedProductProps): JSX.Eleme
         </div>
       </Component>
 
-      <Component variant="lg" backgroundVariant="" sectionWrapperClasses="" {...props}>
+      <Component
+        variant="lg"
+        backgroundVariant=""
+        sectionWrapperClasses=""
+        {...getClientComponentProps(props)}
+      >
         <div className={`col-span-12 ${themeData.classes.subheadingsList}`}>
           {Object.keys(subheadingData)
             .sort(

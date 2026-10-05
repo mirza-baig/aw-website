@@ -1,4 +1,3 @@
-'use client';
 import { ThemeFile } from 'lib/context/ThemeContext';
 
 export const HeroTwoColumnTheme: ThemeFile = {

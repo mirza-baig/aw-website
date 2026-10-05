@@ -1,6 +1,7 @@
 'use client';
 
 import { ComponentRendering, Text, useSitecore } from '@sitecore-content-sdk/nextjs';
+import awClientConfig from 'aw.config.client';
 import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import SvgIcon, { IconTypes } from 'helpers/SvgIcon/SvgIcon';
@@ -11,8 +12,8 @@ import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
-import { getEnum } from 'lib/utils/get-enum';
 import { useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX, ReactNode, useState } from 'react';
@@ -209,8 +210,9 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
   const { screenType } = useCurrentScreenType();
   const isDesktop = screenType !== 'sm' && screenType !== 'md';
   const { page } = useSitecore();
-  const trustArcCmId = process.env.NEXT_PUBLIC_AW_TRUSTARC_CMID ?? '';
+  const trustArcCmId = awClientConfig.trustArc.cmid;
   const showTrustArc = trustArcCmId && !page?.layout.sitecore.context.pageEditing;
+  const useUpdatedAutoBlock = props.page.customProps.featureFlags.releaseTrustArcAutoBlock;
 
   if (!fields) {
     return <></>;
@@ -301,11 +303,24 @@ function AWFooter_Default(props: AWFooterProps): JSX.Element {
             </div>
           </div>
 
-          {showTrustArc && (
-            <button className="flex underline" onClick={FooterConsentTrigger}>
-              Cookie Preferences
-            </button>
-          )}
+          {showTrustArc &&
+            (useUpdatedAutoBlock ? (
+              <>
+                <div
+                  id="teconsent"
+                  className="peer"
+                  dangerouslySetInnerHTML={{ __html: '' }}
+                  suppressHydrationWarning
+                ></div>
+                <button className="hidden underline peer-empty:flex" onClick={FooterConsentTrigger}>
+                  Cookie Preferences
+                </button>
+              </>
+            ) : (
+              <button className="flex underline" onClick={FooterConsentTrigger}>
+                Cookie Preferences
+              </button>
+            ))}
         </div>
       </div>
     </div>

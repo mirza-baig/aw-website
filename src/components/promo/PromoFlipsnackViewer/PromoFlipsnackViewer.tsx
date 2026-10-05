@@ -7,7 +7,7 @@ import Component from 'helpers/Component/Component';
 import Headline from 'helpers/Headline/Headline';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 

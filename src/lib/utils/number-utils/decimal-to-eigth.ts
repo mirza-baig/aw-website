@@ -9,7 +9,14 @@ type Options = {
   roundingDirection: RoundingDirections;
 };
 
-export const decimalToEigth = (number: number, options: Options) => {
+/**
+ * Converts the fractional part of a number to the nearest eighth fraction.
+ *
+ * @param number The number whose fractional part should be converted.
+ * @param options Optional rounding direction options; defaults to closest.
+ * @returns The matching eighth fraction, or undefined when the selected direction has no match.
+ */
+export function decimalToEigth(number: number, options?: Options): string | undefined {
   const decimal = number - Math.floor(number);
 
   options = {
@@ -31,4 +38,4 @@ export const decimalToEigth = (number: number, options: Options) => {
   });
 
   return eigths[0]?.fraction;
-};
+}

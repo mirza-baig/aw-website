@@ -1,6 +1,5 @@
 import { Item } from '@sitecore-content-sdk/nextjs';
-import { getEnum } from 'lib/utils/get-enum';
-import { PartialFields } from 'lib/utils/type-utils/partial-fields';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 

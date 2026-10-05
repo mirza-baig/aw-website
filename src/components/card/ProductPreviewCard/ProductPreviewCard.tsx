@@ -14,13 +14,13 @@ import SingleButton from 'helpers/SingleButton/SingleButton';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
 import { ThemeName, useTheme } from 'lib/context/ThemeContext';
-import { EnumField } from 'lib/utils/get-enum';
+import environment from 'lib/environment';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useBVScript } from 'lib/utils/use-bv-script';
 import { useFavoriteProducts } from 'lib/website/favorite-products/use-favorite-products';
 import Link from 'next/link';
 import { JSX, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import { ProductPreviewCardTheme } from './helpers/ProductPreviewCard.theme';
 import { Sitecore } from '.sitecore/AndersenWindows.model';

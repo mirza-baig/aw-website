@@ -1,3 +1,5 @@
+'use client';
+
 import classNames from 'classnames';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX } from 'react';

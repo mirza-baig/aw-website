@@ -1,7 +1,7 @@
 import { Field } from '@sitecore-content-sdk/nextjs';
 import { DesktopGalleryStyles, VideoItemProps } from 'helpers/VideoGalleryHelpers/types';
 import { ComponentProps } from 'lib/component-props';
-import { EnumField } from 'lib/utils/get-enum';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
 
 // Type definition for VideoGallery props used by GlobalVideoGallery and VideoListing
 export type VideoGalleryProps = ComponentProps & {

@@ -2,7 +2,7 @@ import { Result, ResultListState } from '@coveo/headless';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { getResultItemIndex } from 'lib/coveo';
 import { ResultEntities } from 'lib/coveo/utils';
-import { EnumField } from 'lib/utils/get-enum';
+import { EnumField } from 'lib/utils/sitecore-utils/enum-field';
 import { guidEquals } from 'lib/utils/string-utils/guid-equals';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';

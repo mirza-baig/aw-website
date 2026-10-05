@@ -4,17 +4,18 @@ import Card from 'helpers/Card/Card';
 import { StandaloneSearchBox } from 'helpers/Coveo/StandaloneSearchBox/StandaloneSearchBox';
 import LinkWrapper from 'helpers/LinkWrapper/LinkWrapper';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
+import { useRaqPznBannerActive } from 'helpers/Personalize/use-raq-pzn-banner';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import SingleButton from 'helpers/SingleButton/SingleButton';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
-import { getEnum } from 'lib/utils/get-enum';
+import environment from 'lib/environment';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { JSX, useEffect, useRef, useState } from 'react';
-import { environment } from 'startup/environment';
 
 import RaqMobileBanner from '../../RaqMobileBanner/RaqMobileBanner';
 import GenericCardNav from '../GenericCardNav';
@@ -522,6 +523,8 @@ const AWMobileHeader = (props: AWHeaderProps) => {
   const wrapperMHRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  // Hide the standard RAQ banner while the Personalize RAQ abandon banner is showing (homepage only)
+  const isRaqPznBannerActive = useRaqPznBannerActive();
   // (Optional) If your flow changes only the hash, track it too:
   const [hash, setHash] = useState('');
   useEffect(() => {
@@ -626,7 +629,11 @@ const AWMobileHeader = (props: AWHeaderProps) => {
       )}
 
       <div ref={wrapperMHRef} className={mobileHeaderClass} id="awHeaderMobile">
-        {raqItem && <RaqMobileBanner props={raqItem} />}
+        {raqItem && (
+          <div className={classNames(isRaqPznBannerActive && 'hidden')}>
+            <RaqMobileBanner props={raqItem} />
+          </div>
+        )}
 
         <div className="h-[55px]">
           {/* ── Top bar ── */}

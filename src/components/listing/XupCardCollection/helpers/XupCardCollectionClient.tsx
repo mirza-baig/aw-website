@@ -8,7 +8,7 @@ import Component, { ComponentBackgroundVariants } from 'helpers/Component/Compon
 import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import Headline from 'helpers/Headline/Headline';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, ReactNode } from 'react';
 
 import { XupCardCollectionTheme } from './XupCardCollection.theme';

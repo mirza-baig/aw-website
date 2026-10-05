@@ -11,7 +11,7 @@ import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX } from 'react';
 

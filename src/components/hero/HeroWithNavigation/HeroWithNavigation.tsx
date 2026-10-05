@@ -1,4 +1,3 @@
-'use client';
 import { ComponentRendering, Field, ImageField, LinkField } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import Component, { ComponentSpacing } from 'helpers/Component/Component';
@@ -8,27 +7,29 @@ import ImagePrimary from 'helpers/Media/ImagePrimary';
 import Subheadline from 'helpers/Subheadline/Subheadline';
 import SvgIcon, { IconTypes } from 'helpers/SvgIcon/SvgIcon';
 import { ComponentProps } from 'lib/component-props';
-import { useTheme } from 'lib/context/ThemeContext';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
-import { getEnum } from 'lib/utils/get-enum';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { DataSource } from 'lib/types/data-source';
+import { getClientComponentProps } from 'lib/utils/sitecore-utils/get-client-component-props';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useWebsiteContext } from 'lib/website/WebsiteContext';
+import { getTheme } from 'lib/website/theme';
 import { JSX } from 'react';
 
 import { HeroWithNavigationTheme } from './helpers/HeroWithNavigation.theme';
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
 
-type HeroWithNavigationLink = Sitecore.Components.Hero.HeroWithNavigation.HeroWithNavigationLink & {
+type HeroWithNavigationLink = {
   id: string;
+  fields: Sitecore.Components.Hero.HeroWithNavigation.HeroWithNavigationLink;
 };
 
 type HeroWithNavigationProps = ComponentProps &
-  Sitecore.Components.Hero.HeroWithNavigation.HeroWithNavigation & {
+  DataSource<Sitecore.Components.Hero.HeroWithNavigation.HeroWithNavigation> & {
     rendering: ComponentRendering;
     params: Record<string, string>;
     fields: {
@@ -45,9 +46,9 @@ function HeroWithNavigation_Default(props: HeroWithNavigationProps): JSX.Element
 
   const spacing = getEnum<ComponentSpacing>(fields.componentSpacing) ?? 'standard';
   const spacingValue = spacing === 'standard' ? '8' : '4';
-  const { themeData } = useTheme(HeroWithNavigationTheme(spacingValue));
+  const themeData = getTheme(props.page.customProps.theme, HeroWithNavigationTheme(spacingValue));
 
-  const { breadcrumbs = [] } = useWebsiteContext();
+  const breadcrumbs = props.page.customProps.breadcrumbs ?? [];
   return (
     <Component
       variant=""
@@ -55,7 +56,7 @@ function HeroWithNavigation_Default(props: HeroWithNavigationProps): JSX.Element
       sectionWrapperClasses=""
       dataComponent="hero/herowithnavigation"
       className={breadcrumbs.length === 1 ? 'relative pt-[55px] ml:pt-0' : 'relative'}
-      {...props}
+      {...getClientComponentProps({ ...props, fields })}
     >
       {/* Headline */}
       <div className="col-span-12">
@@ -65,8 +66,7 @@ function HeroWithNavigation_Default(props: HeroWithNavigationProps): JSX.Element
               <Headline
                 useTag={getHeadingLevel('h1', fields?.headlineLevel)}
                 classes={themeData.classes.headline}
-                {...props}
-                fields={fields}
+                {...getClientComponentProps({ ...props, fields })}
               />
             </div>
           </div>
@@ -92,7 +92,10 @@ function HeroWithNavigation_Default(props: HeroWithNavigationProps): JSX.Element
 
         {/* Navigation Links */}
         <div className={themeData.classes.linkContainer}>
-          <Subheadline classes={themeData.classes.subheadlineStyle} {...props} fields={fields} />
+          <Subheadline
+            classes={themeData.classes.subheadlineStyle}
+            {...getClientComponentProps({ ...props, fields })}
+          />
           {fields?.children?.map((_item: HeroWithNavigationLink) => {
             const _linkField = _item.fields?.navigationLink as LinkField;
             const _icon = getEnum<IconTypes>(_item.fields?.navigationIcon);

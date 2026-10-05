@@ -1,3 +1,4 @@
+/** Bitwise flags corresponding to JavaScript regular expression flags. */
 export enum Flags {
   hasIndices = 1,
   global = 2,

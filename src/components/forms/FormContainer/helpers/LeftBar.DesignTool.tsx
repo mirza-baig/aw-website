@@ -11,7 +11,7 @@ import Headline from 'helpers/Headline/Headline';
 import { MediaPrimary } from 'helpers/Media';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import NextLink from 'next/link';
 import { JSX, useContext } from 'react';
 

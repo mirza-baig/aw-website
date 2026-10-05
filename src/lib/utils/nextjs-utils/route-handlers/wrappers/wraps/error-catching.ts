@@ -6,6 +6,12 @@ import { NextRequest } from 'next/server';
 import { AppRouteHandlerFn, AppRouteHandlerFnContext } from '../../types';
 import { Wrapper } from '../wrapper';
 
+/**
+ * Wraps an API route handler with centralized error logging and handling.
+ *
+ * @param debug The debugger used to log handler errors.
+ * @returns A wrapper that preserves successful responses and returns a 500 problem response for failures.
+ */
 export function errorCatching({ debug }: { debug: Debugger }): Wrapper {
   return function errorCatchingWrap(method: AppRouteHandlerFn): AppRouteHandlerFn {
     return async function ErrorCatchingAppRouteHandlerFn(

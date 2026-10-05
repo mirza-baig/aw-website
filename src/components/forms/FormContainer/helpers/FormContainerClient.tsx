@@ -2,7 +2,7 @@
 
 import classNames from 'classnames';
 import Component, { ComponentWrapperProps } from 'helpers/Component/Component';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, ReactNode } from 'react';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';

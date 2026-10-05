@@ -5,8 +5,8 @@ import { Eyebrow } from 'helpers/Eyebrow';
 import { FormFieldsTheme } from 'helpers/GenericFormBuilder/FormFields.Theme';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX } from 'react';
 

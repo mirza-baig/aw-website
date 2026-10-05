@@ -3,7 +3,7 @@ import config from 'aw.config.client';
 import FIELD_IDS from 'lib/constants/salesforce-field-ids';
 import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getCookie } from 'lib/utils/client-storage-utils/get-cookie';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 
 import { ActionProps, ActionResult } from '..';

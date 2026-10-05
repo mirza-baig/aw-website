@@ -35,8 +35,8 @@ import {
   getInitialCriterion,
   replaceTokenInCoveoExpression,
 } from 'lib/coveo/utils';
-import { getEnum } from 'lib/utils/get-enum';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { toShortId } from 'lib/utils/string-utils/to-short-id';
 import { JSX, ReactElement, useEffect, useRef, useState } from 'react';
 

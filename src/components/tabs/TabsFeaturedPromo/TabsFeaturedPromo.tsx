@@ -88,11 +88,16 @@ function TabsFeaturedPromo_Default(props: TabsFeaturedPromoProps) {
     [children]
   );
 
+  const initialized = useRef(false);
   useEffect(() => {
+    if (initialized.current) {
+      return;
+    }
     if (!children || children.length === 0) {
       return;
     }
 
+    initialized.current = true;
     const selectedId = window.location.hash?.slice(1);
     const defaultTabId = fields.defaultActiveTab?.fields?.contentId?.value;
 

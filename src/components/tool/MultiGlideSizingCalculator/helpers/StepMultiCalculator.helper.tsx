@@ -5,17 +5,21 @@ import ModalWrapper from 'helpers/ModalWrapper/ModalWrapper';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
+import { roundToEigth } from 'lib/utils/number-utils/round-to-digth';
+import { RoundingDirections } from 'lib/utils/number-utils/rounding-directions';
+import { truncate } from 'lib/utils/number-utils/truncate';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import { JSX, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiArrowLeft } from 'react-icons/fi';
 import { IoMdDownload } from 'react-icons/io';
 import { useReactToPrint } from 'react-to-print';
-import * as AWNumberUtil from 'src/lib/utils/number-utils/aw-number-utils';
+import { decimalToEigth } from 'src/lib/utils/number-utils/decimal-to-eigth';
 
 import CalculatorResult from './CalculatorResult.helper';
 import { MIN_MAX_WIDTHS, OPTIONS } from './Constant.helper';
 import { MultiGlideSizingCalculatorTheme } from './MultiGlideSizingCalculator.theme';
+
 type CalcForm = {
   calculateUsing: string; //known_size
   width: string; //ew
@@ -833,7 +837,7 @@ export const StepMultiCalculation = (props: any): JSX.Element => {
       panelWidth =
         (inputWidthNum - 4.224 + panelOverlapNum * (numberPanelsNum - 2)) / numberPanelsNum;
     }
-    return AWNumberUtil.truncate(panelWidth, 3);
+    return truncate(panelWidth, 3);
   };
 
   // Panel Overlap
@@ -862,7 +866,7 @@ export const StepMultiCalculation = (props: any): JSX.Element => {
 
     let feet = Math.floor(whole / 12);
     let inches = whole % 12;
-    let fraction = AWNumberUtil.decimalToEigth(number, { roundingDirection: roundingDirection });
+    let fraction = decimalToEigth(number, { roundingDirection: roundingDirection });
 
     // Handle overflow if we rounded up
     if (fraction === '1') {
@@ -898,12 +902,9 @@ export const StepMultiCalculation = (props: any): JSX.Element => {
 
   const formatNumber = (number: any) => {
     if (!isNaN(+number)) {
-      const rounded = AWNumberUtil.roundToEigth(number, AWNumberUtil.roundingDirections.closest);
+      const rounded = roundToEigth(number);
       const mm = rounded * 25.4;
-      const formatted = convertToFeetInchesAndFraction(
-        rounded,
-        AWNumberUtil.roundingDirections.closest
-      );
+      const formatted = convertToFeetInchesAndFraction(rounded, RoundingDirections.closest);
       return formatted + '<br>' + ' (' + String(mm.toFixed(3)) + 'mm)';
     } else {
       return String(number);
@@ -1106,10 +1107,10 @@ export const StepMultiCalculation = (props: any): JSX.Element => {
     }
 
     if (sillOptions === 'flush') {
-      panelHeight = AWNumberUtil.truncate(Number.parseFloat(unitHeight) - 3.644, 3);
+      panelHeight = truncate(Number.parseFloat(unitHeight) - 3.644, 3);
     } else {
       // onfloor_drainage
-      panelHeight = AWNumberUtil.truncate(Number.parseFloat(unitHeight) - 3.144, 3);
+      panelHeight = truncate(Number.parseFloat(unitHeight) - 3.144, 3);
     }
 
     return { panelWidth, panelHeight };
@@ -1425,14 +1426,8 @@ export const StepMultiCalculation = (props: any): JSX.Element => {
         break;
     }
 
-    const minFormatted = convertToFeetInchesAndFraction(
-      minHeight,
-      AWNumberUtil.roundingDirections.up
-    );
-    const maxFormatted = convertToFeetInchesAndFraction(
-      maxHeight,
-      AWNumberUtil.roundingDirections.down
-    );
+    const minFormatted = convertToFeetInchesAndFraction(minHeight, RoundingDirections.up);
+    const maxFormatted = convertToFeetInchesAndFraction(maxHeight, RoundingDirections.down);
 
     if (height < minHeight) {
       return 'Please enter a value greater than or equal to ' + minFormatted + '.';
@@ -1498,14 +1493,8 @@ export const StepMultiCalculation = (props: any): JSX.Element => {
       }
     }
 
-    const minFormatted = convertToFeetInchesAndFraction(
-      minWidth,
-      AWNumberUtil.roundingDirections.up
-    );
-    const maxFormatted = convertToFeetInchesAndFraction(
-      maxWidth,
-      AWNumberUtil.roundingDirections.down
-    );
+    const minFormatted = convertToFeetInchesAndFraction(minWidth, RoundingDirections.up);
+    const maxFormatted = convertToFeetInchesAndFraction(maxWidth, RoundingDirections.down);
 
     if (width < minWidth) {
       return 'Please enter a value greater than or equal to ' + minFormatted + '.';

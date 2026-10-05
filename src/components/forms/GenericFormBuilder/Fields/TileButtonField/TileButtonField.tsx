@@ -6,7 +6,7 @@ import { FormFieldsTheme } from 'helpers/GenericFormBuilder/FormFields.Theme';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
 import { OptionItem } from 'lib/generic-form-builder/utils/get-option-items';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { Page } from 'playwright';

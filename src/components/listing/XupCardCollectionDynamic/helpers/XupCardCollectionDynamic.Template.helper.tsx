@@ -5,7 +5,7 @@ import PhotoItemWithDetail, {
 import { getPhotoItemProps } from 'helpers/PhotoItemWithDetail/PhotoItemWithDetail.Utils';
 import { extractURLParts } from 'lib/coveo/extract-url-parts';
 import { getFieldsToInclude, getResultItemIndex } from 'lib/coveo/utils';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 
 import GenericResultCardMarkup from './XupCardMarkups/GenericResultCardMarkup.helper';
 import { Sitecore } from '.sitecore/AndersenWindows.model';

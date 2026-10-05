@@ -1,5 +1,3 @@
-'use client';
-
 import BodyCopy from 'helpers/BodyCopy/BodyCopy';
 import { cta1ToButtonProps } from 'helpers/Button/Utils';
 import ButtonGroup from 'helpers/ButtonGroup/ButtonGroup';
@@ -9,16 +7,18 @@ import { Eyebrow } from 'helpers/Eyebrow';
 import Headline from 'helpers/Headline/Headline';
 import ImagePrimary from 'helpers/Media/ImagePrimary';
 import { ComponentProps } from 'lib/component-props';
-import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { DataSource } from 'lib/types/data-source';
+import { getClientComponentProps } from 'lib/utils/sitecore-utils/get-client-component-props';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
+import { getTheme } from 'lib/website/theme';
 
 import { HeroBlogArticleTheme } from './helpers/HeroBlogArticle.theme';
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
 
 type HeroBlogArticleProps = ComponentProps &
-  Sitecore.Components.Hero.HeroBlogArticle.HeroBlogArticle;
+  DataSource<Sitecore.Components.Hero.HeroBlogArticle.HeroBlogArticle>;
 
 function HeroBlogArticle_Default(props: HeroBlogArticleProps) {
   const style = getEnum<ComponentBackgroundVariants>(props.fields?.backgroundColor) ?? 'white';
@@ -30,7 +30,8 @@ function HeroBlogArticle_Default(props: HeroBlogArticleProps) {
   const paddingSize = showImage ? 'relative' : 'relative lg:mx-auto md:max-w-(--breakpoint-lg)';
   const hasCaption = props?.fields?.primaryImageCaption?.value != '';
 
-  const { themeData } = useTheme(
+  const themeData = getTheme(
+    props.page.customProps.theme,
     HeroBlogArticleTheme(styleVariation, topBorder, bottomBorder, showImage, hasCaption)
   );
 
@@ -42,20 +43,23 @@ function HeroBlogArticle_Default(props: HeroBlogArticleProps) {
       sectionWrapperClasses={themeData.classes.contentClasses.sectionWrapperClasses}
       backgroundVariant={style}
       dataComponent="hero/heroblogarticle"
-      {...props}
+      {...getClientComponentProps(props)}
     >
       <div className={themeData.classes.contentClasses.copyContainerClass}>
         <Eyebrow
           useTag="h2"
           classes={themeData.classes.contentClasses?.eyebrowContainer}
-          {...props}
+          {...getClientComponentProps(props)}
         />
         <Headline
           useTag={getHeadingLevel('h1', props.fields?.headlineLevel)}
           classes={themeData.classes.contentClasses.headlineContainer}
-          {...props}
+          {...getClientComponentProps(props)}
         />
-        <BodyCopy classes={themeData.classes.contentClasses?.body} {...props} />
+        <BodyCopy
+          classes={themeData.classes.contentClasses?.body}
+          {...getClientComponentProps(props)}
+        />
         {props.fields?.cta1Link?.value.href && (
           <ButtonGroup
             cta1={cta1ToButtonProps(
@@ -76,7 +80,12 @@ function HeroBlogArticle_Default(props: HeroBlogArticleProps) {
       </div>
       {showImage && (
         <div className={themeData.classes.contentClasses.imageContainerClass}>
-          <ImagePrimary {...props} hideCaption={true} priority ratio="picture" />
+          <ImagePrimary
+            {...getClientComponentProps(props)}
+            hideCaption={true}
+            priority
+            ratio="picture"
+          />
         </div>
       )}
     </Component>

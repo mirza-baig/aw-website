@@ -1,4 +1,5 @@
 import { Image as JSSImage, ImageField } from '@sitecore-content-sdk/nextjs';
+import environment from 'lib/environment';
 import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
@@ -7,7 +8,6 @@ import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import NextImage from 'next/image';
 import Script from 'next/script';
 import { JSX } from 'react';
-import { environment } from 'startup/environment';
 
 import { FocusAreaValue, LayoutValue } from './types';
 

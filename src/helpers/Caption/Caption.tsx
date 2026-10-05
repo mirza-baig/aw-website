@@ -1,3 +1,5 @@
+'use client';
+
 import { Field } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import { useTheme } from 'lib/context/ThemeContext';

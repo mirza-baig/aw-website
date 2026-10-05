@@ -13,7 +13,7 @@ import { getPhotoItemProps } from 'helpers/PhotoItemWithDetail/PhotoItemWithDeta
 import { Subheadline } from 'helpers/Subheadline';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { extractURLParts, getFieldsToInclude, getResultItemIndex } from 'lib/coveo';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import Image from 'next/image';
 import { useRef } from 'react';

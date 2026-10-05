@@ -2,7 +2,7 @@ import { AppPlaceholder } from '@sitecore-content-sdk/nextjs';
 import { paginationStyle } from 'helpers/Carousel/Carousels.helper';
 import { SliderWrapper } from 'helpers/SliderWrapper/SliderWrapper';
 import { ComponentProps } from 'lib/component-props';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX } from 'react';
 

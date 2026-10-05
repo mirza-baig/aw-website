@@ -1,4 +1,6 @@
-import { ThemeFile, ThemeName } from 'lib/website/theme';
+'use client';
+
+import { ThemeFile } from 'lib/website/theme';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 
 export const useTheme = (themeFile?: ThemeFile) => {
@@ -8,4 +10,4 @@ export const useTheme = (themeFile?: ThemeFile) => {
   return { themeName, themeData };
 };
 
-export type { ThemeFile, ThemeName };
+export { type ThemeFile, type ThemeName } from 'lib/website/theme';

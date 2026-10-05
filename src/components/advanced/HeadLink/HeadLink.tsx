@@ -1,11 +1,11 @@
 'use client';
 
 import { ComponentProps } from 'lib/component-props';
-import { getEnum } from 'lib/utils/get-enum';
-import { isValidForEnvironment } from 'lib/utils/is-valid-for-environment';
+import environment from 'lib/environment';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { isValidForEnvironment } from 'lib/utils/sitecore-utils/is-valid-for-environment';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { HTMLAttributeReferrerPolicy, JSX } from 'react';
-import { environment } from 'startup/environment';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 

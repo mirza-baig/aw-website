@@ -9,7 +9,7 @@ import { useTheme } from 'lib/context/ThemeContext';
 import { getWidthClass } from 'lib/generic-form-builder/utils/get-width-class';
 import { replacePlaceholders } from 'lib/generic-form-builder/utils/replace-placeholders';
 import { isRuleIncludedInField } from 'lib/generic-form-builder/utils/validation-utils/is-rule-included-in-field';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { JSX, useState } from 'react';

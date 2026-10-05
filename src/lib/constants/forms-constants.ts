@@ -15,6 +15,8 @@ export const FormsConstants = {
   Enterprise: {
     openModalEvent: 'openGenericModal',
     openFormEvent: 'openForm',
+    // Dispatched when a form instance is mounted inside a modal (i.e. the user opened the modal).
+    formOpenedInModalEvent: 'awFormOpenedInModal',
   },
   Country: {
     USA: 'USA',

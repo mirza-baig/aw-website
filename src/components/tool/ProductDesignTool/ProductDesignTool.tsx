@@ -1,7 +1,8 @@
 import { AppPlaceholder, ComponentRendering } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
+import { releaseRenoworksVisualizerHandshakeUrl } from 'lib/feature-flags/flags';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { Suspense } from 'react';
+import { JSX, Suspense } from 'react';
 
 import { ProductDesignToolClient } from './helpers/ProductDesignToolClient';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -11,7 +12,7 @@ type ProductDesignToolProps = ComponentProps &
   Sitecore.Components.Tool.ProductDesignTool.ProductDesignTool;
 
 // Define the ProductDesignTool component
-function ProductDesignTool_Defualt(props: ProductDesignToolProps) {
+async function ProductDesignTool_Defualt(props: ProductDesignToolProps): Promise<JSX.Element> {
   const placeholderKey = Object.keys(props.rendering.placeholders ?? {}).find((k) =>
     k.startsWith('designtool-')
   );
@@ -42,12 +43,14 @@ function ProductDesignTool_Defualt(props: ProductDesignToolProps) {
       });
     }
   });
+  const visualizerHandshakeUrlEnabled = await releaseRenoworksVisualizerHandshakeUrl();
 
   return (
     <Suspense>
       <ProductDesignToolClient
         fields={props.fields}
         rendering={props.rendering}
+        visualizerHandshakeUrlEnabled={visualizerHandshakeUrlEnabled}
         placeholder={
           <AppPlaceholder
             name={`designtool-${props.params?.DynamicPlaceholderId}`}

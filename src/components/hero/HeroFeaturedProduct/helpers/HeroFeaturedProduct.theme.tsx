@@ -1,4 +1,3 @@
-// Lib
 import { ThemeFile } from 'lib/context/ThemeContext';
 
 export const HeroFeaturedProductTheme: ThemeFile = {

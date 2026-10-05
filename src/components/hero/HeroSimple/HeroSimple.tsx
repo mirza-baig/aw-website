@@ -1,46 +1,45 @@
-'use client';
-
 import Component from 'helpers/Component/Component';
 import Headline from 'helpers/Headline/Headline';
 import { ComponentProps } from 'lib/component-props';
-import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
+import { DataSource } from 'lib/types/data-source';
+import { getClientComponentProps } from 'lib/utils/sitecore-utils/get-client-component-props';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import useExperienceEditor from 'lib/utils/use-experience-editor';
+import { getTheme } from 'lib/website/theme';
 import { JSX } from 'react';
 
 import { BackgroundColor, HeroSimpleTheme } from './helpers/HeroSimple.theme';
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
 
-type HeroSimpleProps = ComponentProps & Sitecore.Components.Hero.HeroSimple.HeroSimple;
+type HeroSimpleProps = ComponentProps & DataSource<Sitecore.Components.Hero.HeroSimple.HeroSimple>;
 
-function HeroSimple_Default(props: HeroSimpleProps): JSX.Element {
+function HeroSimple_Default(props: HeroSimpleProps): JSX.Element | null {
   const { fields } = props;
   const backgroundColor = getEnum<BackgroundColor>(fields?.backgroundColor) ?? 'white';
-  const { themeData } = useTheme(HeroSimpleTheme(backgroundColor));
-  const isEE = useExperienceEditor();
+  const themeData = getTheme(props.page.customProps.theme, HeroSimpleTheme(backgroundColor));
+  const isEE = !props.page.mode.isNormal;
 
   // Always render in edit mode so Sitecore field editors appear
   if (!fields && !isEE) {
-    return <></>;
+    return null;
   }
 
   return (
     <Component
       variant="full"
-      backgroundVariant={backgroundColor} // ✅ FIX HERE
+      backgroundVariant={backgroundColor}
       sectionWrapperClasses=""
       padding={'px-0'}
       dataComponent="general/herosimple"
-      {...props}
+      {...getClientComponentProps(props)}
     >
       <div className="col-span-12">
         <div className="px-m md:max-w-(--breakpoint-lg) lg:mx-auto">
           <Headline
             useTag={getHeadingLevel('h1', fields?.headlineLevel)}
             classes={themeData.classes.heroContainer}
-            {...props}
+            {...getClientComponentProps(props)}
           />
         </div>
       </div>

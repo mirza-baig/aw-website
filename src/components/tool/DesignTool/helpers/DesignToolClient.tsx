@@ -2,6 +2,7 @@
 
 import { Item, useSitecore } from '@sitecore-content-sdk/nextjs';
 import { useAsPath } from 'lib/hooks/use-as-path';
+import { VisualizationReferralProvider } from 'lib/renoworks/visualization-referral-context';
 import { JSX, ReactNode, useEffect, useRef, useState } from 'react';
 import { DesignToolQueryItem } from 'src/app/api/aw/design-tool/design-tool-option-by-id/get-option-by-id';
 import KampyleScript from 'src/helpers/KampyleScript/KampyleScript';
@@ -75,6 +76,7 @@ const RenderCurrentView = (
 
 type DesignToolProps = Sitecore.Components.Tool.DesignTool.DesignTool & {
   placeholder: ReactNode;
+  visualizerHandshakeUrlEnabled?: boolean;
 };
 
 export function DesignToolClient(props: DesignToolProps): JSX.Element {
@@ -316,28 +318,31 @@ export function DesignToolClient(props: DesignToolProps): JSX.Element {
               setPreviewImage: setPreviewImage,
             }}
           >
-            <Renoworks
-              product={designToolRouter?.routeData?.product}
-              pathMapper={pathMapper}
-              apiConfig={moduleData}
-              pageSize={0}
-            >
-              <MainBackground {...moduleData}></MainBackground>
-              <HeaderLogo
-                props={moduleData}
-                navigationVisible={navigationVisible}
-                setNavigationVisible={setNavigationVisible}
-              ></HeaderLogo>
-              {(designToolRouter?.routeData?.option || designToolRouter?.routeData?.product) && (
-                <div className={theme.classes.headerNavWrapper}>
-                  <HeaderNav></HeaderNav>
+            <VisualizationReferralProvider fields={props.fields}>
+              <Renoworks
+                product={designToolRouter?.routeData?.product}
+                pathMapper={pathMapper}
+                apiConfig={moduleData}
+                pageSize={0}
+                visualizerHandshakeUrlEnabled={props.visualizerHandshakeUrlEnabled}
+              >
+                <MainBackground {...moduleData}></MainBackground>
+                <HeaderLogo
+                  props={moduleData}
+                  navigationVisible={navigationVisible}
+                  setNavigationVisible={setNavigationVisible}
+                ></HeaderLogo>
+                {(designToolRouter?.routeData?.option || designToolRouter?.routeData?.product) && (
+                  <div className={theme.classes.headerNavWrapper}>
+                    <HeaderNav></HeaderNav>
+                  </div>
+                )}
+                <div className={theme.classes.stepWrapper}>
+                  {RenderCurrentView(designToolRouter, designToolRouter.moduleData, props)}
                 </div>
-              )}
-              <div className={theme.classes.stepWrapper}>
-                {RenderCurrentView(designToolRouter, designToolRouter.moduleData, props)}
-              </div>
-              {RenderCSSHidingBlock()}
-            </Renoworks>
+                {RenderCSSHidingBlock()}
+              </Renoworks>
+            </VisualizationReferralProvider>
             <KampyleScript />
           </DesignToolContext.Provider>
         </div>

@@ -1,3 +1,5 @@
+'use client';
+
 export type ScreenTypes = 'sm' | 'md' | 'mmd' | 'ml' | 'mml' | 'lg' | 'xl';
 
 export type ScreenSizeProps = {
@@ -17,6 +19,11 @@ const breakpoints: Record<ScreenTypes, number> = {
 
 import { useEffect, useState } from 'react';
 
+/**
+ * Tracks the current viewport width and corresponding screen type.
+ *
+ * @returns The current screen type and viewport width.
+ */
 export function useCurrentScreenType() {
   const [screenType, setScreenType] = useState<ScreenSizeProps>({
     screenType: null,
@@ -48,7 +55,13 @@ export function useCurrentScreenType() {
   return screenType;
 }
 
-export const getScreenType = (currentScreenWidth: number): ScreenSizeProps => {
+/**
+ * Maps a viewport width to its screen type while preserving the supplied width.
+ *
+ * @param currentScreenWidth The viewport width to classify.
+ * @returns The classified screen type and original viewport width.
+ */
+export function getScreenType(currentScreenWidth: number): ScreenSizeProps {
   if (currentScreenWidth >= 1488) {
     return { screenType: 'xl', currentScreenWidth };
   } else if (currentScreenWidth >= 1248) {
@@ -64,8 +77,14 @@ export const getScreenType = (currentScreenWidth: number): ScreenSizeProps => {
   } else {
     return { screenType: 'sm', currentScreenWidth };
   }
-};
+}
 
-export const getBreakpoint = (screenType: ScreenTypes) => {
+/**
+ * Returns the minimum viewport width for a screen type.
+ *
+ * @param screenType The screen type whose breakpoint should be returned.
+ * @returns The minimum viewport width for the screen type.
+ */
+export function getBreakpoint(screenType: ScreenTypes): number {
   return breakpoints[screenType];
-};
+}

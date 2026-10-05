@@ -5,7 +5,7 @@ import Component from 'helpers/Component/Component';
 import ModalWrapper, { AnimationStyle, ModalSize } from 'helpers/ModalWrapper/ModalWrapper';
 import { FormsConstants } from 'lib/constants/forms-constants';
 import { useModalIdContext } from 'lib/context/GenericModalIDContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { JSX, ReactNode, useEffect, useState } from 'react';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';

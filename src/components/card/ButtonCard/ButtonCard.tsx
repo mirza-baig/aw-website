@@ -11,7 +11,7 @@ import SvgIcon from 'helpers/Media/SvgIcon';
 import Subheadline from 'helpers/Subheadline/Subheadline';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { useRef } from 'react';
 

@@ -1,5 +1,4 @@
 import { decodeHtml } from 'lib/utils/string-utils/decode-html';
-import { encodeUrl } from 'lib/utils/url-utils/encode-url';
 
 import {
   RenoworksClient,
@@ -7,6 +6,7 @@ import {
   RenoworksKeyUsage,
   RenoworksProductSide,
 } from './renoworks';
+import { encodeUrl } from './utils/encode-url';
 
 class RenoworksResult {
   constructor(

@@ -1,5 +1,3 @@
-'use client';
-// Lib
 import classNames from 'classnames';
 import { ThemeFile } from 'lib/context/ThemeContext';
 

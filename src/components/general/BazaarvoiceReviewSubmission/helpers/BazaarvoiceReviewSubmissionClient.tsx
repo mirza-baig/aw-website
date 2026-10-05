@@ -6,12 +6,12 @@ import Headline from 'helpers/Headline/Headline';
 import ImageWrapper from 'helpers/Media/ImageWrapper';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { ThemeFile, ThemeName, useTheme } from 'lib/context/ThemeContext';
+import environment from 'lib/environment';
 import { useAsPath } from 'lib/hooks/use-as-path';
-import { getHeadingLevel } from 'lib/utils/get-heading-level';
-import { useBVScript } from 'lib/utils/use-bv-script';
+import { useBVScript } from 'lib/utils/react-utils/use-bv-script';
+import { getHeadingLevel } from 'lib/utils/sitecore-utils/get-heading-level';
 import { useEffect, useState } from 'react';
 import { ProductByBVIdQueryResult } from 'src/app/api/aw/bazaarvoice-product-by-bvid/product-by-bv-id-service';
-import { environment } from 'startup/environment';
 
 import styles from './bazaarvoice-review-submission.module.css';
 import { BazaarvoiceReviewSubmissionTheme } from './BazaarvoiceReviewSubmission.theme';

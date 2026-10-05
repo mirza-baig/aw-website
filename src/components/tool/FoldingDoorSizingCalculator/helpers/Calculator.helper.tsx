@@ -2,10 +2,13 @@ import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { useTheme } from 'lib/context/ThemeContext';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
+import { roundToEigth } from 'lib/utils/number-utils/round-to-digth';
+import { RoundingDirections } from 'lib/utils/number-utils/rounding-directions';
+import { truncate } from 'lib/utils/number-utils/truncate';
 import { ChangeEvent, FormEvent, useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useReactToPrint } from 'react-to-print';
-import * as AWNumberUtil from 'src/lib/utils/number-utils/aw-number-utils';
+import { decimalToEigth } from 'src/lib/utils/number-utils/decimal-to-eigth';
 
 import { FoldingDoorSizingCalculatorTheme } from './FoldingDoorSizingCalculator.theme';
 import { FoldingDoorSizingCalculatorContext } from './FoldingDoorSizingCalculatorContext.helper';
@@ -170,7 +173,7 @@ export const Calculator = (props: FoldingDoorSizingCalculatorProps) => {
       (unitWidth - Number(configurationRow[0].panelWidthAdjustment)) /
       Number(configurationRow[0].numberPanels);
 
-    return AWNumberUtil.truncate(panelWidth, 3);
+    return truncate(panelWidth, 3);
   };
 
   const convertToFeetInchesAndFraction = (number: number, roundingDirection: number) => {
@@ -178,7 +181,7 @@ export const Calculator = (props: FoldingDoorSizingCalculatorProps) => {
 
     let feet = Math.floor(whole / 12);
     let inches = whole % 12;
-    let fraction = AWNumberUtil.decimalToEigth(number, { roundingDirection: roundingDirection });
+    let fraction = decimalToEigth(number, { roundingDirection: roundingDirection });
 
     // Handle overflow if we rounded up
     if (fraction === '1') {
@@ -213,11 +216,8 @@ export const Calculator = (props: FoldingDoorSizingCalculatorProps) => {
   };
 
   const formatNumber = (number: number) => {
-    const rounded = AWNumberUtil.roundToEigth(number, AWNumberUtil.roundingDirections.closest);
-    const formatted = convertToFeetInchesAndFraction(
-      rounded,
-      AWNumberUtil.roundingDirections.closest
-    );
+    const rounded = roundToEigth(number);
+    const formatted = convertToFeetInchesAndFraction(rounded, RoundingDirections.closest);
     return formatOutput(formatted, rounded);
   };
 
@@ -745,7 +745,7 @@ export const Calculator = (props: FoldingDoorSizingCalculatorProps) => {
     }
 
     // Panel Width
-    panelWidth = calculatePanelWidth(Number(unitWidth), panelStyle, panelConfiguration);
+    panelWidth = calculatePanelWidth(Number(unitWidth), panelStyle, panelConfiguration).toString();
 
     // Panel Height
     if (sillOption === 'high_performance') {
@@ -943,20 +943,14 @@ export const Calculator = (props: FoldingDoorSizingCalculatorProps) => {
 
         if (heightLength > 0) {
           if (Number(heightLength) < roundNumber(minHeight)) {
-            const minFormatted = convertToFeetInchesAndFraction(
-              minHeight,
-              AWNumberUtil.roundingDirections.up
-            );
+            const minFormatted = convertToFeetInchesAndFraction(minHeight, RoundingDirections.up);
 
             heightValid = false;
             setErrorMsgHeight(
               'Please enter a value greater than or equal to ' + minFormatted + '.'
             );
           } else if (heightLength > roundNumber(maxHeight)) {
-            const maxFormatted = convertToFeetInchesAndFraction(
-              maxHeight,
-              AWNumberUtil.roundingDirections.down
-            );
+            const maxFormatted = convertToFeetInchesAndFraction(maxHeight, RoundingDirections.down);
 
             heightValid = false;
             setErrorMsgHeight('Please enter a value less than or equal to ' + maxFormatted + '.');
@@ -1019,18 +1013,12 @@ export const Calculator = (props: FoldingDoorSizingCalculatorProps) => {
         }
 
         if (widthLength < roundNumber(minWidth) && widthLength > 0) {
-          const minFormatted = convertToFeetInchesAndFraction(
-            minWidth,
-            AWNumberUtil.roundingDirections.up
-          );
+          const minFormatted = convertToFeetInchesAndFraction(minWidth, RoundingDirections.up);
 
           widthValid = false;
           setErrorMsgWidth('Please enter a value greater than or equal to ' + minFormatted + '.');
         } else if (widthLength > roundNumber(maxWidth) && widthLength > 0) {
-          const maxFormatted = convertToFeetInchesAndFraction(
-            maxWidth,
-            AWNumberUtil.roundingDirections.down
-          );
+          const maxFormatted = convertToFeetInchesAndFraction(maxWidth, RoundingDirections.down);
 
           widthValid = false;
           setErrorMsgWidth('Please enter a value less than or equal to ' + maxFormatted + '.');

@@ -2,7 +2,7 @@
 
 import Component from 'helpers/Component/Component';
 import { ComponentProps } from 'lib/component-props';
-import { getEnum } from 'lib/utils/get-enum';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX, useEffect, useRef } from 'react';
 
