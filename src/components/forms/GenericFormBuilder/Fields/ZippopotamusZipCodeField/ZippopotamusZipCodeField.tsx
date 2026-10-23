@@ -53,7 +53,7 @@ function ZippopotamusZipCodeField_Default(
       try {
         const response = await fetch('/api/aw/generic-form-builder/zippopotam-us', {
           method: 'POST',
-          body: JSON.stringify({ postalCode: zipCode }),
+          body: JSON.stringify({ postalCode: zipCode, country: 'us' }),
           headers: {
             'Content-Type': 'application/json',
           },

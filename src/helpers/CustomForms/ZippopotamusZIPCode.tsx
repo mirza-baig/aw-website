@@ -78,14 +78,11 @@ const ZippopotamusZipCode = (props: ZippopotamusZipCodeProps): JSX.Element => {
       try {
         // For Canadian postal codes, zippopotam API only accepts first 3 characters (FSA)
         const lookupCode = country === 'ca' ? zipCode.replace(/\s/g, '').substring(0, 3) : zipCode;
-        const apiEndpoint =
-          country === 'us'
-            ? '/api/aw/custom-forms/zippopotam-us'
-            : '/api/aw/custom-forms/zippopotam-ca';
+        const apiEndpoint = '/api/aw/custom-forms/zippopotam';
 
         const response = await fetch(apiEndpoint, {
           method: 'POST',
-          body: JSON.stringify({ postalCode: lookupCode }),
+          body: JSON.stringify({ postalCode: lookupCode, country }),
           headers: {
             'Content-Type': 'application/json',
           },

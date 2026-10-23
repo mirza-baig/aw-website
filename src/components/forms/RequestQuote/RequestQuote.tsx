@@ -29,7 +29,7 @@ function RequestQuote_Default(props: RequestQuoteProps) {
                     <div
                       key={index}
                       data-cards-index={index}
-                      className="col-span-12 bg-light-gray p-6 md:col-span-4"
+                      className="col-span-12 md:col-span-4 font-serif"
                     >
                       {component}
                     </div>
@@ -50,7 +50,7 @@ function RequestQuote_Default(props: RequestQuoteProps) {
                     <div
                       key={index}
                       data-cards-index={index}
-                      className="col-span-12 bg-light-gray p-6 md:col-span-4"
+                      className="col-span-12 md:col-span-4 font-serif"
                     >
                       {component}
                     </div>
@@ -71,7 +71,7 @@ function RequestQuote_Default(props: RequestQuoteProps) {
                     <div
                       key={index}
                       data-cards-index={index}
-                      className="col-span-12 bg-light-gray p-6 md:col-span-4"
+                      className="col-span-12 md:col-span-4 font-serif"
                     >
                       {component}
                     </div>

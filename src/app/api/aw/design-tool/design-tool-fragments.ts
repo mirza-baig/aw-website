@@ -156,6 +156,9 @@ fragment ProductItemQueryResult on LookupField {
       productName {
         value
       }
+      productFullName {
+        value
+      }
       productId {
         value
       }

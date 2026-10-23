@@ -29,6 +29,7 @@ export const Debug = {
       sitemap: debug(`${defaultNamespace}:api:coveo:sitemap`),
     },
     shareARLink: debug(`${defaultNamespace}:api:share-ar-link`),
+    zippopotam: debug(`${defaultNamespace}:api:zippopotam`),
     customForms: {
       submitActions: {
         saveToDatabase: debug(

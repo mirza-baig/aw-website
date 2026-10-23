@@ -2,8 +2,9 @@
 
 import classNames from 'classnames';
 import Component, { ComponentWrapperProps } from 'helpers/Component/Component';
+import { RequestQuoteStepContext } from 'lib/custom-forms/FormContext';
 import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
-import { JSX, ReactNode } from 'react';
+import { JSX, ReactNode, useMemo, useState } from 'react';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
@@ -18,6 +19,9 @@ type rightSectionStatus = 'middle';
 type MobileWidthStatus = 'top' | 'bottom';
 
 export function FormContainerClient(props: FormContainerProps): JSX.Element {
+  const [isLastStep, setIsLastStep] = useState(false);
+  const requestQuoteStepValue = useMemo(() => ({ isLastStep, setIsLastStep }), [isLastStep]);
+
   if (!props.fields) {
     return <></>;
   }
@@ -59,59 +63,72 @@ export function FormContainerClient(props: FormContainerProps): JSX.Element {
   const containerWidth = props?.fields?.edgeToEdgeContainer?.value === true ? 'full' : 'lg';
   const removeleftPadding = props?.fields?.removeLeftPadding?.value === true ? 'mr-l' : '-mr-m';
 
+  const rightSectionLastStep = 'col-span-12 px-m bg-white flex justify-center';
+  const rightSectionBackgroundClass =
+    rightSectionBackground === 'gray' ? 'bg-light-gray' : 'bg-white';
+
   return (
-    <Component
-      sectionWrapperClasses="-ml-m"
-      variant="full"
-      backgroundVariant={
-        containerWidth !== 'full' &&
-        leftSectionBackground === 'gray' &&
-        rightSectionBackground === 'gray'
-          ? 'gray'
-          : ''
-      }
-      dataComponent="forms/formcontainer"
-      {...props}
-    >
-      <div className={`col-span-12 ${removeleftPadding} `}>
-        <div className={classNames(containerVariants[containerWidth])}>
-          {/* Left section */}
-          <div
-            className={classNames(
-              leftColSpan[getEnum<WidthStatus>(props?.fields?.width) ?? ''],
-              leftSectionBackground === 'gray' ? 'bg-light-gray' : 'bg-white',
-              leftSectionAlignment[
-                getEnum<leftSectionStatus>(props?.fields?.leftSectionAlignment) ?? 'top'
-              ],
-              leftSectionAlignmentMobile[
-                getEnum<MobileWidthStatus>(props?.fields?.leftSectionAlignmentMobile) ?? 'top'
-              ]
+    <RequestQuoteStepContext.Provider value={requestQuoteStepValue}>
+      <Component
+        sectionWrapperClasses="-ml-m"
+        variant="full"
+        backgroundVariant={
+          containerWidth !== 'full' &&
+          leftSectionBackground === 'gray' &&
+          rightSectionBackground === 'gray'
+            ? 'gray'
+            : ''
+        }
+        dataComponent="forms/formcontainer"
+        {...props}
+      >
+        <div className={`col-span-12 ${removeleftPadding} `}>
+          <div className={classNames(containerVariants[isLastStep ? 'full' : containerWidth])}>
+            {/* Left section */}
+            {/* Don't render the left section if it's the last step */}
+            {!isLastStep && (
+              <div
+                className={classNames(
+                  leftColSpan[getEnum<WidthStatus>(props?.fields?.width) ?? ''],
+                  leftSectionBackground === 'gray' ? 'bg-light-gray' : 'bg-white',
+                  leftSectionAlignment[
+                    getEnum<leftSectionStatus>(props?.fields?.leftSectionAlignment) ?? 'top'
+                  ],
+                  leftSectionAlignmentMobile[
+                    getEnum<MobileWidthStatus>(props?.fields?.leftSectionAlignmentMobile) ?? 'top'
+                  ]
+                )}
+              >
+                {props.leftBar}
+              </div>
             )}
-          >
-            {props.leftBar}
-          </div>
-          {/* Right section */}
-          <div
-            className={classNames(
-              rightColSpan[getEnum<WidthStatus>(props?.fields?.width) ?? ''],
-              rightSectionAlignment,
-              rightSectionBackground === 'gray' ? 'bg-light-gray' : 'bg-white',
-              '-mt-s ml:mt-0'
-            )}
-          >
-            <div className="col-span-1"></div>
+            {/* Right section */}
             <div
-              className={
-                props?.fields?.width === null
-                  ? `ml:w-full`
-                  : `col-span-5 py-s px-s ml:w-[80%] ml:px-0`
-              }
+              className={classNames(
+                isLastStep
+                  ? rightSectionLastStep
+                  : classNames(
+                      rightColSpan[getEnum<WidthStatus>(props?.fields?.width) ?? ''],
+                      rightSectionAlignment,
+                      rightSectionBackgroundClass,
+                      '-mt-s ml:mt-0'
+                    )
+              )}
             >
-              {props.placeholder}
+              <div className="col-span-1"></div>
+              <div
+                className={
+                  props?.fields?.width === null
+                    ? `ml:w-full`
+                    : `col-span-5 py-s px-s ml:w-[80%] ml:px-0`
+                }
+              >
+                {props.placeholder}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Component>
+      </Component>
+    </RequestQuoteStepContext.Provider>
   );
 }

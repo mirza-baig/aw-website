@@ -33,7 +33,7 @@ export type ProductCompareChartProps =
 
 const ENABLE_GRAPHQL_SWATCH_RESOLVER = true;
 
-const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*-\s*\$([\d,]+(?:\.\d+)?)$/;
+const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*[-–—]\s*\$([\d,]+(?:\.\d+)?)$/;
 
 // Enum for Sitecore product bucket field.
 enum ProductBucket {
@@ -64,7 +64,7 @@ const NamedItemsCell = ({ items, fieldName, maxVisible = 3 }: NamedItemsCellProp
   };
 
   return (
-    <div className="flex flex-col items-center font-sans! font-normal w-full px-1">
+    <div className="flex flex-col items-center font-serif! font-normal w-full px-1">
       {visible.map((it, i) =>
         it.href ? (
           <a
@@ -340,10 +340,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     const level = Number.parseInt(priceData?.priceLevel ?? '0', 10);
     const maxLevel = 5;
     return (
-      <span
-        className={`font-bold ${isMobile ? 'text-sm' : 'text-lg'}`}
-        style={{ fontFamily: 'futura-pt, sans-serif' }}
-      >
+      <span className={`font-futura-pt! font-bold ${isMobile ? 'text-[16px]' : 'text-[18px]'}`}>
         {Array.from({ length: maxLevel }, (_, i) => (
           <span key={i} className={i < level ? 'text-black' : 'text-[#C4BFB6]'}>
             $
@@ -391,7 +388,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
               });
             }}
             aria-label={`Show all ${swatches.length} swatches`}
-            className={`font-sans! font-normal cursor-pointer hover:underline focus:outline-none focus:underline ${isMobile ? 'text-[8px]' : 'text-sm'}`}
+            className={`font-serif! font-normal cursor-pointer hover:underline focus:outline-none focus:underline ${isMobile ? 'text-[8px]' : 'text-sm'}`}
           >
             +{overflow}
           </button>
@@ -415,7 +412,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
       })
       .filter(Boolean);
     return (
-      <div className="flex flex-col items-center font-sans! font-normal">
+      <div
+        className={`flex flex-col items-center font-serif! font-normal ${
+          isMobile ? 'text-[12px] leading-[16px]' : 'text-[14px] leading-4.5'
+        }`}
+      >
         {lines.map((line: string) => (
           <span key={line}>{line}</span>
         ))}
@@ -892,7 +893,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     const nameField = Object.keys(fields).find((k) => /name$/i.test(k));
     const text = nameField ? fields[nameField]?.value : undefined;
     if (typeof text === 'string' && text.trim()) {
-      return <span className="font-sans! font-normal">{text.trim()}</span>;
+      return (
+        <span className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}>
+          {text.trim()}
+        </span>
+      );
     }
     return null;
   };
@@ -904,18 +909,25 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
   const renderStringValue = (trimmed: string): React.ReactElement => {
     if (/<[a-z][\s\S]*>/i.test(trimmed)) {
       return (
-        <span className="font-sans! font-normal" dangerouslySetInnerHTML={{ __html: trimmed }} />
+        <span
+          className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'} [&_a]:inline-block [&_a]:vertical-baseline [&_a]:text-[#F26924] [&_a]:font-serif! ${isMobile ? '[&_a]:text-[10px]' : '[&_a]:text-[14px]'}`}
+          dangerouslySetInnerHTML={{ __html: trimmed }}
+        />
       );
     }
     const priceRangeMatch = PRICE_RANGE_RE.exec(trimmed);
     if (priceRangeMatch) {
       return (
-        <span className="font-sans! font-normal">
+        <span className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}>
           <strong>${priceRangeMatch[1]}</strong> - <strong>${priceRangeMatch[2]}</strong>
         </span>
       );
     }
-    return <span className="font-sans! font-normal">{trimmed}</span>;
+    return (
+      <span className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}>
+        {trimmed}
+      </span>
+    );
   };
 
   // Handles raw values that are objects with a `.value` string property.
@@ -945,6 +957,27 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     return renderMaterials(lines);
   };
 
+  const renderRawValue = (raw: any) => {
+    if (!raw || typeof raw !== 'object') {
+      return null;
+    }
+
+    if (raw.fields) {
+      return renderFieldsObject(raw.fields);
+    }
+
+    if ('value' in raw) {
+      const value = raw.value;
+
+      if (typeof value === 'string' && value.trim()) {
+        return renderStringValue(value.trim());
+      }
+
+      return renderRawObjectWithValue(raw);
+    }
+
+    return null;
+  };
   // NOSONAR
   const renderProductCell = (product: any, fieldName: string, seriesItem?: any) => {
     // NOSONAR
@@ -966,53 +999,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
     if (raw && typeof raw === 'object' && Array.isArray(raw.swatches)) {
       return renderSwatches(raw);
     }
-
-    if (raw && typeof raw === 'object' && raw.fields) {
-      const result = renderFieldsObject(raw.fields);
-      if (result) {
-        return result;
-      }
-    }
-
-    if (raw && typeof raw === 'object' && 'value' in raw) {
-      return renderRawObjectWithValue(raw) ?? <span>—</span>;
-    }
-    if (raw && typeof raw === 'object' && raw.fields) {
-      const result = renderFieldsObject(raw.fields);
-      if (result) {
-        return result;
-      }
-    }
-
-    if (raw && typeof raw === 'object' && 'value' in raw) {
-      const v = raw.value;
-
-      if (typeof v === 'string' && v.trim()) {
-        const trimmed = v.trim();
-
-        if (/<[a-z][\s\S]*>/i.test(trimmed)) {
-          return (
-            <span
-              className="font-sans! font-normal"
-              dangerouslySetInnerHTML={{ __html: trimmed }}
-            />
-          );
-        }
-
-        const priceRangeMatch = PRICE_RANGE_RE.exec(trimmed);
-
-        if (priceRangeMatch) {
-          return (
-            <span className="font-sans! font-normal">
-              <strong>${priceRangeMatch[1]}</strong> - <strong>${priceRangeMatch[2]}</strong>
-            </span>
-          );
-        }
-
-        return <span className="font-sans! font-normal">{trimmed}</span>;
-      }
-    }
-    return <span>—</span>;
+    return renderRawValue(raw) ?? <span>—</span>;
   };
 
   const getInteriorColorsComment = (product: any, seriesItem?: any): string | undefined => {
@@ -1169,7 +1156,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
 
   const ctaTierClasses = (tier: CTATier): string => {
     const base =
-      'w-full whitespace-normal rounded-lg border-4 px-m py-[9px] font-sans text-button font-heavy disabled:border-gray disabled:text-gray disabled:cursor-not-allowed';
+      'w-full whitespace-normal rounded-lg border-4 px-m py-[9px] font-futura-pt! text-[16px] text-button font-heavy disabled:border-gray disabled:text-gray disabled:cursor-not-allowed';
     if (tier === 'primary') {
       return `${base} border-theme-btn-border bg-theme-btn-bg text-theme-btn-text hover:border-theme-btn-border-hover hover:bg-theme-btn-bg-hover hover:text-theme-btn-text-hover disabled:hover:bg-theme-btn-bg`;
     }
@@ -1250,19 +1237,19 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
 
   // Hardcoded intro heading levels (eyebrow → H4, title → H2, description → paragraph)
   // so the markup stays consistent with the Series compare chart regardless of author input.
-  const introEyebrowClasses = `font-sans! font-bold uppercase tracking-[0.9px] text-[#F26924] ${
-    isMobile ? 'text-[10px] leading-tight' : 'text-lg'
+  const introEyebrowClasses = `font-serif! font-bold uppercase tracking-[0.9px] text-[#F26924] ${
+    isMobile ? 'text-[12px] leading-tight' : 'text-[18px]'
   }`;
-  const introTitleClasses = `font-sans! font-bold line-clamp-3 ${
-    isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
+  const introTitleClasses = `font-futura-pt! font-bold line-clamp-3 ${
+    isMobile ? 'text-[20px] leading-tight' : 'text-[36px]'
   }`;
-  const introDescriptionClasses = `text-[#333] !font-sans ${isMobile ? 'text-[8px] hidden' : 'text-sm'}`;
+  const introDescriptionClasses = `text-[#333] font-serif! ${isMobile ? 'text-[12px]' : 'text-[16px]'}`;
   const introCta = props?.fields?.chartCtaLink;
   const introCtaStyle = props?.fields?.chartCtaStyle;
   const introCtaIcon = props?.fields?.chartCtaIcon;
   const hasIntroCta = !!introCta?.value?.href;
 
-  let introHeaderHeightClass = 'h-[150px]';
+  let introHeaderHeightClass = 'h-[180px]';
   if (!isMobile) {
     introHeaderHeightClass = hasIntroCta ? 'h-[272px]' : 'h-[216px]';
   }
@@ -1436,7 +1423,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                     return (
                       <div
                         key={row.key}
-                        className={`flex flex-col justify-center border-b border-[#CCC] p-[20px] font-sans! ${row.heightClass} ${isMobile ? 'text-[10px]' : 'text-base'}`}
+                        className={`flex flex-col justify-center border-b border-[#CCC] p-[20px] font-serif! ${row.heightClass} text-[14px]`}
                       >
                         <span className="font-bold uppercase tracking-wide">{row.label}</span>
                         {row.cta && (
@@ -1444,7 +1431,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                             href={row.cta.href}
                             target={row.cta.target || undefined}
                             rel={row.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                            className={`mt-0.5 inline-block font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${isMobile ? 'text-[8px]' : 'text-xs'}`}
+                            className={`mt-0.5 inline-block font-serif! font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${isMobile ? 'text-[10px]' : 'text-[14px]'}`}
                           >
                             {row.cta.text}
                           </a>
@@ -1455,7 +1442,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                   return (
                     <div
                       key={row.key}
-                      className={`flex flex-col justify-center border-b border-[#CCC] !font-sans p-[20px] font-normal ${row.heightClass} ${isMobile ? 'text-[9px]' : 'text-base'} ${row.zebra ? 'bg-[#FCFAFA]' : ''}`}
+                      className={`flex flex-col justify-center border-b border-[#CCC] font-serif! p-5 font-normal ${row.heightClass} text-[14px] ${row.zebra ? 'bg-[#FCFAFA]' : ''}`}
                     >
                       <span>{row.label}</span>
                       {row.cta && (
@@ -1463,7 +1450,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                           href={row.cta.href}
                           target={row.cta.target || undefined}
                           rel={row.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                          className={`mt-0.5 inline-block font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${isMobile ? 'text-[8px]' : 'text-[12px]'}`}
+                          className={`mt-0.5 inline-block font-serif! font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${isMobile ? 'text-[10px]' : 'text-[14px]'}`}
                         >
                           {row.cta.text}
                         </a>
@@ -1591,7 +1578,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                               )}
                             </div>
                             <div
-                              className={`flex items-center justify-center gap-1 text-center font-sans! font-bold ${isMobile ? 'text-xs mt-2' : 'text-base mt-4'}`}
+                              className={`flex items-center justify-center gap-1 text-center font-futura-pt! font-bold ${isMobile ? 'text-[16px] mt-2' : 'text-[18px] mt-4'}`}
                             >
                               <span className="line-clamp-2">
                                 {productItem?.fields?.expandedSeriesName?.value ||
@@ -1599,7 +1586,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                               </span>
                             </div>
                             <div
-                              className={`flex items-center justify-center gap-1 text-center font-sans! ${isMobile ? 'text-xs mt-2' : 'text-base mt-2'}`}
+                              className={`flex items-center justify-center uppercase gap-1 text-center font-serif! text-[14px]`}
                             >
                               <span className="line-clamp-2">
                                 {productItem?.fields?.productSubtype?.value}
@@ -1628,7 +1615,7 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                                 {renderProductCell(productItem, row.fieldName, seriesSourceItem)}
                                 {comment && (
                                   <span
-                                    className={`w-full text-center italic font-normal px-1 ${isMobile ? 'text-[8px] leading-[10px]' : 'text-[10px] leading-[12px]'}`}
+                                    className={`mt-[8px] w-full text-center italic font-serif! px-1 text-[10px] leading-[12px]`}
                                   >
                                     {comment}
                                   </span>
@@ -1685,17 +1672,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                           {exploreAllProductsHref ? (
                             <a
                               href={exploreAllProductsHref}
-                              className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 !font-sans font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
+                              className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 font-serif! font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
                               style={{ minHeight: isMobile ? 100 : 320 }}
                             >
-                              <span
-                                className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}
-                              >
-                                Explore all
-                              </span>
-                              <span
-                                className={`text-[#666] line-clamp-2 ${isMobile ? 'text-[8px]' : 'text-xs'}`}
-                              >
+                              <span className={`text-[#666] text-[14px]`}>Explore all</span>
+                              <span className={`text-[#666] line-clamp-2 text-[14px]`}>
                                 {currentProductTypeName}
                               </span>
                               <span
@@ -1706,17 +1687,11 @@ export const ProductCompareChart = /* NOSONAR */ (props: ProductCompareChartProp
                             </a>
                           ) : (
                             <div
-                              className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 !font-sans font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
+                              className={`flex flex-col items-center justify-center h-full w-full gap-2 px-2 font-serif! font-normal text-black no-underline ${isMobile ? 'text-[10px]' : 'text-sm'}`}
                               style={{ minHeight: isMobile ? 100 : 320 }}
                             >
-                              <span
-                                className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}
-                              >
-                                Explore all
-                              </span>
-                              <span
-                                className={`text-[#666] line-clamp-2 ${isMobile ? 'text-[8px]' : 'text-xs'}`}
-                              >
+                              <span className={`text-[#666] text-[14px]`}>Explore all</span>
+                              <span className={`text-[#666] line-clamp-2 text-[14px]`}>
                                 {currentProductTypeName}
                               </span>
                               <span

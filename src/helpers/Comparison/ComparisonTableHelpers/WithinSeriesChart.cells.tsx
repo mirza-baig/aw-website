@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { pickRaw } from './WithinSeriesChart.helper';
 
-const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*-\s*\$([\d,]+(?:\.\d+)?)$/;
+const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*[-–—]\s*\$([\d,]+(?:\.\d+)?)$/;
 
 const PRICE_LEVEL_MAX = 5;
 
@@ -44,7 +44,7 @@ const NamedItemsCell = ({
   };
 
   return (
-    <div className="flex w-full flex-col items-center px-1 font-sans! font-normal">
+    <div className="flex w-full flex-col items-center px-1 font-serif! font-normal">
       {visible.map((item, index) =>
         item.href ? (
           <a
@@ -83,10 +83,7 @@ type CellRenderContext = {
 const renderPriceLevel = (priceLevel: string | undefined, isMobile: boolean) => {
   const level = Number.parseInt(priceLevel ?? '0', 10) || 0;
   return (
-    <span
-      className={`font-bold ${isMobile ? 'text-sm' : 'text-lg'}`}
-      style={{ fontFamily: 'futura-pt, sans-serif' }}
-    >
+    <span className={`font-futura-pt! font-bold ${isMobile ? 'text-[16px]' : 'text-[18px]'}`}>
       {Array.from({ length: PRICE_LEVEL_MAX }, (_, index) => (
         <span key={index} className={index < level ? 'text-black' : 'text-[#C4BFB6]'}>
           $
@@ -132,7 +129,7 @@ const renderSwatches = (swatchData: any, ctx: CellRenderContext, maxVisible?: nu
             });
           }}
           aria-label={`Show all ${swatches.length} swatches`}
-          className={`cursor-pointer font-sans! font-normal hover:underline focus:underline focus:outline-none ${
+          className={`cursor-pointer font-serif! font-normal hover:underline focus:underline focus:outline-none ${
             ctx.isMobile ? 'text-[8px]' : 'text-sm'
           }`}
         >
@@ -143,7 +140,7 @@ const renderSwatches = (swatchData: any, ctx: CellRenderContext, maxVisible?: nu
   );
 };
 
-const renderMaterials = (raw: any) => {
+const renderMaterials = (raw: any, isMobile: boolean) => {
   const lines = (Array.isArray(raw) ? raw : [])
     .map((material: any) => material?.fields?.materialName?.value)
     .filter(Boolean);
@@ -153,7 +150,9 @@ const renderMaterials = (raw: any) => {
   }
 
   return (
-    <div className="flex flex-col items-center font-sans! font-normal">
+    <div
+      className={`flex flex-col items-center font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}
+    >
       {lines.map((line: string) => (
         <span key={line}>{line}</span>
       ))}
@@ -189,27 +188,38 @@ const renderNamedItems = (raw: any[], fieldName: string, isMobile: boolean) => {
   return <NamedItemsCell items={namedItems} fieldName={fieldName} maxVisible={isMobile ? 2 : 3} />;
 };
 
-const renderStringValue = (trimmed: string) => {
+const renderStringValue = (trimmed: string, isMobile: boolean) => {
   if (/<[a-z][\s\S]*>/i.test(trimmed)) {
     return (
-      <span className="font-sans! font-normal" dangerouslySetInnerHTML={{ __html: trimmed }} />
+      <span
+        className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'} [&_a]:text-[#F26924] [&_a]:font-serif! ${isMobile ? '[&_a]:text-[10px]' : '[&_a]:text-[14px]'}`}
+        dangerouslySetInnerHTML={{ __html: trimmed }}
+      />
     );
   }
 
   const priceRange = PRICE_RANGE_RE.exec(trimmed);
   if (priceRange) {
     return (
-      <span className="font-sans! font-normal">
+      <span className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}>
         <strong>${priceRange[1]}</strong> - <strong>${priceRange[2]}</strong>
       </span>
     );
   }
 
-  return <span className="font-sans! font-normal">{trimmed}</span>;
+  return (
+    <span className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}>
+      {trimmed}
+    </span>
+  );
 };
 
 /** Item that carries its own `fields` bag: nested swatches, or a "…Name" field. */
-const renderFieldsObject = (fields: Record<string, any>, ctx: CellRenderContext) => {
+const renderFieldsObject = (
+  fields: Record<string, any>,
+  ctx: CellRenderContext,
+  isMobile: boolean
+) => {
   const nestedSwatches = fields.swatches ?? fields.featuredSwatches;
   if (Array.isArray(nestedSwatches) && nestedSwatches.length > 0) {
     const swatchImages = nestedSwatches
@@ -230,7 +240,11 @@ const renderFieldsObject = (fields: Record<string, any>, ctx: CellRenderContext)
   const nameField = Object.keys(fields).find((key) => /name$/i.test(key));
   const text = nameField ? fields[nameField]?.value : undefined;
   if (typeof text === 'string' && text.trim()) {
-    return <span className="font-sans! font-normal">{text.trim()}</span>;
+    return (
+      <span className={`font-serif! font-normal ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}>
+        {text.trim()}
+      </span>
+    );
   }
 
   return null;
@@ -275,7 +289,7 @@ export const ProductCell = ({
   }
 
   if (fieldName === 'materials' || fieldName === 'productMaterials') {
-    return renderMaterials(raw);
+    return renderMaterials(raw, isMobile);
   }
 
   if (Array.isArray(raw)) {
@@ -287,7 +301,7 @@ export const ProductCell = ({
   }
 
   if (raw && typeof raw === 'object' && raw.fields) {
-    const rendered = renderFieldsObject(raw.fields, ctx);
+    const rendered = renderFieldsObject(raw.fields, ctx, isMobile);
     if (rendered) {
       return rendered;
     }
@@ -296,7 +310,7 @@ export const ProductCell = ({
   if (raw && typeof raw === 'object' && 'value' in raw && typeof raw.value === 'string') {
     const trimmed = raw.value.trim();
     if (trimmed) {
-      return renderStringValue(trimmed);
+      return renderStringValue(trimmed, isMobile);
     }
   }
 

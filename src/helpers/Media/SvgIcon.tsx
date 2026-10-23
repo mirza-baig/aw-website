@@ -1,9 +1,11 @@
 import { Image as JSSImage, ImageField } from '@sitecore-content-sdk/nextjs';
+import environment from 'lib/environment';
+import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
-import { removeCdnHostName } from 'lib/utils/url-utils/remove-cdn-host-name';
 import useExperienceEditor from 'lib/utils/use-experience-editor';
 import useNormalMode from 'lib/utils/use-normal-mode';
-import NextImage from 'next/image';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
+import Image from 'next/image';
 import { JSX } from 'react';
 
 import { FocusAreaValue, LayoutValue } from './types';
@@ -32,6 +34,7 @@ const SvgIcon = ({
 }: ImageProps): JSX.Element => {
   const isEE = useExperienceEditor();
   const isNormalMode = useNormalMode();
+  const { siteInfo } = useWebsiteContext();
 
   // If we're in EE, we still want to render the image for editing, even when it's empty.
   if (!image?.value?.src && !isEE) {
@@ -43,20 +46,17 @@ const SvgIcon = ({
 
   return (
     // If not in normal mode, render the Sitecore JSS image.
-
     isNormalMode ? (
-      <NextImage
-        src={`${imageValue?.src}`}
+      <Image
+        src={getMediaUrl(imageValue?.src, MediaUrlType.Cdn, siteInfo!, environment)}
         alt={`${imageValue?.alt}`}
         width={80}
         height={80}
-        // layout={layout}
         fill={layout === 'fill'}
         style={{ objectPosition: focus }}
-        // objectPosition={focus}
         className={className}
         unoptimized={isSvg}
-        overrideSrc={`${removeCdnHostName(imageValue?.src)}`}
+        overrideSrc={`${getMediaUrl(imageValue?.src, MediaUrlType.Cdn, siteInfo!, environment)}`}
       />
     ) : (
       <JSSImage

@@ -50,3 +50,8 @@ export function useFormFieldProps<FormFieldData>(
 }
 
 export const FormsContext = createContext<FormStateProps>({} as FormStateProps);
+
+export const RequestQuoteStepContext = createContext<{
+  isLastStep: boolean;
+  setIsLastStep: Dispatch<SetStateAction<boolean>>;
+} | null>(null);

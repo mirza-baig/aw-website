@@ -1,4 +1,4 @@
-import { environment } from 'startup/environment';
+import environment from 'lib/environment';
 
 export const dynamic = 'force-dynamic';
 

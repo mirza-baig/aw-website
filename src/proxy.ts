@@ -9,8 +9,8 @@ import {
 } from '@sitecore-content-sdk/nextjs/proxy';
 import { geolocation } from '@vercel/functions';
 import environment from 'lib/environment';
-import { MediaRedirectsMiddleware } from 'lib/middleware/media-redirects-middleware';
-import { SitecoreCDPIdentityMiddleware } from 'lib/middleware/sitecore-cdp-identity-middleware';
+import { MediaRedirectsProxy } from 'lib/proxy/media-redirects-proxy';
+import { SitecoreCDPIdentityProxy } from 'lib/proxy/sitecore-cdp-identity-proxy';
 import { NextFetchEvent, type NextRequest } from 'next/server';
 import scConfig from 'sitecore.config';
 
@@ -18,7 +18,7 @@ import { routing } from './i18n/routing';
 import sites from '.sitecore/sites.json';
 
 function extractGeoDataCb(req: NextRequest): PersonalizeGeoData {
-  // Customization: Add geolocation data to personalize middleware request
+  // Customization: Add geolocation data to personalize proxy request
   const { city, country, countryRegion: region } = geolocation(req);
 
   const geo = {
@@ -102,20 +102,20 @@ export default function proxy(req: NextRequest, event: NextFetchEvent) {
     extractGeoDataCb,
   });
 
-  const mediaRedirects = new MediaRedirectsMiddleware({
+  const mediaRedirects = new MediaRedirectsProxy({
     /**
      * List of sites for site resolver to work with
      */
     sites,
     api: scConfig.api,
-    // This function determines if the middleware should be turned off on per-request basis.
+    // This function determines if the proxy should be turned off on per-request basis.
     // Certain paths are ignored by default (e.g. Next.js API routes), but you may wish to disable more.
     // By default it is disabled while in development mode.
-    // This is an important performance consideration since Next.js Edge middleware runs on every request.
+    // This is an important performance consideration since Next.js Edge proxy runs on every request.
     skip: () => environment.isPreview() || environment.isLocal(), // Redirects don't work against a CM instance
   });
 
-  const identity = new SitecoreCDPIdentityMiddleware({
+  const identity = new SitecoreCDPIdentityProxy({
     sites,
     skip: () => false,
   });

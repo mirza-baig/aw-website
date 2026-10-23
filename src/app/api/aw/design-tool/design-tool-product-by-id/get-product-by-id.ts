@@ -54,6 +54,7 @@ interface ProductItemQueryResult {
     productSeries: ProductTypeQueryResult;
     productType: ProductTypeQueryResult;
     productName: string;
+    productFullName: string;
     productId: {
       value: string;
     };

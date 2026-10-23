@@ -22,14 +22,14 @@ import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { FormsConstants } from 'lib/constants/forms-constants';
 import { StringConstants } from 'lib/constants/string-constants';
 import { useTheme } from 'lib/context/ThemeContext';
-import { FormsContext } from 'lib/custom-forms/FormContext';
+import { FormsContext, RequestQuoteStepContext } from 'lib/custom-forms/FormContext';
 import { VisualizationReferralFields } from 'lib/renoworks/visualization-referral-context';
 import { clearSessionStorageItems } from 'lib/utils/client-storage-utils/clear-session-storage-items';
 import { getCookie } from 'lib/utils/client-storage-utils/get-cookie';
 import { setSessionStorageItems } from 'lib/utils/client-storage-utils/set-session-storage-items';
 import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { useSearchParams } from 'next/navigation';
-import { JSX, useEffect, useRef, useState } from 'react';
+import { JSX, useContext, useEffect, useRef, useState } from 'react';
 import TagManager from 'react-gtm-module';
 import { twMerge } from 'tailwind-merge';
 import * as Yup from 'yup';
@@ -136,6 +136,13 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     return hiddenField?.value;
   };
   const [pageIndex, setPageIndex] = useState(0);
+  const requestQuoteStep = useContext(RequestQuoteStepContext);
+  const setIsLastStep = requestQuoteStep?.setIsLastStep;
+
+  useEffect(() => {
+    setIsLastStep?.(pageIndex === 3);
+  }, [pageIndex, setIsLastStep]);
+
   const [currentFlow, setCurrentFlow] = useState<UserType>('homeowner');
   const [formValues, setFormValues] = useState<FormikValues>();
   const [showFormError, setShowFormError] = useState<false | string>(false);
@@ -1015,11 +1022,29 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
             return (
               <form onChange={handleFormInteraction} onInput={handleFormInteraction}>
                 <div className="grid grid-cols-12 gap-xxs gap-y-m md:gap-s">
-                  <Headline
-                    {...props}
-                    classes="col-span-12 text-center text-theme-text text-sm-m md:text-m font-heavy mb-xxs"
-                  />
-                  <BodyCopy classes="col-span-12 text-center" {...props} />
+                  {pageIndex === 3 && props.fields && (
+                    <div className="col-span-12">
+                      <Headline
+                        classes="text-theme-text text-center text-sm-m md:text-m font-heavy mb-s"
+                        fields={{
+                          headlineText: props.fields.thankYouHeading,
+                        }}
+                      />
+                      <BodyCopy
+                        classes="text-center text-body font-serif text-dark-gray mb-s"
+                        fields={{ body: props.fields?.thankYouText ?? '' }}
+                      />
+                    </div>
+                  )}
+                  {pageIndex != 3 && (
+                    <>
+                      <Headline
+                        {...props}
+                        classes="col-span-12 text-center text-theme-text text-sm-m md:text-m font-heavy mb-xxs"
+                      />
+                      <BodyCopy classes="col-span-12 text-center" {...props} />
+                    </>
+                  )}
 
                   {requestQuoteSteps.length > 1 && (
                     <Steps
@@ -1147,18 +1172,6 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                   )}
                   {pageIndex === 3 && props.fields && (
                     <>
-                      <div className="col-span-12">
-                        <Headline
-                          classes="text-theme-text text-center text-sm-m md:text-m font-heavy mb-s"
-                          fields={{
-                            headlineText: props.fields.thankYouHeading,
-                          }}
-                        />
-                        <BodyCopy
-                          classes="text-theme-body text-center text-body text-black mb-s"
-                          fields={{ body: props.fields?.thankYouText ?? '' }}
-                        />
-                      </div>
                       {(() => {
                         const url = props.fields.renoworksVisualizerUrl;
                         const referral = props.fields.visualizationReferral;
@@ -1180,7 +1193,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                           <div className="col-span-12 mb-l">
                             <div className="flex flex-col overflow-hidden md:flex-row md:items-stretch">
                               {imageSrc && (
-                                <div className="w-full md:w-1/2">
+                                <div className="w-full md:w-auto">
                                   <img
                                     src={imageSrc}
                                     alt={imageAlt}
@@ -1188,7 +1201,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                                   />
                                 </div>
                               )}
-                              <div className="flex w-full flex-col justify-start gap-4 bg-light-gray p-6 md:w-1/2 md:p-8">
+                              <div className="flex w-full flex-col justify-start gap-4 bg-light-gray p-6 md:p-8">
                                 {headline && (
                                   <h3 className="text-theme-text text-sm-m font-heavy md:text-m">
                                     {headline}
@@ -1229,10 +1242,10 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                           <>
                             <div className="col-span-12">
                               <Headline
-                                classes="text-theme-text text-center text-sm-m font-heavy mb-s"
+                                classes="text-theme-text text-sm-m font-heavy mb-s"
                                 fields={{
                                   headlineText: {
-                                    value: 'In the meantime, here are some topics to explore!',
+                                    value: 'Explore other topics:',
                                   },
                                 }}
                               />

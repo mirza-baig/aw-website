@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @import '../assets/utilities/_utilities.theme.css' layer(utilities);
 @import '../assets/legacy/responsive-table.css' layer(utilities);
@@ -8,11 +8,15 @@
 
 /* Theme variants (block form) */
 @custom-variant aw {
-  &:where([data-theme="aw"], [data-theme="aw"] *) { @slot; }
+  &:where([data-theme='aw'], [data-theme='aw'] *) {
+    @slot;
+  }
 }
 
 @custom-variant rba {
-  &:where([data-theme="rba"], [data-theme="rba"] *) { @slot; }
+  &:where([data-theme='rba'], [data-theme='rba'] *) {
+    @slot;
+  }
 }
 
 /* Override or add tokens */
@@ -31,37 +35,36 @@
   --color-secondary: #000000;
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-error-outline: #F14343; /* was 'error-outline' in v3 */
-  --color-error:         #B91515; /* if you also use `text-error` / `bg-error` */
+  --color-error-outline: #f14343; /* was 'error-outline' in v3 */
+  --color-error: #b91515; /* if you also use `text-error` / `bg-error` */
 
-/* Optional semantic colors from your base theme (so you can use bg-theme-bg, etc.) */
+  /* Optional semantic colors from your base theme (so you can use bg-theme-bg, etc.) */
   /* If you use these, override them per theme below */
 
-  --color-theme-body:              var(--color-white);
-  --color-theme-bg:                var(--color-white);
-  --color-theme-btn-bg:            #F0F2F7;
-  --color-theme-btn-bg-hover:      var(--color-primary);
-  --color-theme-btn-text:          #1F2937;
-  --color-theme-btn-text-hover:    var(--color-white);
-  --color-theme-btn-border:        var(--color-primary);
-  --color-theme-btn-border-hover:  var(--color-primary);
-  --color-theme-btn-icon:          #6B7280;
-  --color-theme-btn-icon-hover:    #374151;
-  --color-theme-btn-secondary-bg:           var(--color-white);
-  --color-theme-btn-secondary-bg-hover:     var(--color-secondary);
-  --color-theme-btn-secondary-text:         var(--color-black);
-  --color-theme-btn-secondary-text-hover:   var(--color-white);
-  --color-theme-btn-secondary-border:       var(--color-black);
+  --color-theme-body: var(--color-white);
+  --color-theme-bg: var(--color-white);
+  --color-theme-btn-bg: #f0f2f7;
+  --color-theme-btn-bg-hover: var(--color-primary);
+  --color-theme-btn-text: #1f2937;
+  --color-theme-btn-text-hover: var(--color-white);
+  --color-theme-btn-border: var(--color-primary);
+  --color-theme-btn-border-hover: var(--color-primary);
+  --color-theme-btn-icon: #6b7280;
+  --color-theme-btn-icon-hover: #374151;
+  --color-theme-btn-secondary-bg: var(--color-white);
+  --color-theme-btn-secondary-bg-hover: var(--color-secondary);
+  --color-theme-btn-secondary-text: var(--color-black);
+  --color-theme-btn-secondary-text-hover: var(--color-white);
+  --color-theme-btn-secondary-border: var(--color-black);
   --color-theme-btn-secondary-border-hover: var(--color-black);
-  --color-theme-text:                       var(--color-black);
+  --color-theme-text: var(--color-black);
 
   /* === Font families === */
-  --font-sans: "futura-pt", system-ui;     /* enables: font-sans         */
-  --font-serif: "open-sans", system-ui;    /* enables: font-serif        */
+  --font-sans: 'futura-pt', system-ui; /* enables: font-sans         */
+  --font-serif: 'open-sans', system-ui; /* enables: font-serif        */
 
   /* You can also define a custom token for a custom utility name: */
-  --font-futura-pt: "futura-pt", system-ui;   /* enables: font-futura-pt */
-
+  --font-futura-pt: 'futura-pt', system-ui; /* enables: font-futura-pt */
 
   /* === Font weights === */
   --font-weight-demi: 500;
@@ -76,24 +79,24 @@
   --radius-none: 0;
   --radius-lg: 4.0625rem;
 
-/* === Spacing (so gap-s / p-s / m-s exist) === */
+  /* === Spacing (so gap-s / p-s / m-s exist) === */
   --spacing-xxl: 7.5rem;
-  --spacing-xl:  5rem;
-  --spacing-l:   2.5rem;
-  --spacing-ml:  2rem;
-  --spacing-m:   1.5rem;
-  --spacing-s:   1rem;
-  --spacing-xs:  0.75rem;
+  --spacing-xl: 5rem;
+  --spacing-l: 2.5rem;
+  --spacing-ml: 2rem;
+  --spacing-m: 1.5rem;
+  --spacing-s: 1rem;
+  --spacing-xs: 0.75rem;
   --spacing-xxs: 0.5rem;
-  --spacing-xxxs:0.25rem;
-  --spacing-0:   0px;
+  --spacing-xxxs: 0.25rem;
+  --spacing-0: 0px;
 
-/* === Breakpoints (from your base config) === */
+  /* === Breakpoints (from your base config) === */
   --breakpoint-xl: 1488px;
   --breakpoint-lg: 1248px;
-  --breakpoint-mml:1024px;
+  --breakpoint-mml: 1024px;
   --breakpoint-ml: 1008px;
-  --breakpoint-mmd:800px;
+  --breakpoint-mmd: 800px;
   --breakpoint-md: 672px;
   --breakpoint-sm: 375px;
 
@@ -316,4 +319,8 @@
 body {
   font-family: open-sans, system-ui, sans-serif;
   overflow-x: hidden;
+}
+/* Google Address Autocomplete keeping the dropdown to body level above all other elements */
+.pac-container {
+  z-index: 10000 !important;
 }

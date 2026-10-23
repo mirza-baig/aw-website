@@ -1,7 +1,7 @@
 import { isDesignLibraryPreviewData } from '@sitecore-content-sdk/nextjs/editing';
 import { notFound } from 'next/navigation';
-import { draftMode } from 'next/headers'
-import { SiteInfo } from '@sitecore-content-sdk/nextjs';
+import { draftMode, headers as nextHeaders } from 'next/headers'
+import { getPageMetadata, SiteInfo } from '@sitecore-content-sdk/nextjs';
 import { routing } from 'src/i18n/routing';
 import scConfig from 'sitecore.config';
 import client from 'src/lib/sitecore-client';
@@ -11,15 +11,13 @@ import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
-import { getEnum } from 'lib/utils/get-enum';
-import { environment } from 'startup/environment';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
+import environment from 'lib/environment';
 
 import { isNullOrEmpty } from 'lib/utils/string-utils/is-null-or-empty';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace'
 import { sites } from '.sitecore/aw-sites';
-import { DraftModeWorkaroundMiddleware } from 'lib/middleware/draft-mode-workaround-middleware';
 import { loader } from 'lib/feature-flags/loader';
-
 // Enable Incremental Static Regeneration (ISR)
 export const revalidate = 60;
 
@@ -30,7 +28,6 @@ type PageProps = {
 
 type MetaRobots = 'Follow' | 'Index' | 'No Follow' | 'No Index';
 
-//export default async function Page({ params, searchParams }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { site, locale, path } = await params;
 
@@ -42,11 +39,12 @@ export default async function Page({ params }: PageProps) {
   // Fetch the page data from Sitecore
   let page;
   if (draft.isEnabled) {
-    const editingParams = await DraftModeWorkaroundMiddleware.getSearchParams(); // await searchParams;
-    if (isDesignLibraryPreviewData(editingParams)) {
-      page = await client.getDesignLibraryData(editingParams);
+    const headers = await nextHeaders();
+    const previewData = client.getPreviewData(headers);
+    if (isDesignLibraryPreviewData(previewData)) {
+      page = await client.getDesignLibraryData(previewData);
     } else {
-      page = await client.getPreview(editingParams);
+      page = await client.getPreview(previewData);
     }
   } else {
     page = await client.getPage(path ?? [], { site, locale });
@@ -132,34 +130,14 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
         return acc;
       }, {}) ?? {};
 
+  const baseMetadata = getPageMetadata(page.layout.sitecore.route as any);
   return {
+    ...baseMetadata,
     title: fields?.pageTitle?.value ?? 'Page',
-
-    description: fields?.pageMetaDescription?.value,
-    keywords: fields?.pageMetaKeywords?.value,
-
     robots,
 
     alternates: {
       canonical: canonicalUrl,
-    },
-
-    openGraph: {
-      title:
-        fields?.openGraphTitle?.value ??
-        fields?.siteSearchHeadline?.value,
-      description:
-        fields?.openGraphDescription?.value ??
-        fields?.siteSearchDescription?.value,
-      images: [
-        {
-          url:
-            fields?.openGraphImage?.value?.src ??
-            fields?.primaryImage?.value?.src ??
-            '',
-        },
-      ],
-      url: fields?.openGraphUrl?.value?.href,
     },
 
     other: {

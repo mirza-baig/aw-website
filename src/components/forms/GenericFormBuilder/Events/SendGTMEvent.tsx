@@ -84,10 +84,6 @@ export default function SendGTMEvent(props: Props) {
     [datasource, gtmEventName]
   );
 
-  useEffect(() => {
-    pushEvent('Initial Load Event');
-  }, [pushEvent, props.formValues]);
-
   // The same form can be re-opened in a modal, which mounts a new form instance without a page load.
   useEffect(() => {
     function handleFormOpenedInModal() {

@@ -81,6 +81,278 @@ const ctaTierClasses = (tier: CTATier): string => {
   return `${base} border-gray hover:border-black hover:bg-black hover:text-white`;
 };
 
+const LegendPanel = ({
+  chartEyebrow,
+  chartTitle,
+  activeSeriesLabel,
+  chartDescription,
+  hasIntroCta,
+  introCta,
+  introCtaStyle,
+  introCtaIcon,
+  legendRows,
+  isMobile,
+  introHeaderHeightClass,
+  sectionHeightClass,
+  rowHeightClass,
+}: any) => {
+  const getLegendTextSizeClass = (kind: string): string => {
+    if (!isMobile) {
+      return 'text-[14px]';
+    }
+    return kind === 'section' ? 'text-[10px]' : 'text-[14px]';
+  };
+
+  return (
+    <div
+      className={`shrink-0 bg-white shadow-[10px_0_14px_-20px_rgb(0,0,0)] ${
+        isMobile
+          ? 'min-w-[100px] max-w-[100px] px-2 pt-[13px] pb-[60px]'
+          : 'min-w-[200px] max-w-[310px] px-10 pt-[21px] pb-[120px]'
+      }`}
+    >
+      <div
+        className={`flex w-full shrink-0 flex-col justify-start ${
+          isMobile ? 'gap-1 pb-2' : 'gap-2 pb-4'
+        } ${introHeaderHeightClass}`}
+      >
+        <h4
+          className={`font-serif! font-bold uppercase tracking-[0.9px] text-[#F26924] ${
+            isMobile ? 'text-[12px] leading-tight' : 'text-[18px]'
+          }`}
+        >
+          {chartEyebrow || 'COMPARE'}
+        </h4>
+        <h2
+          className={`line-clamp-3 font-futura-pt! font-bold ${
+            isMobile ? 'text-[20px] leading-tight' : 'text-[36px]'
+          }`}
+        >
+          {chartTitle || activeSeriesLabel}
+        </h2>
+        {chartDescription && (
+          <p className={`font-serif! text-[#333] ${isMobile ? 'text-[12px]' : 'text-[16px]'}`}>
+            {chartDescription}
+          </p>
+        )}
+        {hasIntroCta && (
+          <Button
+            field={introCta}
+            variant={introCtaStyle}
+            icon={introCtaIcon}
+            classes={
+              isMobile
+                ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
+                : 'mt-2 w-full! justify-center'
+            }
+          />
+        )}
+      </div>
+
+      {legendRows.map((row: any) => (
+        <div
+          key={row.key}
+          className={classNames(
+            'flex flex-col justify-center border-b border-[#CCC] p-[20px] font-serif!',
+            row.kind === 'section' ? sectionHeightClass : rowHeightClass,
+            row.kind === 'row' && row.zebra && 'bg-[#FCFAFA]',
+            getLegendTextSizeClass(row.kind)
+          )}
+        >
+          <span className={row.kind === 'section' ? 'font-bold uppercase tracking-wide' : ''}>
+            {row.label}
+          </span>
+          {row.cta && (
+            <a
+              href={row.cta.href}
+              target={row.cta.target || undefined}
+              rel={row.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
+              className={`mt-0.5 inline-block font-serif! font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${
+                isMobile ? 'text-[10px]' : 'text-[14px]'
+              }`}
+            >
+              {row.cta.text}
+            </a>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ProductCard = ({
+  productItem,
+  productIdx,
+  activeSeries,
+  activeBucket,
+  activeSeriesLabel,
+  legendRows,
+  isMobile,
+  introHeaderHeightClass,
+  sectionHeightClass,
+  rowHeightClass,
+  resolvedSwatchCollections,
+  handleSwatchOverflow,
+  ctas,
+  siteInfo,
+}: any) => {
+  const productImage =
+    productItem?.fields?.productImage?.value ?? getSeriesImage(activeSeries, activeBucket);
+
+  return (
+    <div
+      key={productItem?.id ?? `${activeSeries?.id}-${productIdx}`}
+      className={`flex flex-col items-start rounded border border-[#EAEAEA] bg-white shadow-[0px_4px_12px_rgba(0,0,0,0.04)] ${
+        isMobile ? 'w-[160px] min-w-[160px] px-2 py-3' : 'w-[280px] min-w-[280px] px-2.5 py-5'
+      }`}
+    >
+      <div
+        className={`flex w-full shrink-0 flex-col justify-start ${
+          isMobile ? 'pb-2' : 'pb-4'
+        } ${introHeaderHeightClass}`}
+      >
+        <div
+          className={`flex ${
+            isMobile ? 'h-[90px]' : 'h-[134px]'
+          } w-full items-center justify-center`}
+        >
+          {productImage?.src && (
+            <Image
+              src={getMediaUrl(productImage.src, MediaUrlType.Cdn, siteInfo, environment)}
+              width={productImage.width ? Number.parseInt(String(productImage.width), 10) : 134}
+              height={productImage.height ? Number.parseInt(String(productImage.height), 10) : 134}
+              alt={(productImage.alt as string) || activeSeriesLabel}
+              unoptimized={isSvgUrl(productImage.src)}
+              className="h-full w-auto object-contain"
+            />
+          )}
+        </div>
+        <div
+          className={`flex items-center justify-center gap-1 text-center font-futura-pt! font-bold ${
+            isMobile ? 'mt-2 text-[16px]' : 'mt-4 text-[18px]'
+          }`}
+        >
+          <span className="line-clamp-2">{getProductTitle(productItem, activeSeriesLabel)}</span>
+        </div>
+        <div
+          className={`flex items-center justify-center gap-1 text-center font-serif! uppercase mt-2 text-[14px]`}
+        >
+          <span className="line-clamp-2">{productItem?.fields?.productSubtype?.value}</span>
+        </div>
+      </div>
+
+      {legendRows.map((row: any) => {
+        if (row.kind === 'section') {
+          return (
+            <div
+              key={row.key}
+              className={`flex w-full shrink-0 items-center justify-center border-b border-[#CCC] ${sectionHeightClass}`}
+            />
+          );
+        }
+        const comment =
+          row.fieldName === 'standardInteriorColors'
+            ? getInteriorColorsComment(productItem, activeSeries)
+            : undefined;
+
+        return (
+          <div
+            key={row.key}
+            className={classNames(
+              'flex w-full shrink-0 flex-col items-center justify-center gap-0.5 border-b border-[#CCC] text-center',
+              rowHeightClass,
+              row.zebra && 'bg-[#FCFAFA]',
+              isMobile ? 'text-[12px]' : 'text-[14px]'
+            )}
+          >
+            <ProductCell
+              productItem={productItem}
+              seriesItem={activeSeries}
+              fieldName={row.fieldName}
+              isMobile={isMobile}
+              resolvedSwatchCollections={resolvedSwatchCollections}
+              onSwatchOverflow={handleSwatchOverflow}
+            />
+            {comment && (
+              <span
+                className={`w-full px-1 text-center font-serif! font-normal italic text-[10px]`}
+              >
+                {comment}
+              </span>
+            )}
+          </div>
+        );
+      })}
+
+      <div
+        className={`flex w-full flex-col items-stretch justify-center gap-2 ${
+          isMobile ? 'mt-1' : 'mt-4'
+        }`}
+      >
+        {ctas.map((cta: any) => (
+          <a
+            key={`${cta.label}-${cta.href}`}
+            href={cta.href}
+            className={`flex items-center justify-center text-center no-underline ${ctaTierClasses(
+              cta.tier
+            )}`}
+          >
+            {cta.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SwatchPopoverModal = ({ swatchPopover, swatchPopoverRef, onClose }: any) => {
+  if (!swatchPopover) {
+    return null;
+  }
+
+  return (
+    <div
+      ref={swatchPopoverRef}
+      aria-label="All swatches"
+      style={{
+        position: 'fixed',
+        top: swatchPopover.top,
+        left: swatchPopover.left,
+        transform: 'translate(-50%, calc(-100% - 6px))',
+        maxWidth: 'min(90vw, 520px)',
+      }}
+      className="z-50 flex flex-wrap items-center justify-center gap-2 bg-white px-4 py-2 shadow-xl ring-1 ring-black/10"
+    >
+      {swatchPopover.swatches
+        .filter((swatch: any) => swatch?.src)
+        .map((swatch: any, idx: number) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={`${swatch.src}-${idx}`}
+            src={swatch.src}
+            alt={swatch.alt ?? ''}
+            className="h-6.25 w-[25px] rounded-full border border-black/50"
+          />
+        ))}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="ml-1 text-black hover:opacity-60 focus:outline-none"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path
+            d="M1 1 L13 13 M13 1 L1 13"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+};
+
 export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
   const { siteInfo } = useWebsiteContext();
   const { currentScreenWidth } = useCurrentScreenType();
@@ -114,13 +386,10 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
     ? selectedBucket
     : (availableBuckets[0] ?? 'windows');
 
-  // A series only appears in the row when it has products in the active half of
-  // the catalogue, so toggling to Doors hides windows-only series.
   const visibleSeries = seriesList
     .map((item, index) => ({ item, index }))
     .filter(({ item }) => seriesHasProducts(item, activeBucket));
 
-  // ── URL hash (#100-series-windows) → initial selection ──
   useHashSelection(seriesList, availableBuckets, (bucket, index) => {
     setSelectedBucket(bucket);
     setSelectedSeriesIndex(index);
@@ -142,10 +411,6 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
   const destinationReport = describeProductLinkDestinations(props.fields);
   const productLinkDestinations = destinationReport.rendered;
 
-  // A card silently missing a button is hard to diagnose from content alone, so
-  // the hook logs the three ways a destination disappears: it matched no known
-  // destination, it fell past the three-button cap, or the product carries no
-  // link for it.
   useDestinationDiagnostics(destinationReport, products, activeSeries, activeSeriesLabel, [
     props?.rendering?.dataSource,
     activeBucket,
@@ -165,15 +430,22 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
     writeHash(seriesList[index], activeBucket);
   };
 
+  const getNextSeriesIndex = (
+    seriesList: any[],
+    selectedSeriesIndex: number,
+    bucket: BucketKey
+  ): number => {
+    const keepsSelection = seriesHasProducts(seriesList[selectedSeriesIndex], bucket);
+    return keepsSelection
+      ? selectedSeriesIndex
+      : seriesList.findIndex((item) => seriesHasProducts(item, bucket));
+  };
+
   const handleSelectBucket = (bucket: BucketKey) => {
     setSelectedBucket(bucket);
     setActiveCardIndex(0);
-    // Keep the current series when it exists in the new bucket, otherwise fall
-    // back to the first series that does.
-    const keepsSelection = seriesHasProducts(seriesList[selectedSeriesIndex], bucket);
-    const nextIndex = keepsSelection
-      ? selectedSeriesIndex
-      : seriesList.findIndex((item) => seriesHasProducts(item, bucket));
+    const nextIndex = getNextSeriesIndex(seriesList, selectedSeriesIndex, bucket);
+
     if (nextIndex !== -1) {
       setSelectedSeriesIndex(nextIndex);
       writeHash(seriesList[nextIndex], bucket);
@@ -182,9 +454,6 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
 
   const handleSwatchOverflow: SwatchOverflowHandler = (swatches, origin) =>
     setSwatchPopover({ swatches, top: origin.top, left: origin.left });
-
-  const buildCTAs = (productItem: any) =>
-    buildProductCTAs(productItem, productLinkDestinations, activeSeries, activeSeriesLabel, tcText);
 
   if (!props.fields || seriesList.length === 0) {
     return <></>;
@@ -204,7 +473,6 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
     };
   });
 
-  // ── Intro panel (defaults to GPDS values, overridden by authored fields) ──
   const chartEyebrow = props.fields.chartEyebrow?.value;
   const chartTitle = props.fields.chartTitle?.value;
   const chartDescription = props.fields.chartDescription?.value;
@@ -212,7 +480,7 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
   const hasIntroCta = !!introCta?.value?.href;
 
   const desktopHeaderHeightClass = hasIntroCta ? 'h-[272px]' : 'h-[216px]';
-  const introHeaderHeightClass = isMobile ? 'h-[150px]' : desktopHeaderHeightClass;
+  const introHeaderHeightClass = isMobile ? 'h-[180px]' : desktopHeaderHeightClass;
   const sectionHeightClass = isMobile ? 'h-[32px]' : 'h-[44px]';
   const rowHeightClass = isMobile ? 'min-h-[120px]' : 'min-h-[100px]';
 
@@ -258,96 +526,22 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
           )}
 
           <div className={`flex ${isMobile ? 'gap-1 p-[10px]' : 'gap-5 py-[15px]'}`}>
-            {/* ── Left legend panel ── */}
-            <div
-              className={`shrink-0 bg-white shadow-[10px_0_14px_-20px_rgb(0,0,0)] ${
-                isMobile
-                  ? 'min-w-[100px] max-w-[100px] px-2 pt-[13px] pb-[60px]'
-                  : 'min-w-[200px] max-w-[310px] px-10 pt-[21px] pb-[120px]'
-              }`}
-            >
-              <div
-                className={`flex w-full shrink-0 flex-col justify-start ${
-                  isMobile ? 'gap-1 pb-2' : 'gap-2 pb-4'
-                } ${introHeaderHeightClass}`}
-              >
-                <h4
-                  className={`font-sans! font-bold uppercase tracking-[0.9px] text-[#F26924] ${
-                    isMobile ? 'text-[10px] leading-tight' : 'text-lg'
-                  }`}
-                >
-                  {chartEyebrow || 'COMPARE'}
-                </h4>
-                <h2
-                  className={`line-clamp-3 font-sans! font-bold ${
-                    isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
-                  }`}
-                >
-                  {chartTitle || activeSeriesLabel}
-                </h2>
-                {chartDescription && (
-                  <p
-                    className={`!font-sans text-[#333] ${isMobile ? 'hidden text-[8px]' : 'text-sm'}`}
-                  >
-                    {chartDescription}
-                  </p>
-                )}
-                {hasIntroCta && (
-                  <Button
-                    field={introCta}
-                    variant={props.fields.chartCtaStyle}
-                    icon={props.fields.chartCtaIcon}
-                    classes={
-                      isMobile
-                        ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
-                        : 'mt-2 w-full! justify-center'
-                    }
-                  />
-                )}
-              </div>
+            <LegendPanel
+              chartEyebrow={chartEyebrow}
+              chartTitle={chartTitle}
+              activeSeriesLabel={activeSeriesLabel}
+              chartDescription={chartDescription}
+              hasIntroCta={hasIntroCta}
+              introCta={introCta}
+              introCtaStyle={props.fields.chartCtaStyle}
+              introCtaIcon={props.fields.chartCtaIcon}
+              legendRows={legendRows}
+              isMobile={isMobile}
+              introHeaderHeightClass={introHeaderHeightClass}
+              sectionHeightClass={sectionHeightClass}
+              rowHeightClass={rowHeightClass}
+            />
 
-              {legendRows.map((row) => {
-                let textSizeClass: string;
-                if (!isMobile) {
-                  textSizeClass = 'text-base';
-                } else if (row.kind === 'section') {
-                  textSizeClass = 'text-[10px]';
-                } else {
-                  textSizeClass = 'text-[9px]';
-                }
-                return (
-                  <div
-                    key={row.key}
-                    className={classNames(
-                      'flex flex-col justify-center border-b border-[#CCC] p-[20px] font-sans!',
-                      row.kind === 'section' ? sectionHeightClass : rowHeightClass,
-                      row.kind === 'row' && row.zebra && 'bg-[#FCFAFA]',
-                      textSizeClass
-                    )}
-                  >
-                    <span
-                      className={row.kind === 'section' ? 'font-bold uppercase tracking-wide' : ''}
-                    >
-                      {row.label}
-                    </span>
-                    {row.cta && (
-                      <a
-                        href={row.cta.href}
-                        target={row.cta.target || undefined}
-                        rel={row.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                        className={`mt-0.5 inline-block font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${
-                          isMobile ? 'text-[8px]' : 'text-xs'
-                        }`}
-                      >
-                        {row.cta.text}
-                      </a>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* ── Product cards for the selected series ── */}
             <div className="relative min-w-0 flex-1">
               {!isMobile && products.length > 2 && (
                 <>
@@ -381,140 +575,31 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
                 }`}
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {products.map((productItem: any, productIdx: number) => {
-                  const productImage =
-                    productItem?.fields?.productImage?.value ??
-                    getSeriesImage(activeSeries, activeBucket);
-
-                  return (
-                    <div
-                      key={productItem?.id ?? `${activeEntry?.index}-${productIdx}`}
-                      className={`flex flex-col items-start rounded border border-[#EAEAEA] bg-white shadow-[0px_4px_12px_rgba(0,0,0,0.04)] ${
-                        isMobile
-                          ? 'w-[160px] min-w-[160px] px-2 py-3'
-                          : 'w-[280px] min-w-[280px] px-2.5 py-5'
-                      }`}
-                    >
-                      <div
-                        className={`flex w-full shrink-0 flex-col justify-start ${
-                          isMobile ? 'pb-2' : 'pb-4'
-                        } ${introHeaderHeightClass}`}
-                      >
-                        <div
-                          className={`flex ${
-                            isMobile ? 'h-[90px]' : 'h-[134px]'
-                          } w-full items-center justify-center`}
-                        >
-                          {productImage?.src && (
-                            <Image
-                              src={getMediaUrl(
-                                productImage.src,
-                                MediaUrlType.Cdn,
-                                siteInfo!,
-                                environment
-                              )}
-                              width={
-                                productImage.width
-                                  ? Number.parseInt(String(productImage.width), 10)
-                                  : 134
-                              }
-                              height={
-                                productImage.height
-                                  ? Number.parseInt(String(productImage.height), 10)
-                                  : 134
-                              }
-                              alt={(productImage.alt as string) || activeSeriesLabel}
-                              unoptimized={isSvgUrl(productImage.src)}
-                              className="h-full w-auto object-contain"
-                            />
-                          )}
-                        </div>
-                        <div
-                          className={`flex items-center justify-center gap-1 text-center font-sans! font-bold ${
-                            isMobile ? 'mt-2 text-xs' : 'mt-4 text-base'
-                          }`}
-                        >
-                          <span className="line-clamp-2">
-                            {getProductTitle(productItem, activeSeriesLabel)}
-                          </span>
-                        </div>
-                        <div
-                          className={`flex items-center justify-center gap-1 text-center font-sans! ${
-                            isMobile ? 'mt-2 text-xs' : 'mt-2 text-base'
-                          }`}
-                        >
-                          <span className="line-clamp-2">
-                            {productItem?.fields?.productSubtype?.value}
-                          </span>
-                        </div>
-                      </div>
-
-                      {legendRows.map((row) => {
-                        if (row.kind === 'section') {
-                          return (
-                            <div
-                              key={row.key}
-                              className={`flex w-full shrink-0 items-center justify-center border-b border-[#CCC] ${sectionHeightClass}`}
-                            />
-                          );
-                        }
-                        const comment =
-                          row.fieldName === 'standardInteriorColors'
-                            ? getInteriorColorsComment(productItem, activeSeries)
-                            : undefined;
-                        return (
-                          <div
-                            key={row.key}
-                            className={classNames(
-                              'flex w-full shrink-0 flex-col items-center justify-center gap-0.5 border-b border-[#CCC] text-center',
-                              rowHeightClass,
-                              row.zebra && 'bg-[#FCFAFA]',
-                              isMobile ? 'text-[10px]' : 'text-base'
-                            )}
-                          >
-                            <ProductCell
-                              productItem={productItem}
-                              seriesItem={activeSeries}
-                              fieldName={row.fieldName}
-                              isMobile={isMobile}
-                              resolvedSwatchCollections={resolvedSwatchCollections}
-                              onSwatchOverflow={handleSwatchOverflow}
-                            />
-                            {comment && (
-                              <span
-                                className={`w-full px-1 text-center font-normal italic ${
-                                  isMobile
-                                    ? 'text-[8px] leading-[10px]'
-                                    : 'text-[10px] leading-[12px]'
-                                }`}
-                              >
-                                {comment}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-
-                      <div
-                        className={`flex w-full flex-col items-stretch justify-center gap-2 ${
-                          isMobile ? 'mt-1' : 'mt-4'
-                        }`}
-                      >
-                        {buildCTAs(productItem).map((cta) => (
-                          <a
-                            key={`${cta.label}-${cta.href}`}
-                            href={cta.href}
-                            className={`flex items-center justify-center text-center no-underline ${ctaTierClasses(
-                              cta.tier
-                            )}`}
-                          >
-                            {cta.label}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                {products.map((productItem: any, productIdx: number) => (
+                  <ProductCard
+                    key={productItem?.id ?? `${activeEntry?.index}-${productIdx}`}
+                    productItem={productItem}
+                    productIdx={productIdx}
+                    activeSeries={activeSeries}
+                    activeBucket={activeBucket}
+                    activeSeriesLabel={activeSeriesLabel}
+                    legendRows={legendRows}
+                    isMobile={isMobile}
+                    introHeaderHeightClass={introHeaderHeightClass}
+                    sectionHeightClass={sectionHeightClass}
+                    rowHeightClass={rowHeightClass}
+                    resolvedSwatchCollections={resolvedSwatchCollections}
+                    handleSwatchOverflow={handleSwatchOverflow}
+                    ctas={buildProductCTAs(
+                      productItem,
+                      productLinkDestinations,
+                      activeSeries,
+                      activeSeriesLabel,
+                      tcText
+                    )}
+                    siteInfo={siteInfo}
+                  />
+                ))}
                 {/* ── Final CTA column ── */}
                 {showFinalColumn && finalColumnLink?.href && (
                   <div
@@ -526,17 +611,13 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
                       href={finalColumnLink.href}
                       target={finalColumnLink.target || undefined}
                       rel={finalColumnLink.target === '_blank' ? 'noopener noreferrer' : undefined}
-                      className={`flex h-full w-full flex-col items-center justify-center gap-2 px-2 !font-sans font-normal text-black no-underline ${
+                      className={`flex h-full w-full flex-col items-center justify-center gap-2 px-2 font-serif! font-normal text-black no-underline ${
                         isMobile ? 'text-[10px]' : 'text-sm'
                       }`}
                       style={{ minHeight: isMobile ? 100 : 320 }}
                     >
-                      <span className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
-                        Explore all
-                      </span>
-                      <span className={`text-[#666] ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
-                        Series
-                      </span>
+                      <span className={`text-[#666] text-[14px]`}>Explore all</span>
+                      <span className={`text-[#666] text-[14px]`}>Series</span>
                       <span
                         className={`inline-flex items-center justify-center rounded-full border border-[#E0E0E0] ${
                           isMobile ? 'h-6 w-6' : 'h-9 w-9'
@@ -588,47 +669,11 @@ export const WithinSeriesChart = (props: WithinSeriesChartProps) => {
         </div>
       )}
 
-      {swatchPopover && (
-        <div
-          ref={swatchPopoverRef}
-          aria-label="All swatches"
-          style={{
-            position: 'fixed',
-            top: swatchPopover.top,
-            left: swatchPopover.left,
-            transform: 'translate(-50%, calc(-100% - 6px))',
-            maxWidth: 'min(90vw, 520px)',
-          }}
-          className="z-50 flex flex-wrap items-center justify-center gap-2 bg-white px-4 py-2 shadow-xl ring-1 ring-black/10"
-        >
-          {swatchPopover.swatches
-            .filter((swatch) => swatch?.src)
-            .map((swatch, idx) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={`${swatch.src}-${idx}`}
-                src={swatch.src}
-                alt={swatch.alt ?? ''}
-                className="h-6.25 w-[25px] rounded-full border border-black/50"
-              />
-            ))}
-          <button
-            type="button"
-            onClick={() => setSwatchPopover(null)}
-            aria-label="Close"
-            className="ml-1 text-black hover:opacity-60 focus:outline-none"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path
-                d="M1 1 L13 13 M13 1 L1 13"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-      )}
+      <SwatchPopoverModal
+        swatchPopover={swatchPopover}
+        swatchPopoverRef={swatchPopoverRef}
+        onClose={() => setSwatchPopover(null)}
+      />
     </>
   );
 };

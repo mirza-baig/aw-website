@@ -1,9 +1,9 @@
+import environment from 'lib/environment';
 import sitecoreClient from 'lib/sitecore-client';
 import { getHostNameFromRequest } from 'lib/utils/nextjs-utils/get-host-name-from-request';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { NextRequest } from 'next/server';
 import { TechDocsSitemapService } from 'src/lib/techdocs-sitemap/techdocs-sitemap-service';
-import { environment } from 'startup/environment';
 
 export const dynamic = 'force-dynamic';
 
