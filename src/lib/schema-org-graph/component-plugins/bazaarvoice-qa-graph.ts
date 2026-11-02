@@ -91,7 +91,7 @@ function toSchemaQuestion(
 export async function plugin({
   graph,
   fields,
-  page,
+  websiteStaticState,
 }: ComponentPluginParams<BazaarvoiceQAFields>): Promise<Thing[]> {
   const bazaarvoiceProductId = (
     fields?.productItem?.fields?.bazaarvoiceProductId as Field<string> | undefined
@@ -106,7 +106,7 @@ export async function plugin({
     return graph;
   }
 
-  const canonicalHostName = (page.customProps.siteInfo?.canonicalHostName ?? '') as string;
+  const canonicalHostName = (websiteStaticState.siteInfo?.canonicalHostName ?? '') as string;
 
   const questions = questionData
     .map((q) => toSchemaQuestion(q, canonicalHostName))

@@ -2,7 +2,7 @@
 import { MetricReader, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { registerOTel } from '@vercel/otel';
-import config from 'aw.config.client';
+import config from 'aw.config';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 
 // Prevent registering the SDK multiple times

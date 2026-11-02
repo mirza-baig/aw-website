@@ -1,13 +1,10 @@
 'use client';
 import { useEffect, JSX } from 'react';
-import config from 'sitecore.config';
 import { initContentSdk } from '@sitecore-content-sdk/nextjs';
 import { eventsPlugin } from '@sitecore-content-sdk/events';
 import { analyticsBrowserAdapter, analyticsPlugin } from '@sitecore-content-sdk/analytics-core';
-import {
-  personalizeBrowserPlugin,
-  personalizeBrowserAdapter,
-} from '@sitecore-content-sdk/personalize'; // CUSTOMIZATION
+import config from 'sitecore.config';
+import { personalizeBrowserAdapter, personalizeBrowserPlugin } from '@sitecore-content-sdk/personalize';
 
 const Bootstrap = ({
   siteName,
@@ -17,10 +14,10 @@ const Bootstrap = ({
   isPreviewMode: boolean;
 }): JSX.Element | null => {
   useEffect(() => {
-/*     if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development') {
       console.debug('Browser Events SDK is not initialized in development environment');
       return;
-    } */
+    }
 
     if (isPreviewMode) {
       console.debug('Browser Events SDK is not initialized in edit and preview modes');
@@ -28,7 +25,6 @@ const Bootstrap = ({
     }
 
     if (config.api.edge?.clientContextId) {
-      console.log('✨ Initializing CloudSDK for site:', siteName);
       initContentSdk({
         config: {
           contextId: config.api.edge.clientContextId,

@@ -1,7 +1,7 @@
 'use client';
 
 import { Text } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.client';
+import config from 'aw.config';
 import classNames from 'classnames';
 import Card from 'helpers/Card/Card';
 import { StandaloneSearchBox } from 'helpers/Coveo/StandaloneSearchBox/StandaloneSearchBox';

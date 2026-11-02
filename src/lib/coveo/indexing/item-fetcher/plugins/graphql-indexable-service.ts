@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import { SearchQueryService } from 'lib/graphql/search-query-service';
 import sitecoreClient, { AWSitecoreClient } from 'lib/sitecore-client';

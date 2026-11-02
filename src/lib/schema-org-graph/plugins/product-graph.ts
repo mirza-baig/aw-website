@@ -12,14 +12,15 @@ export function plugin({
   graph,
   data,
   page,
+  websiteStaticState,
 }: PluginParams<Sitecore.Components.Seo.ProductSchema.ProductSchema['fields']>): Thing[] {
   if (!data) {
     return graph;
   }
 
   const canonicalHostName =
-    (page.customProps.siteInfo?.canonicalHostName as string | undefined) ?? '';
-  const requestedPath = page.customProps.requestedPath ?? '';
+    (websiteStaticState.siteInfo?.canonicalHostName as string | undefined) ?? '';
+  const requestedPath = websiteStaticState.requestedPath ?? '';
 
   const productName =
     (data.productItem?.fields?.productName as Field<string> | undefined)?.value ?? '';

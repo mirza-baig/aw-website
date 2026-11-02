@@ -6,7 +6,6 @@ import config from 'sitecore.config';
 
 /**
  * This is the CDP page view component.
- *
  * See Sitecore Content SDK documentation for details.
  * https://www.npmjs.com/package/@sitecore-content-sdk/events
  */
@@ -51,7 +50,7 @@ const CdpPageView = (): JSX.Element => {
       page: route.name,
       pageVariantId,
       language,
-    }).catch(e => console.debug(e));
+    }).catch((e) => console.debug(e));
   }, [mode, route, context.variantId, siteName]);
 
   return <></>;

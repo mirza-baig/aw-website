@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 
 import { BaseSubmitAction, BaseSubmitProps, ExecutionResult } from '../BaseSubmitAction';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -11,6 +11,14 @@ declare global {
   }
 }
 
+type GrecaptchaEnterprise = {
+  execute: (siteKey: string, options: { action: string }) => Promise<string>;
+};
+
+const getGrecaptchaEnterprise = (): GrecaptchaEnterprise | undefined =>
+  (globalThis as unknown as { grecaptcha?: { enterprise?: GrecaptchaEnterprise } }).grecaptcha
+    ?.enterprise;
+
 type ExtendedActionFieldProps = Sitecore.Forms.GenericFormBuilder.SubmitActions.Recaptcha['fields'];
 
 export class Recaptcha extends BaseSubmitAction {
@@ -22,14 +30,29 @@ export class Recaptcha extends BaseSubmitAction {
   }
 
   private async executeRecaptcha(userAction: string): Promise<string | undefined> {
+    const maxWaitMs = 10000;
+    const startedAt = Date.now();
+
     return new Promise((resolve) => {
       const checkGrecaptcha = () => {
-        if (window.grecaptcha && typeof window.grecaptcha.enterprise.execute === 'function') {
-          window.grecaptcha.enterprise
+        const enterprise = getGrecaptchaEnterprise();
+        if (typeof enterprise?.execute === 'function') {
+          enterprise
             .execute(config.google.recaptcha.siteKey, {
               action: userAction,
             })
-            .then(resolve);
+            .then(
+              (token: string) => {
+                console.info('[reCAPTCHA] token received:', !!token);
+                resolve(token);
+              },
+              (error: unknown) => {
+                console.error('reCAPTCHA execute failed:', error);
+                resolve(undefined);
+              }
+            );
+        } else if (Date.now() - startedAt > maxWaitMs) {
+          resolve(undefined);
         } else {
           setTimeout(checkGrecaptcha, 100);
         }
@@ -52,13 +75,23 @@ export class Recaptcha extends BaseSubmitAction {
     }
 
     const verificationResult = await response.json();
+    console.info('[reCAPTCHA] verify response', {
+      status: response.status,
+      valid: verificationResult.tokenProperties?.valid,
+      invalidReason: verificationResult.tokenProperties?.invalidReason,
+      action: verificationResult.tokenProperties?.action,
+      score: verificationResult.riskAnalysis?.score,
+    });
     const minimumScoreValue = this.actionFieldsProps?.minimumScoreValue?.value ?? 0.1;
+    this.formData['googleRecaptchaResponse'] = verificationResult;
 
     if (
-      verificationResult.riskAnalysis?.score <= minimumScoreValue ||
+      verificationResult.riskAnalysis?.score < minimumScoreValue ||
       !verificationResult.tokenProperties?.valid ||
       verificationResult.tokenProperties?.action !== userAction
     ) {
+      verificationResult.isValid = false;
+      this.formData['isRecaptchaValid'] = false; // needs to be on the form data for multi-step forms to grab
       return {
         success: false,
         errorMessage: this.actionFieldsProps?.errorMessage?.value,
@@ -66,6 +99,8 @@ export class Recaptcha extends BaseSubmitAction {
       };
     }
 
+    verificationResult.isValid = true;
+    this.formData['isRecaptchaValid'] = true;
     return {
       success: true,
       errorMessage: this.actionFieldsProps?.errorMessage?.value,
@@ -105,7 +140,11 @@ export class Recaptcha extends BaseSubmitAction {
     const userAction = this.actionFieldsProps?.userAction?.value as string;
 
     try {
-      const token = (await this.executeRecaptcha(userAction)) as string;
+      const token = await this.executeRecaptcha(userAction);
+      if (!token) {
+        this.formData['isRecaptchaValid'] = false;
+        return { success: false, errorMessage: errorMessage };
+      }
       return this.verifyRecaptcha(token, userAction);
     } catch (error) {
       console.error('Caught error:', error);

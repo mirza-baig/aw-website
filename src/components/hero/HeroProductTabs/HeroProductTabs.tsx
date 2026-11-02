@@ -77,6 +77,7 @@ async function HeroProductTabs_Default(props: HeroProductTabsProps): Promise<JSX
             }}
             page={props.page}
             componentMap={componentMap}
+            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         }
       />

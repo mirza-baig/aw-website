@@ -147,7 +147,7 @@ describe('app > api > ai > answer', () => {
 
   describe('getServiceToken', () => {
     test('returns null when no credentials configured', async () => {
-      const cfg = (await import('aw.config.server')).default;
+      const cfg = (await import('aw.config')).default;
       const origUsername = cfg.chatbot.api.username;
       const origPassword = cfg.chatbot.api.password;
       cfg.chatbot.api.username = '';
@@ -161,7 +161,7 @@ describe('app > api > ai > answer', () => {
     });
 
     test('tries /auth/login first when username and password set', async () => {
-      const cfg = (await import('aw.config.server')).default;
+      const cfg = (await import('aw.config')).default;
       const origUsername = cfg.chatbot.api.username;
       const origPassword = cfg.chatbot.api.password;
       cfg.chatbot.api.username = 'user1';
@@ -186,7 +186,7 @@ describe('app > api > ai > answer', () => {
     });
 
     test('falls back to /all-login when /auth/login fails', async () => {
-      const cfg = (await import('aw.config.server')).default;
+      const cfg = (await import('aw.config')).default;
       const origUsername = cfg.chatbot.api.username;
       const origPassword = cfg.chatbot.api.password;
       cfg.chatbot.api.username = 'user1';
@@ -210,7 +210,7 @@ describe('app > api > ai > answer', () => {
     });
 
     test('returns null when both login attempts fail', async () => {
-      const cfg = (await import('aw.config.server')).default;
+      const cfg = (await import('aw.config')).default;
       const origUsername = cfg.chatbot.api.username;
       const origPassword = cfg.chatbot.api.password;
       cfg.chatbot.api.username = 'user1';
@@ -242,7 +242,7 @@ describe('app > api > ai > answer', () => {
       const req = new Request('http://localhost/api/ai/answer');
       const nextReq = new NextRequest(req);
 
-      const cfg = (await import('aw.config.server')).default;
+      const cfg = (await import('aw.config')).default;
       const origUsername = cfg.chatbot.api.username;
       const origPassword = cfg.chatbot.api.password;
       cfg.chatbot.api.username = 'svc';

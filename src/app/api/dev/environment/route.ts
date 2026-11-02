@@ -1,7 +1,5 @@
 import environment from 'lib/environment';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(): Promise<Response> {
   const result = {
     application: environment.applicationName,

@@ -8,11 +8,11 @@ import { PluginParams } from '../plugin-types';
 export const pluginId =
   SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.SchemaOrgGraph.Breadcrumb.Id;
 
-export function plugin({ graph, page }: PluginParams<unknown>): Thing[] {
-  const breadcrumbs: BreadcrumbItem[] = page.customProps.breadcrumbs ?? [];
+export function plugin({ graph, page, websiteStaticState }: PluginParams<unknown>): Thing[] {
+  const breadcrumbs: BreadcrumbItem[] = websiteStaticState.breadcrumbs ?? [];
   const canonicalHostName =
-    (page.customProps.siteInfo?.canonicalHostName as string | undefined) ?? '';
-  const requestedPath = page.customProps.requestedPath ?? '';
+    (websiteStaticState.siteInfo?.canonicalHostName as string | undefined) ?? '';
+  const requestedPath = websiteStaticState.requestedPath ?? '';
 
   if (breadcrumbs.length <= 1) {
     return graph;

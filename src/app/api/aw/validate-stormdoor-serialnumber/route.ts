@@ -1,6 +1,5 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 import { NextRequest } from 'next/server';
-export const dynamic = 'force-dynamic';
 
 const endpoint = `${config.mulesoft.apiUrl}/api/web/stormdoor/v1.0/getstormdooritemnumber`;
 const clientId = config.mulesoft.clientId;

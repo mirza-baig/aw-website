@@ -1,7 +1,7 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 import crypto from 'crypto';
 import type { NextRequest } from 'next/server';
-export const dynamic = 'force-dynamic';
+
 // Normalize code by trimming whitespace and converting to lowercase
 function normalizeCode(input: string) {
   return input.trim().toLowerCase();

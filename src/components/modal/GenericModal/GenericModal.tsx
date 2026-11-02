@@ -28,6 +28,7 @@ function GenericModal_Default(props: GenericModalProps): JSX.Element {
           rendering={props.rendering}
           page={props.page}
           componentMap={componentMap}
+          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
     />

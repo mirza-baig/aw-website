@@ -1,18 +1,7 @@
 'use client';
-/**
- * Below are Sitecore default BYOC components. Included components will be available in Pages and Components apps out of the
- * box for convenience. It is advised to comment out unused components when application is ready for production
- * to reduce javascript bundle size.
- */
-// SitecoreForm component displays forms created in XM Forms as individual components to be embedded into Pages.
-// Sitecore Forms for Sitecore XP are still available separately via @sitecore-jss-forms package
-import '@sitecore/components/form';
-
 import * as FEAAS from '@sitecore-feaas/clientside/react';
-
 /**
- * End of built-in JSS imports
- * You can import your own client component below
+ * You can import your own client components here
  * @example
  * import './MyClientComponent';
  * @example
@@ -27,4 +16,5 @@ const ClientsideComponent = (props: FEAAS.ExternalComponentProps) => FEAAS.Exter
  * - Use clientside react hooks like useEffect.
  * - Be implemented as web components.
  */
+
 export default ClientsideComponent;

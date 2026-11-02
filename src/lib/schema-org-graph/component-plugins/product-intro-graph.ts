@@ -14,6 +14,7 @@ export async function plugin({
   graph,
   fields,
   page,
+  websiteStaticState,
 }: ComponentPluginParams<ProductIntroFields>): Promise<Thing[]> {
   const productItem = fields?.productItem;
   const productName = (productItem?.fields?.productName as Field<string> | undefined)?.value ?? '';
@@ -45,7 +46,7 @@ export async function plugin({
       : graph;
   }
 
-  const canonicalHostName = (page.customProps.siteInfo?.canonicalHostName ?? '') as string;
+  const canonicalHostName = (websiteStaticState.siteInfo?.canonicalHostName ?? '') as string;
   const productPageHref =
     (productItem?.fields?.productDetailPageLink as LinkField | undefined)?.value?.href ?? '';
   const productImage =

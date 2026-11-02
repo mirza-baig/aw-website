@@ -1,6 +1,5 @@
 import { AppPlaceholder, ComponentRendering } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
-import { releaseRenoworksVisualizerHandshakeUrl } from 'lib/feature-flags/flags';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX, Suspense } from 'react';
 
@@ -43,7 +42,9 @@ async function ProductDesignTool_Defualt(props: ProductDesignToolProps): Promise
       });
     }
   });
-  const visualizerHandshakeUrlEnabled = await releaseRenoworksVisualizerHandshakeUrl();
+
+  const visualizerHandshakeUrlEnabled =
+    props.websiteStaticState.featureFlags.releaseRenoworksVisualizerHandshakeUrl;
 
   return (
     <Suspense>
@@ -57,6 +58,7 @@ async function ProductDesignTool_Defualt(props: ProductDesignToolProps): Promise
             rendering={props.rendering}
             page={props.page}
             componentMap={componentMap}
+            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         }
       />

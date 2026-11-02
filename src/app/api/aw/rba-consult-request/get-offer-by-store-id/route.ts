@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 import {
   circuitBreaker,
   ConsecutiveBreaker,
@@ -10,8 +10,6 @@ import {
   wrap,
 } from 'cockatiel';
 import { NextRequest } from 'next/server';
-
-export const dynamic = 'force-dynamic';
 
 const getOfferByStoreId = async (storeId: string) => {
   // Create a retry policy that'll try whatever function we execute 3

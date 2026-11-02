@@ -5,8 +5,6 @@ import { getHostNameFromRequest } from 'lib/utils/nextjs-utils/get-host-name-fro
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { NextRequest } from 'next/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(req: NextRequest): Promise<Response> {
   const path = req.nextUrl.searchParams.get('path');
 

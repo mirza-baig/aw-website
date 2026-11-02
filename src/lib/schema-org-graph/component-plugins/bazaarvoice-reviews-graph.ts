@@ -86,7 +86,7 @@ function mergeReviews(existing: unknown, reviews: Review[]): Review[] {
 export async function plugin({
   graph,
   fields,
-  page,
+  websiteStaticState,
 }: ComponentPluginParams<BazaarvoiceReviewsFields>): Promise<Thing[]> {
   const bazaarvoiceProductId = getBazaarvoiceProductId(fields);
   if (!bazaarvoiceProductId || !hasGraphNode(graph, 'Product')) {
@@ -94,7 +94,7 @@ export async function plugin({
   }
 
   const reviewData = await fetchReviews(bazaarvoiceProductId);
-  const canonicalHostName = (page.customProps.siteInfo?.canonicalHostName ?? '') as string;
+  const canonicalHostName = (websiteStaticState.siteInfo?.canonicalHostName ?? '') as string;
   const reviews = reviewData
     .map((review) => toSchemaReview(review, canonicalHostName))
     .filter((review): review is Review => review !== null);

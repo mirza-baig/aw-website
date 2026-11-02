@@ -1,6 +1,6 @@
 // Global
 import { Field, ImageField, Item, LinkField } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.client';
+import config from 'aw.config';
 // Components
 import { BouncyCardBaseProps } from 'helpers/BouncyCard/BouncyCard';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';

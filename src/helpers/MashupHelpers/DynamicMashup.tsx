@@ -15,15 +15,13 @@ import {
   Unsubscribe,
 } from '@coveo/headless';
 import { useSitecore } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.client';
+import config from 'aw.config';
 import BodyCopy from 'helpers/BodyCopy/BodyCopy';
 import Headline from 'helpers/Headline/Headline';
 import SingleButton from 'helpers/SingleButton/SingleButton';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';
 import { buildEngineAsync } from 'lib/coveo';
-import { buildBoostExpression } from 'lib/coveo/build-boost-expression';
-import { buildFilterExpression } from 'lib/coveo/build-filter-expression';
 import { getInitialCriterion, replaceTokenInCoveoExpression } from 'lib/coveo/utils';
 import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { toShortId } from 'lib/utils/string-utils/to-short-id';
@@ -42,6 +40,8 @@ type PageMashupDynamicProps = ComponentProps &
     fields: {
       children: Sitecore.Components.Search.PageMashupDynamic.ResultItem[];
     };
+    boostingExpression: string;
+    filterExpression: string;
   };
 
 const DynamicMashup = (props: PageMashupDynamicProps) => {
@@ -113,10 +113,8 @@ const DynamicMashup = (props: PageMashupDynamicProps) => {
       );
 
       const { updateAdvancedSearchQueries } = loadAdvancedSearchQueryActions(_engine);
-      const filterXml = props.fields?.filterExpression?.value;
-      const boostXml = props.fields?.boostingExpression?.value;
-      let filterExp = (await buildFilterExpression(filterXml)) ?? '';
-      let boostExp = (await buildBoostExpression(boostXml)) ?? '';
+      let filterExp = props.filterExpression;
+      let boostExp = props.boostingExpression;
       filterExp = replaceTokenInCoveoExpression(filterExp, {
         currentPage: PAGE_ID,
       });
@@ -149,7 +147,6 @@ const DynamicMashup = (props: PageMashupDynamicProps) => {
     // "sitecoreContext.language" it is related to language;
     // "pageAffiliate?.affiliateId" and "userAffiliate?.affiliateId" are configured from affiliateId;
     // "props.fields?.filterExpression.value", "props.fields?.boostingExpression.value" are configured for "replaceTokenInCoveoExpression";
-    // "featureToggles" is configured for coveo driven state;
     // "props.fields?.children", "props.fields?.placeholderImage", "props.fields?.queryPipeline.value", "props.fields?.searchHub.value", "props.fields?.sortDirection", "props.fields?.sortField", and "props.fields?.sortType" are props coming from layout, which will not change;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mashupStyle]);

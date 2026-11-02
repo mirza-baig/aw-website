@@ -29,10 +29,12 @@ const NamedItemsCell = ({
   items,
   fieldName,
   maxVisible,
+  isMobile,
 }: {
   items: NamedItem[];
   fieldName: string;
   maxVisible: number;
+  isMobile: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const overflow = items.length - maxVisible;
@@ -52,7 +54,7 @@ const NamedItemsCell = ({
             href={item.href}
             target={item.target || undefined}
             rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
-            className="text-center text-[#F26924] hover:underline"
+            className={`text-center text-[#F26924] hover:underline ${isMobile ? 'text-[10px]' : 'text-[14px]'}`}
           >
             {item.name}
           </a>
@@ -185,7 +187,14 @@ const renderNamedItems = (raw: any[], fieldName: string, isMobile: boolean) => {
     return null;
   }
 
-  return <NamedItemsCell items={namedItems} fieldName={fieldName} maxVisible={isMobile ? 2 : 3} />;
+  return (
+    <NamedItemsCell
+      items={namedItems}
+      fieldName={fieldName}
+      maxVisible={isMobile ? 2 : 3}
+      isMobile={isMobile}
+    />
+  );
 };
 
 const renderStringValue = (trimmed: string, isMobile: boolean) => {

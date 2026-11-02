@@ -5,8 +5,6 @@ import scConfig from 'sitecore.config';
 import { BreadcrumbItem, BreadcrumbService } from './breadcrumb/breadcrumb-service';
 import { ThemeName } from './context/ThemeContext';
 import { FlagValues } from './feature-flags/types';
-import { defaultValues, FeatureToggles } from './feature-toggles/feature-toggles';
-import { FeatureTogglesService } from './feature-toggles/feature-toggles-service';
 import { WebsiteStaticState } from './website/website-state';
 import { sites } from '.sitecore/aw-sites';
 
@@ -14,40 +12,30 @@ type SitecoreClientInit = ConstructorParameters<typeof SitecoreClient>[0];
 
 export class AWSitecoreClient extends SitecoreClient {
   protected readonly breadcrumbService: BreadcrumbService;
-  protected readonly featureTogglesService: FeatureTogglesService;
 
   constructor(initOptions: SitecoreClientInit) {
     super(initOptions);
     this.breadcrumbService = new BreadcrumbService({ sitecoreClient: this });
-    this.featureTogglesService = new FeatureTogglesService({ sitecoreClient: this });
   }
 
-  async getPageWithCustomProps(
+  async getWebsiteStaticState(
     page: Page,
     featureFlags: FlagValues,
     path: string[] = []
-  ): Promise<Page & { customProps: WebsiteStaticState }> {
-    const siteInfo = client.getSiteInfoByName(page.siteName);
+  ): Promise<WebsiteStaticState> {
+    const siteInfo = this.getSiteInfoByName(page.layout.sitecore.context.site?.name);
     const customProps = {
-      requestedPath: client.parsePath(path),
-      featureToggles: await client.getFeatureToggles(page.siteName),
-      breadcrumbs: await client.getBreadcrumbs(page.layout.sitecore.route?.itemId, page.locale),
+      requestedPath: this.parsePath(path),
+      breadcrumbs: await this.getBreadcrumbs(page.layout.sitecore.route?.itemId, page.locale),
       siteInfo,
       theme: (siteInfo?.theme ?? 'aw') as ThemeName,
       featureFlags,
     };
-    return { ...page, customProps };
+    return customProps;
   }
 
   async getBreadcrumbs(componentItemId?: string, language?: string): Promise<BreadcrumbItem[]> {
     return await this.breadcrumbService.getBreadcrumbData(componentItemId, language);
-  }
-
-  async getFeatureToggles(siteName?: string): Promise<FeatureToggles> {
-    if (siteName === undefined) {
-      return defaultValues;
-    }
-    return await this.featureTogglesService.fetchFeatureToggles(siteName);
   }
 
   getSiteInfoByName(siteName?: string): SiteInfo | undefined {

@@ -14,7 +14,16 @@ import { FormPage } from 'lib/generic-form-builder/form-props';
 import { buildForm } from 'lib/generic-form-builder/utils/load-utils/build-form';
 import { useSimpleReducer } from 'lib/utils/react-utils/use-simple-reducer';
 import { createUUID } from 'lib/utils/string-utils/create-uuid';
-import { JSX, ReactNode, RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  JSX,
+  ReactNode,
+  RefObject,
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { FormTheme } from './GenericFormBuilder.theme';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -129,35 +138,43 @@ export function GenericFormBuilderClient(props: GenericFormBuilder): JSX.Element
     [formState, setFormState]
   );
 
-  const formContext = useMemo(
-    (): GenericFormBuilderContextState => ({
-      currentPage: formState.currentPage,
-      navigateToPage: updatePageIndex,
-      sessionId: createUUID().toUpperCase(),
-      isErrorOnSubmit: formState.isErrorOnSubmit,
-      setIsErrorOnSubmit: (isErrorOnSubmit: false | string) => {
-        setFormState({ isErrorOnSubmit });
-      },
-      botCheckers: formState.botCheckers,
-      isFormInteracted: formState.isFormInteracted,
-      formPages: formState.formPages ?? [],
-      initialValues: formState.initialValues,
-      formDetails: { id: props.rendering.uid, name: props.fields?.formName.value },
-    }),
-    [
-      formState.botCheckers,
-      formState.currentPage,
-      formState.formPages,
-      formState.initialValues,
-      formState.isErrorOnSubmit,
-      formState.isFormInteracted,
-      props,
-      setFormState,
-      updatePageIndex,
-    ]
-  );
+  const [formContext, setFormContext] = useState<GenericFormBuilderContextState>();
 
-  if (formState.formPages === undefined) {
+  useEffect(() => {
+    // Wrap in startTransition so that if any component below suspends
+    // during this update, React keeps the existing UI visible instead
+    // of flashing the nearest outer <Suspense> fallback.
+    startTransition(() => {
+      const sessionId = createUUID().toUpperCase();
+      setFormContext({
+        currentPage: formState.currentPage,
+        navigateToPage: updatePageIndex,
+        sessionId,
+        isErrorOnSubmit: formState.isErrorOnSubmit,
+        setIsErrorOnSubmit: (isErrorOnSubmit: false | string) => {
+          setFormState({ isErrorOnSubmit });
+        },
+        botCheckers: formState.botCheckers,
+        isFormInteracted: formState.isFormInteracted,
+        formPages: formState.formPages ?? [],
+        initialValues: formState.initialValues,
+        formDetails: { id: props.rendering.uid, name: props.fields?.formName.value },
+      });
+    });
+  }, [
+    formState.botCheckers,
+    formState.currentPage,
+    formState.formPages,
+    formState.initialValues,
+    formState.isErrorOnSubmit,
+    formState.isFormInteracted,
+    props.fields?.formName.value,
+    props.rendering.uid,
+    setFormState,
+    updatePageIndex,
+  ]);
+
+  if (formState.formPages === undefined || formContext === undefined) {
     return null;
   }
 

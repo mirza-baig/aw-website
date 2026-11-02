@@ -1,5 +1,7 @@
+import { buildSitecoreItemCacheTag } from 'lib/cache/build-sitecore-item-cache-tag';
 import { ItemChildrenService } from 'lib/graphql/item-children-service';
 import sitecoreClient from 'lib/sitecore-client';
+import { cacheTag } from 'next/cache';
 
 export type OptionItem = {
   id: string;
@@ -51,6 +53,8 @@ export async function getOptionItems(
   labelName: string,
   valueName: string
 ): Promise<OptionItem[]> {
+  'use cache';
+
   const itemChildrenService = new ItemChildrenService<DatasourceResult>({ sitecoreClient });
   const results = await itemChildrenService.fetchAllResults(query, {
     parentId,
@@ -63,6 +67,10 @@ export async function getOptionItems(
     label: item.label.value,
     value: item.value.value,
   }));
+
+  options.forEach((option) => {
+    cacheTag(buildSitecoreItemCacheTag({ itemId: option.id, locale: 'en' }));
+  });
 
   return options;
 }

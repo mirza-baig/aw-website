@@ -1,9 +1,11 @@
 import { AppPlaceholder } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
+import { buildSitecoreItemCacheTag } from 'lib/cache/build-sitecore-item-cache-tag';
 import { ItemFields } from 'lib/graphql/item-fetcher/item';
 import { ItemBatch } from 'lib/graphql/item-fetcher/item-batch';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { AWSitecoreClient } from 'lib/sitecore-client';
+import { cacheTag } from 'next/cache';
 import scConfig from 'sitecore.config';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -51,11 +53,14 @@ async function PlaceholderContainer_Default(props: PlaceholderContainerProps) {
       rendering={props.rendering}
       page={props.page}
       componentMap={componentMap}
+      passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
     />
   );
 }
 
 async function getItemById(itemId: string, language: string = 'en') {
+  'use cache';
+
   if (!itemId) {
     return null;
   }
@@ -67,6 +72,8 @@ async function getItemById(itemId: string, language: string = 'en') {
   await itemBatch.execute();
 
   const item = itemPromise?.result;
+
+  cacheTag(buildSitecoreItemCacheTag({ itemId, locale: language }));
 
   return {
     fields: {

@@ -1,7 +1,7 @@
 'use client';
 
 import { ComponentPropsCollection } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.client';
+import config from 'aw.config';
 import { GenericFormBuilderClient } from 'components/forms/GenericFormBuilder/GenericFormBuilder/helpers/GenericFormBuilderClient';
 import { useExternalScript } from 'lib/utils/react-utils/use-external-script';
 import { getEnum } from 'lib/utils/sitecore-utils/get-enum';

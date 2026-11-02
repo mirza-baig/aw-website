@@ -41,6 +41,7 @@ export async function GenericFormBuilder_Default(
               );
             });
           }}
+          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
       componentProps={componentProps}

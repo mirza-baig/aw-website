@@ -21,9 +21,8 @@ export type ComponentProps = {
      */
     EnabledPlaceholders?: string;
   };
-  page: Page & {
-    customProps: WebsiteStaticState;
-  };
+  page: Page;
+  websiteStaticState: WebsiteStaticState;
 };
 
 /**

@@ -42,6 +42,7 @@ async function TabsGeneralContent_Default(props: Omit<TabsGeneralContentProps, '
             rendering={props.rendering}
             page={props.page}
             componentMap={componentMap}
+            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         ) : null
       }

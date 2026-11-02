@@ -21,7 +21,7 @@ function getHasPaddingInValue(field?: EnumField<ComponentPadding>) {
 }
 
 export function MediaClient(props: HeroMediaBackgroundProps): JSX.Element | null {
-  const themeData = getTheme(props.page.customProps.theme, HeroMediaBackgroundTheme);
+  const themeData = getTheme(props.websiteStaticState.theme, HeroMediaBackgroundTheme);
   const { screenType } = useCurrentScreenType();
   const [isVideoPaused, setIsVideoPaused] = useState(true);
 
@@ -60,7 +60,7 @@ export function MediaClient(props: HeroMediaBackgroundProps): JSX.Element | null
 
   const isDesktop = screenType !== 'sm';
   let hasOverlay = !!getEnum(props.fields?.overlay);
-  if (props.page.customProps.theme === 'rba' && props.fields?.overlay === null) {
+  if (props.websiteStaticState.theme === 'rba' && props.fields?.overlay === null) {
     hasOverlay = true;
   }
 
@@ -88,7 +88,7 @@ export function MediaClient(props: HeroMediaBackgroundProps): JSX.Element | null
         <div
           className={classNames(
             themeData.classes.overlay,
-            props.page.customProps.theme === 'aw' ? componentPadding : ''
+            props.websiteStaticState.theme === 'aw' ? componentPadding : ''
           )}
         ></div>
       )}

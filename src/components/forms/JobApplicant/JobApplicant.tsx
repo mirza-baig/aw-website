@@ -9,6 +9,7 @@ import { FormFieldsTheme } from 'helpers/CustomForms/FormFields.Theme';
 import { InputPhone } from 'helpers/CustomForms/InputPhone';
 import { InputText } from 'helpers/CustomForms/InputText';
 import NavigationButton from 'helpers/CustomForms/NavigationButton.Helper';
+import { useCustomFormRecaptcha } from 'helpers/CustomForms/useCustomFormRecaptcha';
 import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import { Eyebrow } from 'helpers/Eyebrow';
 import Headline from 'helpers/Headline/Headline';
@@ -62,6 +63,7 @@ function JobApplicant_Default(props: JobApplicantProps) {
   const [showThankYou, setShowThankYou] = useState(false);
   const [isButtonEnabled, setIsButtonEnabled] = useState(true);
   const [submitError, setSubmitError] = useState<string | false>(false);
+  const { runRecaptcha } = useCustomFormRecaptcha(props.fields, 'JobApplicant');
 
   const [areaInterestId, setAreaInterestId] = useState<string>('');
   const [sourceId, setSourceId] = useState<string>('');
@@ -126,6 +128,13 @@ function JobApplicant_Default(props: JobApplicantProps) {
   };
   const handleFormSubmit = async (values: FormikValues) => {
     setIsButtonEnabled(false);
+
+    const recaptcha = await runRecaptcha();
+    if (!recaptcha.success) {
+      setSubmitError(recaptcha.errorMessage ?? 'Error while processing your request.');
+      setIsButtonEnabled(true);
+      return;
+    }
 
     const response = await fetch('/api/aw/job-applicant/submit-job-applicant', {
       method: 'POST',

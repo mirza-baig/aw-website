@@ -4,13 +4,13 @@ import { appendImageObject, createImageObject } from '../image-graph-utils';
 import { PluginParams } from '../plugin-types';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
-export function plugin({ graph, page }: PluginParams<unknown>): Thing[] {
+export function plugin({ graph, page, websiteStaticState }: PluginParams<unknown>): Thing[] {
   const route = page.layout.sitecore.route;
   if (!route) {
     return graph;
   }
 
-  const siteInfo = page.customProps.siteInfo;
+  const siteInfo = websiteStaticState.siteInfo;
   if (!siteInfo) {
     return graph;
   }

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentRendering } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.server';
+import config from 'aw.config';
 import { ComponentProps } from 'lib/component-props';
-import { loader } from 'lib/feature-flags/loader';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
@@ -14,6 +13,7 @@ import { JSX } from 'react';
 import { ProductSwatch } from './helpers/product-swatch';
 import { ProductIntroClient } from './helpers/ProductIntroClient';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { cacheLife } from 'next/cache';
 
 type ProductIntroProps = ComponentProps &
   Sitecore.Components.Product.ProductIntro.ProductIntro & {
@@ -24,7 +24,10 @@ type ProductIntroProps = ComponentProps &
   };
 
 async function ProductIntro_Default(props: ProductIntroProps): Promise<JSX.Element> {
-  const { fields, awAggregateRating } = await getComponentServerProps(props.rendering);
+  const { fields, awAggregateRating } = await getComponentServerProps(
+    props.rendering,
+    props.websiteStaticState.featureFlags
+  );
 
   return (
     <ProductIntroClient
@@ -47,6 +50,9 @@ type IntegratedGraphQl = IntegratedGraphQlResult<{
 }>;
 
 async function fetchBazaarvoiceRating(productId: string, featureFlags: any) {
+  'use cache';
+  cacheLife('days');
+
   if (featureFlags.releaseSchemaOrgGraph) {
     return null;
   }
@@ -69,11 +75,9 @@ async function fetchBazaarvoiceRating(productId: string, featureFlags: any) {
   }
 }
 
-async function getComponentServerProps(rendering: ComponentRendering) {
+async function getComponentServerProps(rendering: ComponentRendering, featureFlags: any) {
   let result: any = {};
   const productReviewStaticProps: { staticProductReview?: any; awAggregateRating?: any } = {};
-
-  const featureFlags = await loader();
 
   // First part
   if (rendering.fields !== undefined && 'data' in rendering.fields) {

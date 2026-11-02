@@ -11,13 +11,14 @@ export function plugin({
   graph,
   data,
   page,
+  websiteStaticState
 }: PluginParams<Sitecore.Components.Seo.OrganizationSchema.OrganizationSchema['fields']>): Thing[] {
   if (!data) {
     return graph;
   }
 
   const canonicalHostName =
-    (page.customProps.siteInfo?.canonicalHostName as string | undefined) ?? '';
+    (websiteStaticState.siteInfo?.canonicalHostName as string | undefined) ?? '';
 
   const brandId = `${canonicalHostName}/#/schema/Brand/Andersen_Windows`;
 

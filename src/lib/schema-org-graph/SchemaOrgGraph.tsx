@@ -1,7 +1,10 @@
 import { Page } from '@sitecore-content-sdk/nextjs';
+import { buildSitecoreItemCacheTag } from 'lib/cache/build-sitecore-item-cache-tag';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import sitecoreClient from 'lib/sitecore-client';
+import { Item } from 'lib/types/item';
 import { WebsiteStaticState } from 'lib/website/website-state';
+import { cacheTag } from 'next/cache';
 import { JSX } from 'react';
 import { Graph, Thing } from 'schema-dts';
 
@@ -15,7 +18,7 @@ import * as Breadcrumb from './plugins/breadcrumb-graph';
 import * as PagePrimaryImage from './plugins/page-primary-image-graph';
 import * as WebPage from './plugins/webpage-graph';
 import { SchemaOrgGraphService } from './schema-org-graph-service';
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
 
 // Normalizes integrated GraphQL rendering fields to the standard field-map shape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,9 +62,8 @@ function normalizeSitecoreFields(fields: ItemFieldResult[]): Record<string, any>
 }
 
 type SchemaOrgGraphProps = Readonly<{
-  page: Page & {
-    customProps: WebsiteStaticState;
-  };
+  page: Page;
+  websiteStaticState: WebsiteStaticState;
 }>;
 
 export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.Element | null> {
@@ -70,7 +72,7 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
     return null;
   }
 
-  if (!page.customProps.featureFlags.releaseSchemaOrgGraph) {
+  if (!props.websiteStaticState.featureFlags.releaseSchemaOrgGraph) {
     return null;
   }
 
@@ -79,11 +81,10 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let settingsLevelData: any[] = [];
-  const rootPath = page.customProps.siteInfo?.rootPath as string | undefined;
+  const rootPath = props.websiteStaticState.siteInfo?.rootPath as string | undefined;
 
   if (rootPath) {
-    const service = new SchemaOrgGraphService(sitecoreClient);
-    const rawSettingsData = await service.getSettingsSchemaOrgGraph(rootPath, page.locale);
+    const rawSettingsData = await getSchemaOrgGraphData(rootPath, page.locale);
     settingsLevelData = rawSettingsData.map((item) => ({
       ...item,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,7 +92,7 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
     }));
   }
 
-  const templateMap = new Map<string, Sitecore.BaseTemplates.BaseSchemaOrgGraph>();
+  const templateMap = new Map<string, Item<Sitecore.BaseTemplates.BaseSchemaOrgGraph>>();
   [...settingsLevelData, ...pageLevelData].forEach((data) => {
     const fields = data.fields;
     const templateId = fields?._AW_TemplateId?.value ?? fields?._AW_TemplateId;
@@ -111,11 +112,20 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
     (graph, [templateId, data]) => {
       const plugin = factory(templateId);
       if (plugin) {
-        graph = plugin({ graph, page, data: data.fields });
+        graph = plugin({
+          graph,
+          page,
+          websiteStaticState: props.websiteStaticState,
+          data: data.fields,
+        });
       }
       return graph;
     },
-    automaticPlugins.reduce((g, p) => p({ graph: g, page, data: undefined }), [] as Thing[])
+    automaticPlugins.reduce(
+      (g, p) =>
+        p({ graph: g, page, websiteStaticState: props.websiteStaticState, data: undefined }),
+      [] as Thing[]
+    )
   );
 
   const renderings = getAllRenderings(page.layout.sitecore.route?.placeholders);
@@ -127,6 +137,7 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
       rendering,
       fields: getComponentFields(rendering.fields),
       page,
+      websiteStaticState: props.websiteStaticState,
     });
   }
 
@@ -144,4 +155,20 @@ export async function SchemaOrgGraph(props: SchemaOrgGraphProps): Promise<JSX.El
       }}
     />
   );
+}
+
+async function getSchemaOrgGraphData(
+  rootPath: string,
+  locale: string
+): Promise<Item<Sitecore.BaseTemplates.BaseSchemaOrgGraph>[]> {
+  'use cache';
+
+  const service = new SchemaOrgGraphService(sitecoreClient);
+  const rawSettingsData = await service.getSettingsSchemaOrgGraph(rootPath, locale);
+
+  rawSettingsData?.forEach((item) => {
+    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id!, locale }));
+  });
+
+  return rawSettingsData;
 }

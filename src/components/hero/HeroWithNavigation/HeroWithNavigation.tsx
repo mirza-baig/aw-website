@@ -46,9 +46,9 @@ function HeroWithNavigation_Default(props: HeroWithNavigationProps): JSX.Element
 
   const spacing = getEnum<ComponentSpacing>(fields.componentSpacing) ?? 'standard';
   const spacingValue = spacing === 'standard' ? '8' : '4';
-  const themeData = getTheme(props.page.customProps.theme, HeroWithNavigationTheme(spacingValue));
+  const themeData = getTheme(props.websiteStaticState.theme, HeroWithNavigationTheme(spacingValue));
 
-  const breadcrumbs = props.page.customProps.breadcrumbs ?? [];
+  const breadcrumbs = props.websiteStaticState.breadcrumbs ?? [];
   return (
     <Component
       variant=""

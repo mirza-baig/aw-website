@@ -3,14 +3,14 @@ import { Thing, WebPage } from 'schema-dts';
 import { PluginParams } from '../plugin-types';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
-export function plugin({ graph, page }: PluginParams<unknown>): Thing[] {
+export function plugin({ graph, page, websiteStaticState }: PluginParams<unknown>): Thing[] {
   const route = page.layout.sitecore.route;
   if (!route) {
     return graph;
   }
 
-  const canonicalHostName = (page.customProps.siteInfo?.canonicalHostName ?? '') as string;
-  const requestedPath = page.customProps.requestedPath ?? '/';
+  const canonicalHostName = (websiteStaticState.siteInfo?.canonicalHostName ?? '') as string;
+  const requestedPath = websiteStaticState.requestedPath ?? '/';
   const canonicalUrl = `${canonicalHostName}${requestedPath}`;
 
   const pageFields = route.fields as Sitecore.BaseTemplates.BasePage['fields'] &

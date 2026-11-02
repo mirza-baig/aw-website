@@ -129,7 +129,7 @@ export const ComparisonTable = (
   if (
     !isProductComparison &&
     ((props.fields as WithinSeriesChartFields).enableWithinSeriesLayout?.value ||
-      props.page.customProps.featureFlags.releaseWithinSeriesCompareChart)
+      props.websiteStaticState.featureFlags.releaseWithinSeriesCompareChart)
   ) {
     return <WithinSeriesChart {...(props as ComparisonTableSeriesProps)} />;
   }
@@ -140,7 +140,7 @@ export const ComparisonTable = (
   if (
     !isProductComparison &&
     ((props.fields as ComparisonSeriesChartFields).enableRedesignedLayout?.value ||
-      props.page.customProps.featureFlags.releaseRedesignedSeriesCompareChart)
+      props.websiteStaticState.featureFlags.releaseRedesignedSeriesCompareChart)
   ) {
     return <ComparisonSeriesChart {...(props as ComparisonTableSeriesProps)} />;
   }

@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
 import { ThemeFile, ThemeName, useTheme } from 'lib/context/ThemeContext';
-import { JSX, memo } from 'react';
+import { JSX, memo, useId } from 'react';
 
 import { StarRatingTheme } from './StarRating.theme';
 
@@ -65,7 +65,8 @@ const renderStars = (
 const StarRating = ({ ...props }: StarRatingProps): JSX.Element => {
   const { themeName, themeData } = useTheme(StarRatingTheme);
   const maxStars = props?.maxStars ?? 5;
-  const gradientKey = 'gradient-' + Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
+  const id = useId();
+  const gradientKey = `gradient-${id}`;
 
   // If no content is present, don't print
   if (props?.reviewStars === null) {

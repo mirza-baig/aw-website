@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 
 export async function handler(req: Request): Promise<Response> {
   // Validate environment variables

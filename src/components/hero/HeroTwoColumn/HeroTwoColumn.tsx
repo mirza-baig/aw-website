@@ -20,7 +20,7 @@ type HeroTwoColumnProps = ComponentProps &
   DataSource<Sitecore.Components.Hero.HeroTwoColumn.HeroTwoColumn>;
 
 function HeroTwoColumn_Default(props: HeroTwoColumnProps): JSX.Element | null {
-  const themeData = getTheme(props.page.customProps.theme, HeroTwoColumnTheme);
+  const themeData = getTheme(props.websiteStaticState.theme, HeroTwoColumnTheme);
   const isEE = !props.page.mode.isNormal;
 
   // Always render in edit mode so Sitecore field editors appear

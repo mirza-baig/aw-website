@@ -15,6 +15,6 @@ type ClientComponentProps<TFields = unknown> = ComponentProps & DataSource<TFiel
 export function getClientComponentProps<TFields = unknown>(
   props: ClientComponentProps<TFields>
 ): ClientComponentProps<TFields> {
-  const { fields, page, rendering, params } = props;
-  return { fields, page, rendering, params };
+  const { fields, page, rendering, params, websiteStaticState } = props;
+  return { fields, page, rendering, params, websiteStaticState };
 }

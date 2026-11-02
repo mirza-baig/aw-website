@@ -1,9 +1,9 @@
-import clientConfig from 'aw.config.client';
+import clientConfig from 'aw.config';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildVisualizerUrl, encodeProductConfig, RenoworksProductConfig } from './product-config';
 
-vi.mock('aw.config.client', () => ({
+vi.mock('aw.config', () => ({
   default: {
     renoworks: {
       visualizerUrl: 'https://andersenwindows.staging.s3.renoworks.com/',

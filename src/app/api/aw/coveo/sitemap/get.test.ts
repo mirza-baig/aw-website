@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
-import sitemapService from 'lib/coveo/sitemap-service';
 import { NextRequest } from 'next/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +7,22 @@ import { handler, schema } from './get';
 
 const rootId = SitecoreIds.Content.AndersenCorporation.AndersenWindows.Id;
 const host = 'example.com';
+
+const { buildSitemap, buildSitemapIndex, buildItemHtml } = vi.hoisted(() => ({
+  buildSitemap: vi.fn().mockResolvedValue('<urlset />'),
+  buildSitemapIndex: vi.fn().mockResolvedValue('<sitemapindex />'),
+  buildItemHtml: vi.fn().mockReturnValue('<html></html>'),
+}));
+
+vi.mock(import('lib/coveo/sitemap-service'), () => {
+  return {
+    default: {
+      buildSitemap,
+      buildSitemapIndex,
+      buildItemHtml,
+    },
+  };
+});
 
 function requestWith(hostName: string = host, forwardedProto: string | null = null): NextRequest {
   return {
@@ -55,14 +70,6 @@ describe('app > api > aw > coveo > sitemap', async () => {
   });
 
   describe('handler', async () => {
-    const buildSitemap = vi.spyOn(sitemapService, 'buildSitemap').mockResolvedValue('<urlset />');
-    const buildSitemapIndex = vi
-      .spyOn(sitemapService, 'buildSitemapIndex')
-      .mockResolvedValue('<sitemapindex />');
-    const buildItemHtml = vi
-      .spyOn(sitemapService, 'buildItemHtml')
-      .mockReturnValue('<html></html>');
-
     afterEach(() => {
       vi.clearAllMocks();
     });

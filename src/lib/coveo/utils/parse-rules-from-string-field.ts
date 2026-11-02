@@ -4,10 +4,11 @@ import { RuleContext } from 'lib/rules/rule-context';
 import { CoveoRule } from '../expressions/coveo-rule';
 import { ParseRulesContext } from './parse-rules-context';
 import { parseRulesFromXmlString } from './parse-rules-from-xml-string';
+import { Item } from 'lib/graphql/item-fetcher/item';
 
 export async function parseRulesFromStringField<TContext extends RuleContext>(
   field: Field<string>,
   context: ParseRulesContext<TContext>
-): Promise<CoveoRule<TContext>[]> {
+): Promise<{ rules:CoveoRule<TContext>[], fetchedItems: Item[] }> {
   return parseRulesFromXmlString(field.value, context);
 }

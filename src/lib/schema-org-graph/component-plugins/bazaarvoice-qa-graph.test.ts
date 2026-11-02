@@ -31,9 +31,11 @@ function componentParams(
     fields,
     rendering: { componentName: 'BazaarvoiceQuestionAnswer' } as ComponentRendering,
     page: {
-      customProps: { siteInfo },
       layout: { sitecore: {} },
     } as unknown as ComponentPluginParams<BazaarvoiceQAFields>['page'],
+    websiteStaticState: {
+      siteInfo,
+    } as unknown as ComponentPluginParams<BazaarvoiceQAFields>['websiteStaticState'],
   };
 }
 

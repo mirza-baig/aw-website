@@ -46,9 +46,11 @@ function componentParams(
     fields,
     rendering: { componentName } as ComponentRendering,
     page: {
-      customProps: { siteInfo },
       layout: { sitecore: {} },
     } as unknown as ComponentPluginParams<TestFields>['page'],
+    websiteStaticState: {
+      siteInfo,
+    } as unknown as ComponentPluginParams<TestFields>['websiteStaticState'],
   };
 }
 
@@ -102,7 +104,6 @@ describe('schema-org-graph > component-plugins > primary-image-graph', () => {
   it('deduplicates a component image already contributed by the page', async () => {
     const sharedImage = image('/-/media/shared.jpg');
     const page = {
-      customProps: { siteInfo },
       layout: {
         sitecore: {
           route: {
@@ -111,8 +112,16 @@ describe('schema-org-graph > component-plugins > primary-image-graph', () => {
         },
       },
     } as unknown as PluginParams<unknown>['page'];
+    const websiteStaticState = {
+      siteInfo,
+    } as unknown as ComponentPluginParams<TestFields>['websiteStaticState'];
 
-    const pageGraph = pagePrimaryImagePlugin({ graph: [], data: undefined, page });
+    const pageGraph = pagePrimaryImagePlugin({
+      graph: [],
+      data: undefined,
+      page,
+      websiteStaticState,
+    });
     const componentGraph = await componentFactory<TestFields>('UnregisteredComponent')({
       ...componentParams('UnregisteredComponent', { primaryImage: sharedImage }, pageGraph),
       page,

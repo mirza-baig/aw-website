@@ -35,6 +35,7 @@ function RequestQuote_ProductDesignTool(props: RequestQuoteProps) {
                 ))}
               </div>
             )}
+            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         ),
         windowsOrDoorReplacement: (
@@ -56,6 +57,7 @@ function RequestQuote_ProductDesignTool(props: RequestQuoteProps) {
                 ))}
               </div>
             )}
+            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         ),
         remodeling: (
@@ -77,6 +79,7 @@ function RequestQuote_ProductDesignTool(props: RequestQuoteProps) {
                 ))}
               </div>
             )}
+            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         ),
       }}

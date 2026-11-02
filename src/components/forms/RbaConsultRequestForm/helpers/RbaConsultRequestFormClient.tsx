@@ -2,6 +2,7 @@
 
 import classNames from 'classnames';
 import { Field, FieldProps, Form, Formik } from 'formik';
+import { useCustomFormRecaptcha } from 'helpers/CustomForms/useCustomFormRecaptcha';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { useTheme } from 'lib/context/ThemeContext';
 import { useAsPath } from 'lib/hooks/use-as-path';
@@ -20,6 +21,10 @@ export function RbaConsultRequestFormClient(props: RbaConsultRequestFormProps) {
   const [showSubmitError, setShowSubmitError] = useState(false);
   const [responseOk, setResponseOk] = useState(false);
   const asPath = useAsPath();
+  const { runRecaptcha, recaptchaError } = useCustomFormRecaptcha(
+    props.fields,
+    'RbaConsultRequestForm'
+  );
   if (!props.fields) {
     return <></>;
   }
@@ -118,6 +123,14 @@ export function RbaConsultRequestFormClient(props: RbaConsultRequestFormProps) {
             validateOnChange={false}
             validateOnBlur={true}
             onSubmit={async (values, { setSubmitting }) => {
+              // reCAPTCHA first (skipped when not configured on the datasource); stop on failure
+              const recaptcha = await runRecaptcha();
+              if (!recaptcha.success) {
+                setShowSubmitError(false);
+                setSubmitting(false);
+                return;
+              }
+
               const submitFormURL = '/api/aw/rba-consult-request/send-rba-consult-request';
               // in-home is currently the only option available
               const formTypeValue = '2';
@@ -352,6 +365,11 @@ export function RbaConsultRequestFormClient(props: RbaConsultRequestFormProps) {
                       Request a Consultation
                     </button>
                   </div>
+                  {recaptchaError && (
+                    <div className="flex justify-center p-1.25">
+                      <span className={themeData.classes.formErrorMessage}>{recaptchaError}</span>
+                    </div>
+                  )}
                   {showSubmitError && (
                     <div className="flex justify-center p-[5px]">
                       <span className={themeData.classes.formErrorMessage}>

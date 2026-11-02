@@ -1,5 +1,5 @@
 import { Field, Item } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.client';
+import config from 'aw.config';
 import FIELD_IDS from 'lib/constants/salesforce-field-ids';
 import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getCookie } from 'lib/utils/client-storage-utils/get-cookie';

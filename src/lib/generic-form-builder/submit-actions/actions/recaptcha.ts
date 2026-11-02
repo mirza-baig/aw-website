@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 
 import { ActionProps, ActionResult, SubmitActionProps } from '..';
 import { BaseSubmitAction } from '../base-submit-action';
@@ -12,6 +12,14 @@ declare global {
   }
 }
 
+type GrecaptchaEnterprise = {
+  execute: (siteKey: string, options: { action: string }) => Promise<string>;
+};
+
+const getGrecaptchaEnterprise = (): GrecaptchaEnterprise | undefined =>
+  (globalThis as unknown as { grecaptcha?: { enterprise?: GrecaptchaEnterprise } }).grecaptcha
+    ?.enterprise;
+
 export class Recaptcha extends BaseSubmitAction<Sitecore.Forms.GenericFormBuilder.SubmitActions.Recaptcha> {
   private readonly scriptId = 'recaptcha-script';
 
@@ -23,14 +31,30 @@ export class Recaptcha extends BaseSubmitAction<Sitecore.Forms.GenericFormBuilde
   }
 
   private async executeRecaptcha(userAction: string): Promise<string | undefined> {
+    const maxWaitMs = 10000;
+    const startedAt = Date.now();
+
     return new Promise((resolve) => {
       const checkGrecaptcha = () => {
-        if (window.grecaptcha && typeof window.grecaptcha.enterprise.execute === 'function') {
-          window.grecaptcha.enterprise
+        const enterprise = getGrecaptchaEnterprise();
+        if (typeof enterprise?.execute === 'function') {
+          enterprise
             .execute(config.google.recaptcha.siteKey, {
               action: userAction,
             })
-            .then(resolve);
+            .then(
+              (token: string) => {
+                console.info('[reCAPTCHA] GFB token received:', !!token);
+                resolve(token);
+              },
+              (error: unknown) => {
+                console.error('reCAPTCHA execute failed:', error);
+                resolve(undefined);
+              }
+            );
+        } else if (Date.now() - startedAt > maxWaitMs) {
+          console.error('reCAPTCHA script did not load');
+          resolve(undefined);
         } else {
           setTimeout(checkGrecaptcha, 100);
         }
@@ -52,12 +76,29 @@ export class Recaptcha extends BaseSubmitAction<Sitecore.Forms.GenericFormBuilde
       body: JSON.stringify({ token, userAction }),
     });
 
+    console.info('[reCAPTCHA] GFB verify status:', response.status);
     if (!response.ok) {
-      return { success: false, errorMessage: this.props.submitAction.fields?.errorMessage.value };
+      return { success: false, errorMessage: this.props.submitAction.fields?.errorMessage?.value };
     }
 
     const verificationResult = await response.json();
-    const minimumScoreValue = this.props.submitAction.fields?.minimumScoreValue.value ?? 0.1;
+    const minimumScoreValue = Number(
+      this.props.submitAction.fields?.minimumScoreValue?.value ?? 0.1
+    );
+    console.info('[reCAPTCHA] GFB verify response', {
+      valid: verificationResult.tokenProperties?.valid,
+      invalidReason: verificationResult.tokenProperties?.invalidReason,
+      action: verificationResult.tokenProperties?.action,
+      score: verificationResult.riskAnalysis?.score,
+      minimumScoreValue,
+    });
+
+    const isValid = !(
+      verificationResult.riskAnalysis?.score < minimumScoreValue ||
+      !verificationResult.tokenProperties?.valid ||
+      verificationResult.tokenProperties?.action !== userAction
+    );
+    verificationResult.isValid = isValid;
 
     props.context['GoogleRecaptchaResponse'] = {
       id: this.props.submitAction.id,
@@ -65,28 +106,23 @@ export class Recaptcha extends BaseSubmitAction<Sitecore.Forms.GenericFormBuilde
       type: 'GoogleRecaptchaResponse',
       value: JSON.stringify(verificationResult),
     };
-
-    if (
-      verificationResult.riskAnalysis?.score <= minimumScoreValue ||
-      !verificationResult.tokenProperties?.valid ||
-      verificationResult.tokenProperties?.action !== userAction
-    ) {
-      return {
-        success: false,
-        errorMessage: this.props.submitAction.fields?.errorMessage.value,
-        verificationResult: verificationResult,
-      };
-    }
+    // Equivalent of EnterpriseWeb's formData['isRecaptchaValid'] for multi-step forms / downstream actions
+    props.context['IsRecaptchaValid'] = {
+      id: this.props.submitAction.id,
+      name: 'isRecaptchaValid',
+      type: 'IsRecaptchaValid', // if `type` is a string-literal union in ActionProps, add this value to it
+      value: String(isValid),
+    };
 
     return {
-      success: true,
-      errorMessage: this.props.submitAction.fields?.errorMessage.value,
+      success: isValid,
+      errorMessage: this.props.submitAction.fields?.errorMessage?.value,
       verificationResult: verificationResult,
     };
   }
 
   private async initializeRecaptcha(): Promise<void> {
-    const userAction = this.props.submitAction.fields?.userAction.value ?? '';
+    const userAction = this.props.submitAction.fields?.userAction?.value ?? '';
     await this.executeRecaptcha(userAction);
   }
 
@@ -112,13 +148,26 @@ export class Recaptcha extends BaseSubmitAction<Sitecore.Forms.GenericFormBuilde
   }
 
   async execute(props: ActionProps): Promise<ActionResult> {
-    const errorMessage = this.props.submitAction.fields?.errorMessage.value;
-    const userAction = this.props.submitAction.fields?.userAction.value ?? '';
+    const fields = this.props.submitAction.fields;
+    const errorMessage = fields?.errorMessage?.value;
+    const userAction = fields?.userAction?.value ?? '';
+    console.info('[reCAPTCHA] GFB execute', {
+      userAction,
+      minimumScoreValue: fields?.minimumScoreValue?.value,
+      stopOnError: fields?.stopOnError?.value,
+      fieldNames: fields ? Object.keys(fields) : 'NO FIELDS',
+    });
 
     try {
-      const token = (await this.executeRecaptcha(userAction)) as string;
-      return this.verifyRecaptcha(token, userAction, props);
-    } catch {
+      const token = await this.executeRecaptcha(userAction);
+      if (!token) {
+        return { success: false, errorMessage: errorMessage };
+      }
+      const result = await this.verifyRecaptcha(token, userAction, props);
+      console.info('[reCAPTCHA] GFB result', result);
+      return result;
+    } catch (error) {
+      console.error('[reCAPTCHA] GFB execute error', error);
       return { success: false, errorMessage: errorMessage };
     }
   }

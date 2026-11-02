@@ -1,6 +1,6 @@
 'use client';
 
-import config from 'aw.config.client';
+import config from 'aw.config';
 import classNames from 'classnames';
 import { Formik, FormikValues } from 'formik';
 import BodyCopy from 'helpers/BodyCopy/BodyCopy';
@@ -8,6 +8,7 @@ import Dropdown from 'helpers/CustomForms/Dropdown';
 import { FormFieldsTheme } from 'helpers/CustomForms/FormFields.Theme';
 import { InputText } from 'helpers/CustomForms/InputText';
 import NavigationButton from 'helpers/CustomForms/NavigationButton.Helper';
+import { useCustomFormRecaptcha } from 'helpers/CustomForms/useCustomFormRecaptcha';
 import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import { Eyebrow } from 'helpers/Eyebrow';
 import Headline from 'helpers/Headline/Headline';
@@ -32,6 +33,10 @@ export function SelectionGuideSignUpClient(props: SelectionGuideSignUpProps) {
 
   const [showThankYou, setShowThankYou] = useState(false);
   const [isButtonEnabled, setIsButtonEnabled] = useState(true);
+  const { runRecaptcha, recaptchaError } = useCustomFormRecaptcha(
+    props.fields,
+    'SelectionGuideSignUp'
+  );
   const getHiddenFieldValue = (): string => {
     const hiddenField = document.querySelector('input[name="website"]') as HTMLInputElement;
     return hiddenField?.value;
@@ -187,6 +192,13 @@ export function SelectionGuideSignUpClient(props: SelectionGuideSignUpProps) {
               );
 
               if (getHiddenFieldValue() === '') {
+                // reCAPTCHA first (skipped when not configured on the datasource); stop on failure
+                const recaptcha = await runRecaptcha();
+                if (!recaptcha.success) {
+                  setIsButtonEnabled(true);
+                  return;
+                }
+
                 const result = await actionHandler?.executeAction(true);
 
                 if (result?.success) {
@@ -357,6 +369,17 @@ export function SelectionGuideSignUpClient(props: SelectionGuideSignUpProps) {
                     >
                       Submit
                     </NavigationButton>
+                    {recaptchaError && isButtonEnabled && !isInvalid && (
+                      <span
+                        className={classNames(
+                          themeData.classes.errorMessage,
+                          themeData.classes.errorTextColor,
+                          'mx-auto w-fit md:mx-0'
+                        )}
+                      >
+                        {recaptchaError}
+                      </span>
+                    )}
                     {(!isButtonEnabled || isInvalid) && (
                       <span
                         className={

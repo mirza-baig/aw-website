@@ -1,31 +1,37 @@
 import { ComponentProps } from 'lib/component-props';
-import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import Script from 'next/script';
 
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
+import { DataSource } from 'lib/types/data-source';
+import { Item } from 'lib/types/item';
+import { Field } from '@sitecore-content-sdk/nextjs';
 
-type ProductSchemaProps = ComponentProps & Sitecore.Components.Seo.ProductSchema.ProductSchema;
+type ProductSchemaProps = ComponentProps &
+  DataSource<Sitecore.Components.Seo.ProductSchema.ProductSchema>;
 
 function ProductSchema_Default(props: ProductSchemaProps) {
   if (!props.fields) {
-    return <></>;
+    return null;
   }
-  //This is test
+
+  const productItem = props.fields?.productItem as Item<Sitecore.Data.Products.Product> | null;
+  const brandName = props.fields?.brandName as Item<{ Value: Field<string> }>;
+
   const ldJsonScript = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: props.fields?.productItem?.fields?.productName?.value ?? '',
-    image: props.fields?.productItem?.fields?.productImage?.value?.src ?? '',
-    description: props.fields?.productItem?.fields?.productDescription?.value ?? '',
+    name: productItem?.fields.productName.value ?? '',
+    image: productItem?.fields.productImage.value?.src ?? '',
+    description: productItem?.fields.productDescription.value ?? '',
     brand: {
       '@type': 'Brand',
-      name: props.fields?.brandName?.fields?.Value.value ?? '',
+      name: brandName?.fields.Value.value ?? '',
     },
   };
   return (
     <>
-      {!FeatureFlags.values.releaseSchemaOrgGraph && (
+      {!props.websiteStaticState.featureFlags.releaseSchemaOrgGraph && (
         <Script
           id=""
           type="application/ld+json"

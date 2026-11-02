@@ -7,7 +7,7 @@ import { Sitecore } from '.sitecore/AndersenWindows.model';
 export const pluginId =
   SitecoreIds.Templates.Project.AndersenCorporation.AndersenWindows.SchemaOrgGraph.Article.Id;
 
-export function plugin({ graph, page }: PluginParams<unknown>): Thing[] {
+export function plugin({ graph, page, websiteStaticState }: PluginParams<unknown>): Thing[] {
   const route = page.layout.sitecore.route;
   if (!route) {
     return graph;
@@ -20,8 +20,8 @@ export function plugin({ graph, page }: PluginParams<unknown>): Thing[] {
   }
 
   const canonicalHostName =
-    (page.customProps.siteInfo?.canonicalHostName as string | undefined) ?? '';
-  const requestedPath = page.customProps.requestedPath ?? '';
+    (websiteStaticState.siteInfo?.canonicalHostName as string | undefined) ?? '';
+  const requestedPath = websiteStaticState.requestedPath ?? '';
   const articleId = route.itemId ?? requestedPath;
 
   const pageFields = route.fields as Sitecore.FieldSets.Article['fields'] &

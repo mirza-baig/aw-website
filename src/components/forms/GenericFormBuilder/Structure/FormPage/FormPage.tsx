@@ -26,6 +26,7 @@ function FormPage_Default(props: FormPageProps): JSX.Element {
           componentProps={props.componentProps}
           page={props.page}
           componentMap={componentMap}
+          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
     />

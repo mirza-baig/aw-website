@@ -19,7 +19,7 @@ export class GetRulesContext<TContext extends RuleContext>
 {
   protected readonly conditionFactory: (element: XmlElement) => RuleCondition<TContext> | null;
   protected readonly actionFactory: (element: XmlElement) => RuleAction<TContext> | null;
-  protected readonly itemBatch: ItemBatch;
+  public readonly itemBatch: ItemBatch;
 
   constructor(
     public readonly conditionMap: Map<string, ConditionConstructor>,

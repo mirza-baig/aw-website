@@ -18,6 +18,7 @@ import { FormFieldsTheme } from 'helpers/CustomForms/FormFields.Theme';
 import { InputPhone } from 'helpers/CustomForms/InputPhone';
 import { InputText } from 'helpers/CustomForms/InputText';
 import NavigationButton from 'helpers/CustomForms/NavigationButton.Helper';
+import { useCustomFormRecaptcha } from 'helpers/CustomForms/useCustomFormRecaptcha';
 import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import { Eyebrow } from 'helpers/Eyebrow';
 import Headline from 'helpers/Headline/Headline';
@@ -58,6 +59,10 @@ function WarrantyRegistration_Default(props: WarrantyRegistrationProps) {
   const [isWarrantyRegistered, setIsWarrantyRegistered] = useState(false);
   const [showFormError, setShowFormError] = useState<false | string>(false);
   const [isSubmitButtonEnabled, setIsSubmitButtonEnabled] = useState(true);
+  const { runRecaptcha, recaptchaError } = useCustomFormRecaptcha(
+    props.fields,
+    'WarrantyRegistration'
+  );
   const [showThankYouBot, setShowThankYouBot] = useState(false);
   const [bazaarvoiceProducts, setBazaarvoiceProducts] = useState([]);
   const getHiddenFieldValue = (): string => {
@@ -137,6 +142,14 @@ function WarrantyRegistration_Default(props: WarrantyRegistrationProps) {
       );
 
       if (getHiddenFieldValue() === '') {
+        // reCAPTCHA first (skipped when not configured on the datasource); stop on failure
+        const recaptcha = await runRecaptcha();
+        if (!recaptcha.success) {
+          setShowFormError(false);
+          setIsSubmitButtonEnabled(true);
+          return;
+        }
+
         const result = await actionHandler?.executeAction(true);
         if (result?.success) {
           setIsWarrantyRegistered(true);
@@ -423,6 +436,16 @@ function WarrantyRegistration_Default(props: WarrantyRegistrationProps) {
                           }
                         >
                           {showFormError}
+                        </span>
+                      )}
+                      {recaptchaError && isSubmitButtonEnabled && (
+                        <span
+                          className={classNames(
+                            themeData.classes.errorMessage,
+                            themeData.classes.errorTextColor
+                          )}
+                        >
+                          {recaptchaError}
                         </span>
                       )}
                     </div>

@@ -1,4 +1,5 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
+import { cacheLife } from 'next/cache';
 
 export type BazaarvoiceRatingData = {
   ReviewStatistics?: {
@@ -10,6 +11,9 @@ export type BazaarvoiceRatingData = {
 export async function fetchAggregateRating(
   bazaarvoiceProductId: string
 ): Promise<BazaarvoiceRatingData | null> {
+  'use cache';
+  cacheLife('days');
+
   const sanitizedId = bazaarvoiceProductId.replaceAll(/\s/g, '');
   if (!sanitizedId) {
     return null;

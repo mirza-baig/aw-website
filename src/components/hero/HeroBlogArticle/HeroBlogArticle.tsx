@@ -31,7 +31,7 @@ function HeroBlogArticle_Default(props: HeroBlogArticleProps) {
   const hasCaption = props?.fields?.primaryImageCaption?.value != '';
 
   const themeData = getTheme(
-    props.page.customProps.theme,
+    props.websiteStaticState.theme,
     HeroBlogArticleTheme(styleVariation, topBorder, bottomBorder, showImage, hasCaption)
   );
 

@@ -24,6 +24,7 @@ function TabsGeneralTabItem_Default(props: TabItemProps): JSX.Element {
         rendering={props.rendering}
         page={props.page}
         componentMap={componentMap}
+        passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
       />
     </TabsGeneralTabItemClient>
   );
@@ -35,9 +36,9 @@ export async function getStaticTabProps(
   rendering: ComponentRendering<TabItemProps['fields']>
 ): Promise<Tab> {
   return {
-    id: rendering.fields?.data.item.id ?? '',
-    contentId: rendering.fields?.data.item.contentId.jsonValue ?? { value: '' },
-    headlineText: rendering.fields?.data.item.headlineText.jsonValue ?? { value: '' },
-    headlineLevel: rendering.fields?.data.item.headlineLevel?.jsonValue,
+    id: rendering.fields?.data.item?.id ?? '',
+    contentId: rendering.fields?.data.item?.contentId.jsonValue ?? { value: '' },
+    headlineText: rendering.fields?.data.item?.headlineText.jsonValue ?? { value: '' },
+    headlineLevel: rendering.fields?.data.item?.headlineLevel?.jsonValue,
   };
 }

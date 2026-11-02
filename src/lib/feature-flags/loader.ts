@@ -2,10 +2,12 @@ import * as flags from 'lib/feature-flags/flags';
 
 import { Flags, FlagValues } from './types';
 
-async function processFlagsParallel(record: Flags): Promise<FlagValues> {
+async function processFlagsParallel(precomputed: string, record: Flags): Promise<FlagValues> {
+  const flagGroups = Object.values(record);
+
   // 1. Get entries and map them to promises
   const entriesPromises = Object.entries(record).map(async ([key, flag]) => {
-    const resolvedValue = await flag();
+    const resolvedValue = await flag(precomputed, flagGroups);
     return [key, resolvedValue];
   });
 
@@ -17,7 +19,7 @@ async function processFlagsParallel(record: Flags): Promise<FlagValues> {
   return resultObject;
 }
 
-export async function loader(): Promise<FlagValues> {
-  const featureFlags = await processFlagsParallel(flags);
+export async function loader(precomputed: string): Promise<FlagValues> {
+  const featureFlags = await processFlagsParallel(precomputed, flags);
   return featureFlags;
 }

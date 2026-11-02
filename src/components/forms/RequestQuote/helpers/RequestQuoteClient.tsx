@@ -14,6 +14,7 @@ import { FormFieldsTheme } from 'helpers/CustomForms/FormFields.Theme';
 import { InputPhone } from 'helpers/CustomForms/InputPhone';
 import { InputText } from 'helpers/CustomForms/InputText';
 import NavigationButton from 'helpers/CustomForms/NavigationButton.Helper';
+import { useCustomFormRecaptcha } from 'helpers/CustomForms/useCustomFormRecaptcha';
 import ZippopotamusZipCode from 'helpers/CustomForms/ZippopotamusZIPCode';
 import DisclaimerText from 'helpers/DisclaimerText/DisclaimerText';
 import Headline from 'helpers/Headline/Headline';
@@ -153,6 +154,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [hasModalBeenShown, setHasModalBeenShown] = useState(false);
   const lastIdentifiedEmailRef = useRef<string>('');
+  const { runRecaptcha, recaptchaError } = useCustomFormRecaptcha(props.fields, 'RequestQuote');
 
   const searchParams = useSearchParams();
   const { themeData } = useTheme(FormFieldsTheme);
@@ -425,6 +427,80 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
       pushFormInteraction(3);
     }
   };
+  const updateCardDetailsForProject = (values: FormikValues) => {
+    if (values?.project_type === 'New Construction') {
+      setCardDetails(props?.fields?.newConstruction, 'newConstruction');
+    } else if (values?.project_type === 'Windows or door replacement only') {
+      setCardDetails(props?.fields?.replacement, 'windowsOrDoorReplacement');
+    } else if (values?.project_type === 'Remodeling') {
+      setCardDetails(props?.fields?.remodeling, 'remodeling');
+    }
+  };
+  const submitRequestQuote = async (values: FormikValues): Promise<boolean> => {
+    if (getHiddenFieldValue() !== '') {
+      return true;
+    }
+
+    const recaptcha = await runRecaptcha();
+    if (!recaptcha.success) {
+      setIsButtonEnabled(true);
+      setShowFormError(false);
+      handleFormInteraction();
+      return false;
+    }
+
+    const COOKIE_NAME = 'awSourceKey';
+    const QUERYSTRING_NAME = 'sourceKey';
+
+    // Access the query parameter (App Router way)
+    const queryParamValue = searchParams?.get(QUERYSTRING_NAME) ?? undefined;
+
+    // Access the cookie value
+    const cookieValue = getCookie(COOKIE_NAME);
+
+    // Decide which value to store in your variable
+    const originalSourceValue = queryParamValue ?? cookieValue ?? '';
+
+    // Fire submit event
+    fireSubmitEvent(values);
+
+    // If its last page submit the form
+    const actionHandler = formActionFactory(
+      {
+        templateName: 'Salesforce Web To Lead',
+      },
+      getRequestQuotePayload(
+        values,
+        campaignIdValue,
+        props.fields?.leadSource.value,
+        originalSourceValue,
+        props.fields?._injectedFields
+      )
+    );
+    const result = await actionHandler?.executeAction(true);
+    // If form submission is successful then push data to GTM
+    TagManager.dataLayer({
+      dataLayer: {
+        event: 'request_quote_form',
+        form_name: 'Request Quote',
+        form_submit_text: 'Request a quote',
+        user_type: values['about'] === 'homeowner' ? 'Homeowner' : values['trades'],
+        project_type: values['project_type'],
+      },
+    });
+    // Send GTM Step 4/ final when user submits the form
+    pushFormInteraction('final');
+
+    if (!result?.success) {
+      setIsButtonEnabled(true);
+      setShowFormError('Something went wrong');
+      handleFormInteraction();
+      return false;
+    }
+    handleSubmitSuccess();
+    return true;
+  };
+
   const handleNextButtonClick = async (
     values: FormikValues,
     touched: FormikTouched<FormikValues>,
@@ -448,13 +524,7 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
     };
     updateTouchedState();
 
-    if (values?.project_type === 'New Construction') {
-      setCardDetails(props?.fields?.newConstruction, 'newConstruction');
-    } else if (values?.project_type === 'Windows or door replacement only') {
-      setCardDetails(props?.fields?.replacement, 'windowsOrDoorReplacement');
-    } else if (values?.project_type === 'Remodeling') {
-      setCardDetails(props?.fields?.remodeling, 'remodeling');
-    }
+    updateCardDetailsForProject(values);
 
     globalThis.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -467,56 +537,9 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
         fireIdentify(values);
         setIsButtonEnabled(false);
         setShowFormError('Processing... please wait');
-        if (getHiddenFieldValue() === '') {
-          const COOKIE_NAME = 'awSourceKey';
-          const QUERYSTRING_NAME = 'sourceKey';
-
-          // Access the query parameter (App Router way)
-          const queryParamValue = searchParams?.get(QUERYSTRING_NAME) ?? undefined;
-
-          // Access the cookie value
-          const cookieValue = getCookie(COOKIE_NAME);
-
-          // Decide which value to store in your variable
-          const originalSourceValue = queryParamValue ?? cookieValue ?? '';
-
-          // Fire submit event
-          fireSubmitEvent(values);
-
-          // If its last page submit the form
-          const actionHandler = formActionFactory(
-            {
-              templateName: 'Salesforce Web To Lead',
-            },
-            getRequestQuotePayload(
-              values,
-              campaignIdValue,
-              props.fields?.leadSource.value,
-              originalSourceValue,
-              props.fields?._injectedFields
-            )
-          );
-          const result = await actionHandler?.executeAction(true);
-          // If form submission is successful then push data to GTM
-          TagManager.dataLayer({
-            dataLayer: {
-              event: 'request_quote_form',
-              form_name: 'Request Quote',
-              form_submit_text: 'Request a quote',
-              user_type: values['about'] === 'homeowner' ? 'Homeowner' : values['trades'],
-              project_type: values['project_type'],
-            },
-          });
-          // Send GTM Step 4/ final when user submits the form
-          pushFormInteraction('final');
-
-          if (!result?.success) {
-            setIsButtonEnabled(true);
-            setShowFormError('Something went wrong');
-            handleFormInteraction();
-            return;
-          }
-          handleSubmitSuccess();
+        const shouldContinue = await submitRequestQuote(values);
+        if (!shouldContinue) {
+          return;
         }
       }
       // Fire CDP step-complete event for step 1 and 2 transitions
@@ -1145,6 +1168,17 @@ export function RequestQuoteClient(props: Readonly<RequestQuoteClientProps>): JS
                             }
                           >
                             {showFormError}
+                          </span>
+                        )}
+                        {recaptchaError && isButtonEnabled && pageIndex === 2 && (
+                          <span
+                            className={classNames(
+                              'my-auto',
+                              themeData.classes.errorMessage,
+                              themeData.classes.errorTextColor
+                            )}
+                          >
+                            {recaptchaError}
                           </span>
                         )}
                       </div>

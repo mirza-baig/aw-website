@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 import { NextRequest } from 'next/server';
 function getHostHeader(req: NextRequest): string {
   const host = req.headers.get('host') ?? 'localhost';

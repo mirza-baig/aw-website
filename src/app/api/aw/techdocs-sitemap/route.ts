@@ -5,8 +5,6 @@ import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace
 import { NextRequest } from 'next/server';
 import { TechDocsSitemapService } from 'src/lib/techdocs-sitemap/techdocs-sitemap-service';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(req: NextRequest): Promise<Response> {
   // Resolve site based on hostname
   const host = getHostNameFromRequest(req);

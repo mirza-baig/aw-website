@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 import { AppPlaceholder, DesignLibraryApp, Field, Page } from '@sitecore-content-sdk/nextjs';
-import awClientConfig from 'aw.config.client';
+import awClientConfig from 'aw.config';
 import { BeforeAfterScript } from 'helpers/BeforeAfterScripts/BeforeAfterScripts';
 import { GoogleTagManager } from 'helpers/GoogleTagManager/GoogleTagManager';
 import { PageSchemaOrg } from 'helpers/SchemaOrg/PageSchemaOrg';
@@ -16,21 +16,22 @@ import SitecoreStyles from 'components/content-sdk/SitecoreStyles';
 import componentMap from '.sitecore/component-map';
 import classNames from 'classnames';
 import { WebsiteStaticState } from 'lib/website/website-state';
-import { SetFeatureFlags } from 'lib/feature-flags/SetFeatureFlags';
 import { DemoFeatureFlag } from 'lib/feature-flags/DemoFeatureFlag';
 import { SchemaOrgGraph } from 'lib/schema-org-graph/SchemaOrgGraph';
 import { AbandonRouteTracker } from 'helpers/Personalize/AbandonRouteTracker';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 
 interface LayoutProps {
-  page: Page & { customProps: WebsiteStaticState };
-}
+  page: Page;
+  websiteStaticState: WebsiteStaticState;
+};
 
 export interface RouteFields {
   [key: string]: unknown;
   Title?: Field;
 }
 
-const Layout = ({ page }: LayoutProps): JSX.Element => {
+const Layout = ({ page, websiteStaticState }: LayoutProps): JSX.Element => {
   const { layout, mode } = page;
   const { route } = layout.sitecore;
   const mainClassPageEditing = mode.isEditing ? 'editing-mode' : 'prod-mode';
@@ -46,25 +47,26 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
     favoriteProducts: [],
   };
 
+  FeatureFlags.setValues(websiteStaticState.featureFlags);
+
   return (
     <AppInsightsClient
       connectionString={awClientConfig.applicationInsights.connectionString}
       roleName={awClientConfig.app.application}
       roleInstance={awClientConfig.app.environment}
       additionalProperties={{
-        'sitecore.siteName': page.customProps.siteInfo?.name ?? 'unknown',
+        'sitecore.siteName': websiteStaticState.siteInfo?.name ?? 'unknown',
         'app.name': awClientConfig.app.application,
         'app.environment': awClientConfig.app.environment,
         'app.role': awClientConfig.app.role,
       }}
     >
-      <SchemaOrgGraph page={page} />
-      <SetFeatureFlags values={page.customProps.featureFlags} />
+      <SchemaOrgGraph page={page} websiteStaticState={websiteStaticState} />
       <ApmErrorBoundary disableSuspense={true}>
         <Scripts />
         <SitecoreStyles layoutData={layout} />
         {/* root placeholder for the app, which we add components to using route data */}
-        <div className={classNames(mainClassPageEditing, page.customProps.theme)}>
+        <div className={classNames(mainClassPageEditing, websiteStaticState.theme)}>
           {mode.isDesignLibrary ? (
             route && (
               <DesignLibraryApp
@@ -79,13 +81,13 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
               <SkipLink />
               <WebsiteContextProvider
                 initialDynamicState={initialDynamicState}
-                staticState={page.customProps}
+                staticState={websiteStaticState}
               >
                 <SourcingCookies />
                 {/* Legacy client-side TrustArc implementation: only used while the
                     server-side Auto-Block flag is off. When the flag is on, the
                     scripts are rendered server-side in the root layout's <head>. */}
-                {!page.customProps.featureFlags.releaseTrustArcAutoBlock && <TrustArcScript />}
+                {!websiteStaticState.featureFlags.releaseTrustArcAutoBlock && <TrustArcScript />}
                 <GoogleTagManager />
                 <TypeKit />
                 <BeforeAfterScript />
@@ -99,6 +101,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
                         componentMap={componentMap}
                         name="headless-header"
                         rendering={route}
+                        passThroughComponentProps={{ websiteStaticState }}
                       />
                     )}
                   </div>
@@ -111,6 +114,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
                         componentMap={componentMap}
                         name="headless-hero"
                         rendering={route}
+                        passThroughComponentProps={{ websiteStaticState }}
                       />
                     )}
                   </div>
@@ -121,6 +125,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
                         componentMap={componentMap}
                         name="headless-main"
                         rendering={route}
+                        passThroughComponentProps={{ websiteStaticState }}
                       />
                     )}
                   </div>
@@ -133,6 +138,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
                         componentMap={componentMap}
                         name="headless-footer"
                         rendering={route}
+                        passThroughComponentProps={{ websiteStaticState }}
                       />
                     )}
                   </div>
@@ -141,7 +147,7 @@ const Layout = ({ page }: LayoutProps): JSX.Element => {
             </>
           )}
         </div>
-        <DemoFeatureFlag page={page} />
+        <DemoFeatureFlag websiteStaticState={websiteStaticState} />
       </ApmErrorBoundary>
     </AppInsightsClient>
   );

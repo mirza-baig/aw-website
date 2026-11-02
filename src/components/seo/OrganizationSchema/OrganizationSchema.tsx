@@ -1,26 +1,22 @@
-'use client';
-
 import { ComponentProps } from 'lib/component-props';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
 
-import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
+import { DataSource } from 'lib/types/data-source';
 
 type OrganizationSchemaProps = ComponentProps &
-  Sitecore.Components.Seo.OrganizationSchema.OrganizationSchema;
+  DataSource<Sitecore.Components.Seo.OrganizationSchema.OrganizationSchema>;
 
 function OrganizationSchema_Default(props: OrganizationSchemaProps) {
-  const { siteInfo, featureFlags } = useWebsiteContext();
-
   if (!props.fields) {
-    return <></>;
+    return null;
   }
 
   const ldJsonScript = {
     '@context': 'https://schema.org/',
     '@type': 'Organization',
-    url: siteInfo?.canonicalHostName ?? '',
+    url: props.websiteStaticState.siteInfo?.canonicalHostName ?? '',
     logo: props.fields?.logo?.value?.src ?? '',
     name: props.fields?.name?.value ?? '',
     description: props.fields?.description?.value ?? '',
@@ -37,7 +33,7 @@ function OrganizationSchema_Default(props: OrganizationSchemaProps) {
 
   return (
     <>
-      {!featureFlags.releaseSchemaOrgGraph && (
+      {!props.websiteStaticState.featureFlags.releaseSchemaOrgGraph && (
         <Script
           id=""
           type="application/ld+json"

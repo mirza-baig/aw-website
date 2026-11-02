@@ -40,14 +40,19 @@ async function Search_Default(props: SearchProps) {
 export const Default = withDatasourceCheck(Search_Default);
 
 async function getComponentServerProps(rendering: ComponentRendering) {
-  const boostingExpression =
-    (await buildBoostExpression(
-      rendering.fields.searchParameters?.fields.boostingExpression?.value
-    )) ?? '';
-  const filterExpression =
-    (await buildFilterExpression(
-      rendering.fields.searchParameters?.fields.filterExpression?.value
-    )) ?? '';
+  'use cache';
+
+  const { expression: boostingExpression, fetchedItems: boostingFetchedItems } =
+    await buildBoostExpression(rendering.fields.boostingExpression?.value);
+  const { expression: filterExpression, fetchedItems: filterFetchedItems } =
+    await buildFilterExpression(rendering.fields.filterExpression?.value);
+
+  boostingFetchedItems.forEach((item) => {
+    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id, locale: item.language }));
+  });
+  filterFetchedItems.forEach((item) => {
+    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id, locale: item.language }));
+  });
 
   return { boostingExpression, filterExpression };
 }

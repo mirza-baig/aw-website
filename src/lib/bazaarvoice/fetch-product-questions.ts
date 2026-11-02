@@ -1,4 +1,5 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
+import { cacheLife } from 'next/cache';
 
 const QUESTION_LIMIT = 100;
 
@@ -42,6 +43,10 @@ type BazaarvoiceQuestionsResponse = {
 export async function fetchProductQuestions(
   bazaarvoiceProductId: string
 ): Promise<BazaarvoiceQuestionData[]> {
+  'use cache';
+
+  cacheLife('days');
+
   const sanitizedId = bazaarvoiceProductId.trim();
   if (!sanitizedId) {
     return [];

@@ -1,4 +1,4 @@
-import config from 'aw.config.client';
+import config from 'aw.config';
 import { FormikValues } from 'formik';
 import { FormsConstants } from 'lib/constants/forms-constants';
 import FIELD_IDS from 'lib/constants/salesforce-field-ids';

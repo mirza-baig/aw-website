@@ -2,9 +2,9 @@
 import { Field, ImageField } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
-import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { normalizeSitecoreDateStringFormattedWithTime } from 'lib/utils/string-utils/normalize-sitecore-date-string-formatted-with-time';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
 import { CSSProperties, JSX, useState } from 'react';
 
@@ -41,6 +41,8 @@ const VimeoWrapper = (videoItem: VimeoProps): JSX.Element => {
   );
 
   const { currentScreenWidth } = useCurrentScreenType();
+
+  const { featureFlags } = useWebsiteContext();
 
   // If the video has no value, return nothing - not sure if videoId is the best way to check this currently
   if (!videoItem.fields?.videoId?.value) {
@@ -81,7 +83,7 @@ const VimeoWrapper = (videoItem: VimeoProps): JSX.Element => {
   }
   return (
     <>
-      {videoItem.includeSEOSchemaForVimeoYouTube && !FeatureFlags.values.releaseSchemaOrgGraph && (
+      {videoItem.includeSEOSchemaForVimeoYouTube && !featureFlags.releaseSchemaOrgGraph && (
         <Script
           id=""
           strategy="beforeInteractive"
@@ -162,10 +164,10 @@ export const playStopVideo = (
     pauseVideo: 'pause',
   };
 
-  if (!videoIframe) {
-    setTimeout(() => playStopVideo(video, action), 1000);
-  } else {
+  if (videoIframe) {
     videoIframe.contentWindow?.postMessage(`{"method":"${actionMap[action]}"`, '*');
+  } else {
+    setTimeout(() => playStopVideo(video, action), 1000);
   }
 };
 

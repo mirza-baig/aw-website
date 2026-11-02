@@ -11,6 +11,8 @@ import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-ch
 
 import { XupCardCollectionDynamicClient } from './helpers/XupCardCollectionDynamicClient';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
+import { cacheTag } from 'next/cache';
+import { buildSitecoreItemCacheTag } from 'lib/cache/build-sitecore-item-cache-tag';
 
 type XupCardCollectionDynamicProps = ComponentProps &
   Sitecore.Components.Listing.XupCardCollectionDynamic.XupCardCollectionDynamic & {
@@ -50,6 +52,8 @@ type IntegratedGraphQl = IntegratedGraphQlResult<{
 }>;
 
 async function getComponentServerProps(rendering: ComponentRendering) {
+  'use cache';
+
   if (rendering.fields === undefined || !('data' in rendering.fields)) {
     return {};
   }
@@ -73,10 +77,18 @@ async function getComponentServerProps(rendering: ComponentRendering) {
     filterExpression: '',
   };
 
-  result.boostingExpression =
-    (await buildBoostExpression(result.fields.boostingExpression?.value)) ?? '';
-  result.filterExpression =
-    (await buildFilterExpression(result.fields.filterExpression?.value)) ?? '';
+  const { expression: boostingExpression, fetchedItems: boostingFetchedItems } = await buildBoostExpression(result.fields.boostingExpression?.value);
+  const { expression: filterExpression, fetchedItems: filterFetchedItems } = await buildFilterExpression(result.fields.filterExpression?.value);
+
+  boostingFetchedItems.forEach((item) => {
+    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id, locale: item.language }));
+  });
+  filterFetchedItems.forEach((item) => {
+    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id, locale: item.language }));
+  });
+
+  result.boostingExpression = boostingExpression ?? '';
+  result.filterExpression = filterExpression ?? '';
 
   return result;
 }

@@ -1,4 +1,4 @@
-import config from 'aw.config.server';
+import config from 'aw.config';
 import type { Debugger } from 'debug';
 import marlimarService from 'lib/marlimar';
 import { SuccessResponse } from 'lib/utils/request-response-utils/responses/success-response';

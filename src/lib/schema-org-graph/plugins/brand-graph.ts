@@ -11,13 +11,14 @@ export function plugin({
   graph,
   data,
   page,
+  websiteStaticState,
 }: PluginParams<Sitecore.Components.Seo.BrandSchema.BrandSchema['fields']>): Thing[] {
   if (!data) {
     return graph;
   }
 
   const canonicalHostName =
-    (page.customProps.siteInfo?.canonicalHostName as string | undefined) ?? '';
+    (websiteStaticState.siteInfo?.canonicalHostName as string | undefined) ?? '';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getValue = (field: any): string => {

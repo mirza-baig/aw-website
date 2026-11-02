@@ -41,6 +41,7 @@ async function ConsultationRequest_Default(props: ConsultationRequestProps) {
               );
             });
           }}
+          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
       componentProps={componentProps}

@@ -10,7 +10,7 @@ import {
   Unsubscribe,
 } from '@coveo/headless';
 import { Field, LinkField, useSitecore } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config.client';
+import config from 'aw.config';
 import { useTheme } from 'lib/context/ThemeContext';
 import { buildEngine } from 'lib/coveo';
 import { replaceTokenInCoveoExpression } from 'lib/coveo/utils';
