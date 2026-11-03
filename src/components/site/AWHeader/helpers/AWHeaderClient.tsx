@@ -1,7 +1,7 @@
 'use client';
 
 import { Text } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config';
+import config from 'aw.config.client';
 import classNames from 'classnames';
 import Card from 'helpers/Card/Card';
 import { StandaloneSearchBox } from 'helpers/Coveo/StandaloneSearchBox/StandaloneSearchBox';
@@ -18,6 +18,7 @@ import { useRouter } from 'next/compat/router';
 import { JSX, Suspense, useEffect, useRef, useState } from 'react';
 
 import GenericCardNav, { ImageRatio } from '../GenericCardNav';
+import { awHeaderMenuClasses } from './aw-header-menu.types';
 import AWMobileHeader from './AWMobileHeader.helper';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
@@ -346,7 +347,11 @@ const MegaMenuGroup = ({
 
   return (
     <div
-      className={classNames('megamenu', isGroupActive ? 'flex' : 'sr-only')}
+      className={classNames(
+        awHeaderMenuClasses.panel,
+        isGroupActive ? awHeaderMenuClasses.panelVisible : awHeaderMenuClasses.hidden
+      )}
+      data-nav-group-title={mainGroup.fields?.navGroupTitle?.value}
       aria-hidden={!isGroupActive}
     >
       <div ref={wrapperRef} className="megamenu-content flex w-full gap-[20px] px-l">
@@ -679,6 +684,7 @@ export function AWHeaderClient(props: AWHeaderProps): JSX.Element {
                     <li
                       key={menu.id ?? `main-menu-${i}`}
                       className="mx-[15px] my-[10px] flex items-center bg-white capitalize"
+                      data-nav-group-title={menu.fields?.navGroupTitle?.value}
                     >
                       {showNavGroupTitle && (
                         <Text
@@ -798,8 +804,9 @@ export function AWHeaderClient(props: AWHeaderProps): JSX.Element {
             >
               <div
                 className={classNames(
-                  'modal-content py-l overflow-auto',
-                  showModal ? 'block' : 'sr-only'
+                  awHeaderMenuClasses.content,
+                  'py-l overflow-auto',
+                  showModal ? awHeaderMenuClasses.contentVisible : awHeaderMenuClasses.hidden
                 )}
               >
                 <div className="mx-auto max-w-[1220px]">

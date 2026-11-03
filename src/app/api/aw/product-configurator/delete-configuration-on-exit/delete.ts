@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { after, NextRequest } from 'next/server';
 
 export async function handler(req: NextRequest): Promise<Response> {

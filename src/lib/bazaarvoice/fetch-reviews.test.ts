@@ -2,14 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchReviews } from './fetch-reviews';
 
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn((profile) => {
-    // Simply acts as a pass-through during testing
-    return typeof profile === 'object' ? profile : {};
-  }),
-}));
-
-vi.mock('aw.config', () => ({
+vi.mock('aw.config.server', () => ({
   default: {
     bazaarvoice: {
       apiUrl: 'https://stg.api.bazaarvoice.com/data/reviews.json?apiversion=5.4&passkey=',

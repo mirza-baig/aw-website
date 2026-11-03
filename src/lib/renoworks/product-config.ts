@@ -1,4 +1,4 @@
-import clientConfig from 'aw.config';
+import clientConfig from 'aw.config.client';
 
 export interface RenoworksVisualizerProduct {
   rwd: string;
@@ -51,7 +51,7 @@ export function buildVisualizerUrl(config: RenoworksProductConfig): string {
   const domain = clientConfig.renoworks.visualizerUrl;
   if (!domain) {
     throw new Error(
-      'Renoworks visualizer URL is not configured (aw.config → renoworks.visualizerUrl / NEXT_PUBLIC_AW_RENOWORKS_VISUALIZER_URL).'
+      'Renoworks visualizer URL is not configured (aw.config.client → renoworks.visualizerUrl / NEXT_PUBLIC_AW_RENOWORKS_VISUALIZER_URL).'
     );
   }
 

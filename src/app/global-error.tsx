@@ -1,72 +1,7 @@
 'use client';
-
-// import { useEffect, useState } from 'react';
 import Link from 'next/link';
-// import { ErrorPage, Page } from '@sitecore-content-sdk/nextjs';
-// import client from 'lib/sitecore-client';
-// import scConfig from 'sitecore.config';
-// import Providers from 'src/Providers';
-// import Layout from 'src/Layout';
-// import { WebsiteStaticState } from 'lib/website/website-state';
-// import { defaults } from 'lib/feature-flags/defaults';
 
 export default function GlobalError() {
-  // const [page, setPage] = useState<
-  //   | (Page & {
-  //       customProps: WebsiteStaticState;
-  //     })
-  //   | null
-  // >(null);
-  // const [loading, setLoading] = useState(true);
-
-  // useEffect(() => {
-  //   async function loadErrorPage() {
-  //     try {
-  //       const page = await client.getErrorPage(ErrorPage.InternalServerError, {
-  //         site: scConfig.defaultSite,
-  //         locale: scConfig.defaultLanguage,
-  //       });
-  //       if (page === null) {
-  //         setPage(null);
-  //         setLoading(false);
-  //         return;
-  //       }
-  //       // const featureFlags = defaults();
-  //       const featureFlags = {
-  //         releaseExampleFeature: false,
-  //         releaseFooterExpandedLayout: false,
-  //         releaseRaqWebToLeadFetchMethod: false,
-  //         releaseSchemaOrgGraph: false,
-  //         releaseRedesignedSeriesCompareChart: false,
-  //         releaseRobotsVercelProductionCheck: false,
-  //         releaseTrustArcAutoBlock: false,
-  //         releaseWithinSeriesCompareChart: false,
-  //         releaseRenoworksVisualizerHandshakeUrl: false,
-  //       };
-  //       const pageWithCustomProps = await client.getPageWithCustomProps(page, featureFlags);
-  //       setPage(pageWithCustomProps);
-  //     } catch {
-  //       setPage(null);
-  //     }
-
-  //     setLoading(false);
-  //   }
-
-  //   loadErrorPage();
-  // }, []);
-
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
-
-  // if (page) {
-  //   return (
-  //     <Providers page={page}>
-  //       <Layout page={page} />
-  //     </Providers>
-  //   );
-  // }
-
   return (
     <div style={{ padding: 10 }}>
       <h1>500 Internal Server Error</h1>

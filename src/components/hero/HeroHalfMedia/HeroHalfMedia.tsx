@@ -34,7 +34,7 @@ async function HeroHalfMedia_Default(props: HeroHalfMediaProps): Promise<JSX.Ele
     getEnum<'full-bleed' | 'full-width'>(props.fields?.containerWidth) ?? 'full-bleed';
 
   const themeData = getTheme(
-    props.websiteStaticState.theme,
+    props.page.customProps.theme,
     HeroHalfMediaTheme(ctaRightAlign, !!props.fields?.body?.value)
   );
 

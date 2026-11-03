@@ -25,8 +25,8 @@ import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
 import { JSX } from 'react';
 
-import { GenericChartTheme, GetTextAlignment } from './GenericChart.theme';
-import { BackgroundColor, TextAlignment } from './GenericChart.types';
+import { GenericChartTheme } from './GenericChart.theme';
+import { TextAlignment } from './GenericChart.types';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 const MAX_CHART_ROWS = 25;
@@ -63,6 +63,7 @@ function getColumnContent(
 
 type ChartHeadingProps = {
   ariaLabel: string;
+  classes?: string;
   link?: LinkField;
   tag: 'h3' | 'h4' | 'h5';
   text?: TextField;
@@ -75,6 +76,7 @@ type ChartHeadingProps = {
  */
 function ChartHeading({
   ariaLabel,
+  classes,
   link,
   tag: Tag,
   text,
@@ -86,20 +88,20 @@ function ChartHeading({
     if (!text?.value) {
       return <></>;
     }
-    return <Tag>{textContent}</Tag>;
+    return <Tag className={classes}>{textContent}</Tag>;
   }
 
   let heading: JSX.Element;
   if (!text?.value) {
-    heading = <Tag>{link.value.text}</Tag>;
+    heading = <Tag className={classes}>{link.value.text}</Tag>;
   } else if (underlineOnHover) {
     heading = (
-      <Tag>
+      <Tag className={classes}>
         <span className="border-black hover:border-b-2">{textContent}</span>
       </Tag>
     );
   } else {
-    heading = <Tag>{textContent}</Tag>;
+    heading = <Tag className={classes}>{textContent}</Tag>;
   }
 
   return (
@@ -131,7 +133,12 @@ function ChartImage({ ariaLabel, image, link, ...imageProps }: ChartImageProps):
 
 function ChartColumnTitles({
   column,
-}: Readonly<{ column?: GenericChartColumnProps }>): JSX.Element {
+  titleAlignment,
+}: Readonly<{
+  column?: GenericChartColumnProps;
+  titleAlignment: TextAlignment;
+}>): JSX.Element {
+  const { themeData } = useTheme(GenericChartTheme(titleAlignment));
   if (!column?.fields) {
     return <></>;
   }
@@ -147,6 +154,7 @@ function ChartColumnTitles({
       />
       <ChartHeading
         tag="h4"
+        classes={themeData.classes.rowSubtitle}
         text={column.fields.subtitle}
         link={column.fields.subtitleLink}
         ariaLabel={column.fields.subtitle?.value || 'Subtitle Link'}
@@ -158,16 +166,9 @@ function ChartColumnTitles({
 
 function GenericChart_Default(props: GenericChartProps): JSX.Element {
   const fields = getComponentServerProps(props.rendering).fields;
-
-  const alignment = getEnum<TextAlignment>(fields?.textAlignment) || 'left';
-  const titleRowBackgroundColor =
-    getEnum<BackgroundColor>(fields?.titleRowBackgroundColor) || 'black';
-  const titleColumnBackgroundColor =
-    getEnum<BackgroundColor>(fields?.titleColumnBackgroundColor) || 'gray';
-  const { themeData } = useTheme(
-    GenericChartTheme(titleRowBackgroundColor, titleColumnBackgroundColor, alignment)
-  );
-
+  const titleAlignment = getEnum<TextAlignment>(fields?.titleAlignment) || 'left';
+  const copyAlignment = getEnum<TextAlignment>(fields?.copyAlignment) || 'left';
+  const { themeData } = useTheme(GenericChartTheme(titleAlignment, copyAlignment));
   const columns: GenericChartColumnProps[] = fields?.children ?? [];
 
   // Rows are authored per column, so the chart is as tall as its most populated column.
@@ -215,13 +216,9 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
       <Headline
         {...props}
         fields={fields}
-        classes={' text-[26px] font-demi leading-[1.25] mb-[12px] md:text-[34px] '}
+        classes={'text-sm-m md:text-m font-bold mb-xxs pt-sm-s'}
       />
-      <BodyCopy
-        {...props}
-        fields={fields}
-        classes={' hidden md:block text-[18px] leading-1.5] mb-[10px] '}
-      />
+      <BodyCopy {...props} fields={fields} classes={' text-dark-gray font-serif text-xxs mb-xs '} />
       <div className="comparison-chart-table">
         {hasSchemaText && (
           <>
@@ -235,13 +232,13 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
             <thead>
               <tr className={themeData.classes.theadRow}>
                 {hasImageColumn && <th className={themeData.classes.imageColumnHeader}>&nbsp;</th>}
-                {hasRowTitles && <th>&nbsp;</th>}
+                {hasRowTitles && <th className="bg-light-gray">&nbsp;</th>}
                 {columns.map((column, index) => (
                   <th
-                    className={themeData.classes.rowHeader}
+                    className={themeData.classes.rowColumnTitle}
                     key={column.id ?? `chart-column-title-${index}`}
                   >
-                    <ChartColumnTitles column={column} />
+                    <ChartColumnTitles column={column} titleAlignment={titleAlignment} />
                   </th>
                 ))}
               </tr>
@@ -250,8 +247,8 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
           <tbody>
             {hasImageRow && (
               <tr className={themeData.classes.imageRow}>
-                {hasImageColumn && <td className={themeData.classes.imageColumn}>&nbsp;</td>}
-                {hasRowTitles && <th>&nbsp;</th>}
+                {hasRowTitles && <th className="bg-light-gray">&nbsp;</th>}
+                {hasImageColumn && <td className="bg-light-gray border-l-0 border-t-0">&nbsp;</td>}
                 {columns.map((column, index) => (
                   <td
                     key={column.id ?? `chart-column-image-${index}`}
@@ -278,15 +275,8 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
 
               return (
                 <tr className={themeData.classes.tableRow} key={`content-row-${rowNumber}`}>
-                  {hasImageColumn && (
-                    <td className={themeData.classes.imageColumn}>
-                      {rowImage?.value?.src && (
-                        <ChartImage image={rowImage} link={rowImageLink} ariaLabel="Row Image" />
-                      )}
-                    </td>
-                  )}
                   {hasRowTitles && (
-                    <th className={themeData.classes.columnHeader}>
+                    <th className={themeData.classes.rowColumnTitle}>
                       <ChartHeading
                         tag="h4"
                         text={rowTitle}
@@ -294,6 +284,7 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
                         ariaLabel={rowTitleLink?.value?.text || 'Row Title Link'}
                       />
                       <ChartHeading
+                        classes={themeData.classes.rowSubtitle}
                         tag="h5"
                         text={rowSubtitle}
                         link={rowSubtitleLink}
@@ -301,21 +292,30 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
                       />
                     </th>
                   )}
+                  {hasImageColumn && (
+                    <td className={themeData.classes.imageColumn}>
+                      {rowImage?.value?.src && (
+                        <ChartImage image={rowImage} link={rowImageLink} ariaLabel="Row Image" />
+                      )}
+                    </td>
+                  )}
                   {columns.map((column, index) => {
-                    const textAlignment =
-                      getEnum<TextAlignment>(column.fields?.textAlignment) || '';
                     const rowContent = getColumnContent(column, rowNumber) ?? { value: '' };
 
                     return (
                       <td
-                        className={`${themeData.classes.tableData} ${GetTextAlignment(
-                          textAlignment
-                        )}`}
+                        className={`${themeData.classes.tableData}`}
                         key={column.id ?? `chart-column-content-${index}`}
                       >
                         {hasColumnTitles && (
-                          <div className={themeData.classes.mobileTitleColumn}>
-                            <ChartColumnTitles column={column} />
+                          <div
+                            className={
+                              index === 0 && rowNumber === 1
+                                ? themeData.classes.mobileTitleColumnFirst
+                                : themeData.classes.mobileTitleColumn
+                            }
+                          >
+                            <ChartColumnTitles column={column} titleAlignment={titleAlignment} />
                           </div>
                         )}
                         <RichTextWrapper
@@ -332,9 +332,7 @@ function GenericChart_Default(props: GenericChartProps): JSX.Element {
         </table>
       </div>
       {fields?.footer?.value && (
-        <div className={themeData.classes.footer}>
-          <RichTextWrapper field={fields.footer} />
-        </div>
+        <RichTextWrapper field={fields.footer} classes={themeData.classes.footer} />
       )}
     </Component>
   );

@@ -11,8 +11,8 @@ export type PrimaryImageFields = {
 export function plugin({
   graph,
   fields,
-  websiteStaticState,
+  page,
 }: ComponentPluginParams<PrimaryImageFields>): Thing[] {
-  const imageObject = createImageObject(fields?.primaryImage, websiteStaticState.siteInfo);
+  const imageObject = createImageObject(fields?.primaryImage, page.customProps.siteInfo);
   return appendImageObject(graph, imageObject);
 }

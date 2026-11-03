@@ -2,8 +2,6 @@ import { ItemChildrenService } from 'lib/graphql/item-children-service';
 import sitecoreClient from 'lib/sitecore-client';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
-import { buildSitecoreItemCacheTag } from 'lib/cache/build-sitecore-item-cache-tag';
-import { cacheTag } from 'next/cache';
 
 export type ButtonCardItem = Sitecore.Forms.GenericFormBuilder.Datasources.ButtonCardItem & {
   id: string;
@@ -53,8 +51,6 @@ const query = /* GraphQL */ `
 `;
 
 export async function getButtonCardItems(parentId: string): Promise<ButtonCardItem[]> {
-  'use cache';
-
   const itemChildrenService = new ItemChildrenService<DatasourceResult>({ sitecoreClient });
   const results = await itemChildrenService.fetchAllResults(query, {
     parentId,
@@ -71,10 +67,6 @@ export async function getButtonCardItems(parentId: string): Promise<ButtonCardIt
       _AW_TemplateId: { value: '' },
     },
   }));
-
-  options.forEach((option) => {
-    cacheTag(buildSitecoreItemCacheTag({ itemId: option.id, locale: 'en' }))
-  });
 
   return options;
 }

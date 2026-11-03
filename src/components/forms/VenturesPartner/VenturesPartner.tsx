@@ -24,25 +24,13 @@ import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-ch
 import { createUUID } from 'lib/utils/string-utils/create-uuid';
 import { hashCode } from 'lib/utils/string-utils/hash-code';
 import Link from 'next/link';
-import { MouseEvent, useRef, useState } from 'react';
+import React, { MouseEvent, useEffect, useRef, useState } from 'react';
 import * as Yup from 'yup';
 
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 import { formActionFactory } from '.sitecore/aw-form-action-factory';
 
 type VenturesPartnerProps = ComponentProps & Sitecore.Forms.Custom.VenturesPartner.VenturesPartner;
-
-async function runActionsInOrder(
-  actionHandlers: Array<ReturnType<typeof formActionFactory>>
-): Promise<boolean> {
-  for (const actionHandler of actionHandlers) {
-    const result = await actionHandler?.executeAction(true);
-    if (!result?.success) {
-      return false;
-    }
-  }
-  return true;
-}
 
 function VenturesPartner_Default(props: VenturesPartnerProps) {
   const { themeData } = useTheme(FormFieldsTheme);
@@ -53,6 +41,7 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
   const [isTnCModalOpen, setIsTnCModalOpen] = useState(false);
   const [acceptTCChecked, setAcceptTCChecked] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [refererValue, setRefererValue] = useState('');
   const [errorOnSubmit, setErrorOnSubmit] = useState<boolean>(false);
   const { runRecaptcha, recaptchaError } = useCustomFormRecaptcha(props.fields, 'VenturesPartner');
   const getHiddenFieldValue = (): string => {
@@ -61,6 +50,12 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
   };
 
   const formRef = useRef<FormikProps<FormikValues> | null>(null);
+
+  useEffect(() => {
+    const referer = document.referrer ?? '';
+    const refererValue = referer.replace(/https?:\/\//, '');
+    setRefererValue(refererValue);
+  }, []);
 
   function replaceTokensWithValues(template: string, values: FormikValues) {
     const regex = /{{\s*(\w+)\s*}}/g;
@@ -168,276 +163,274 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
 
   const contextId = props.rendering.dataSource?.replaceAll(/[{}]/g, '');
 
-  async function handleSubmit(values: FormikValues): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formProps: any = {
-      sessionId: createUUID().toUpperCase(),
-      name: 'Ventures Partner Form',
-      rendering: {
-        dataSource: props.rendering.dataSource,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formProps: any = {
+    sessionId: createUUID().toUpperCase(),
+    name: 'Ventures Partner Form',
+    rendering: {
+      dataSource: props.rendering.dataSource,
+    },
+    fields: {
+      formName: {
+        value: 'Ventures Partner Form',
       },
-      fields: {
-        formName: {
-          value: 'Ventures Partner Form',
-        },
-        children: [
-          {
-            fields: {
-              children: [
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Short Text',
-                  fields: {
-                    fieldName: {
-                      value: 'company',
-                    },
+      children: [
+        {
+          fields: {
+            children: [
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Short Text',
+                fields: {
+                  fieldName: {
+                    value: 'company',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Dropdown',
-                  fields: {
-                    fieldName: {
-                      value: 'company_type',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Dropdown',
+                fields: {
+                  fieldName: {
+                    value: 'company_type',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Dropdown',
-                  fields: {
-                    fieldName: {
-                      value: 'target_area',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Dropdown',
+                fields: {
+                  fieldName: {
+                    value: 'target_area',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Short Text',
-                  fields: {
-                    fieldName: {
-                      value: 'first_name',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Short Text',
+                fields: {
+                  fieldName: {
+                    value: 'first_name',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Short Text',
-                  fields: {
-                    fieldName: {
-                      value: 'last_name',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Short Text',
+                fields: {
+                  fieldName: {
+                    value: 'last_name',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Email',
-                  fields: {
-                    fieldName: {
-                      value: 'email',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Email',
+                fields: {
+                  fieldName: {
+                    value: 'email',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Phone',
-                  fields: {
-                    fieldName: {
-                      value: 'phone',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Phone',
+                fields: {
+                  fieldName: {
+                    value: 'phone',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Short Text',
-                  fields: {
-                    fieldName: {
-                      value: 'website',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Short Text',
+                fields: {
+                  fieldName: {
+                    value: 'website',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Dropdown',
-                  fields: {
-                    fieldName: {
-                      value: 'country',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Dropdown',
+                fields: {
+                  fieldName: {
+                    value: 'country',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Text Area',
-                  fields: {
-                    fieldName: {
-                      value: 'message',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Text Area',
+                fields: {
+                  fieldName: {
+                    value: 'message',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Checkbox',
-                  fields: {
-                    fieldName: {
-                      value: 'agree_to_news_updates',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Checkbox',
+                fields: {
+                  fieldName: {
+                    value: 'agree_to_news_updates',
                   },
                 },
-                {
-                  id: createUUID().toUpperCase(),
-                  templateName: 'Checkbox',
-                  fields: {
-                    fieldName: {
-                      value: 'agree_to_terms',
-                    },
+              },
+              {
+                id: createUUID().toUpperCase(),
+                templateName: 'Checkbox',
+                fields: {
+                  fieldName: {
+                    value: 'agree_to_terms',
                   },
                 },
-              ],
-            },
-          },
-        ],
-      },
-      params: {},
-    };
-
-    const today = new Date();
-    const interactionDate =
-      ('0' + (today.getMonth() + 1)).slice(-2) +
-      '/' +
-      ('0' + today.getDate()).slice(-2) +
-      '/' +
-      today.getFullYear();
-
-    if (acceptTCChecked) {
-      const referer = document.referrer ?? '';
-      const refererValue = referer.replace(/https?:\/\//, '');
-
-      setIsButtonEnabled(false);
-      values.referrer = refererValue;
-      values.agree_to_terms = acceptTCChecked;
-      values.context_id = contextId;
-      values.interaction_date = interactionDate;
-
-      const emailBody = props.fields.emailBody?.value;
-
-      // for Send Email Action
-      const emailBodyWithValues = replaceTokensWithValues(emailBody, values);
-      const emailFields = {
-        emailBody: {
-          value: emailBodyWithValues,
-        },
-        emailSubject: {
-          value: props.fields.emailSubject?.value,
-        },
-        fromEmailAddress: {
-          value: props.fields.fromEmailAddress?.value,
-        },
-        toEmailAddress: {
-          value: props.fields.toEmailAddress?.value,
-        },
-        errorMessage: {
-          value: props.fields.errorMessage?.value,
-        },
-        stopOnError: {
-          value: true,
-        },
-      };
-
-      // actionFieldsProps for SFMC
-      const actionFieldsProps = {
-        account: 'AW',
-        definitionKey: 'sitecore_venture_confirmation_email',
-        recipient: {
-          contactKey: createUUID().replace(/-/, ''),
-          to: values.email,
-          attributes: {
-            company: values.company,
-            company_type: values.company_type,
-            target_area: values.target_area,
-            first_name: values.first_name,
-            last_name: values.last_name,
-            phone: values.phone,
-            website: values.website,
-            country: values.country,
-            message: values.message,
+              },
+            ],
           },
         },
-      };
+      ],
+    },
+    params: {},
+  };
 
-      //Save To Database Action
-      const actionHandler1 = formActionFactory(
-        {
-          templateName: 'Save To Database',
-        },
-        values,
-        formProps
-      );
+  const today = new Date();
+  const interactionDate =
+    ('0' + (today.getMonth() + 1)).slice(-2) +
+    '/' +
+    ('0' + today.getDate()).slice(-2) +
+    '/' +
+    today.getFullYear();
 
-      //Send Email Actions
-      const actionHandler2 = formActionFactory(
-        {
-          templateName: 'Send Email',
-          fields: emailFields,
-        },
-        {}
-      );
+  const emailBody = props.fields.emailBody?.value;
 
-      // SFMC Transactional Messaging Send Email
-      const actionHandler3 = formActionFactory(
-        {
-          templateName: 'SFMC Transactional Messaging Send Email',
-        },
-        actionFieldsProps
-      );
-
-      if (getHiddenFieldValue()) {
-        setShowThankYou(true);
-        setErrorOnSubmit(true);
-        return;
-      }
-
-      // reCAPTCHA first (skipped when not configured on the datasource); stop on failure
-      const recaptcha = await runRecaptcha();
-      if (!recaptcha.success) {
-        setIsButtonEnabled(true);
-        return;
-      }
-
-      const allSucceeded = await runActionsInOrder([
-        actionHandler1,
-        actionHandler2,
-        actionHandler3,
-      ]);
-      if (allSucceeded) {
-        setIsButtonEnabled(true);
-        setShowThankYou(true);
-        setFormSubmitted(true);
-      } else {
-        setErrorOnSubmit(true);
-      }
-    } else {
-      handleOpenModal();
-    }
-  }
-
-  function handleOpenModal() {
+  const handleOpenModal = () => {
     if (!formSubmitted) {
       setIsAcceptModalOpen(true);
     }
-  }
-
-  function handleCloseModal() {
+  };
+  const handleCloseModal = () => {
     setIsAcceptModalOpen(false);
-  }
-
-  function handleOpenTnCModal(e: MouseEvent) {
+  };
+  const handleOpenTnCModal = (e: MouseEvent) => {
     e.preventDefault();
     setIsTnCModalOpen(true);
-  }
-
-  function handleCloseTnCModal() {
+  };
+  const handleCloseTnCModal = () => {
     setIsTnCModalOpen(false);
-  }
+  };
+
+  const runActionsInOrder = async (
+    actionHandlers: Array<ReturnType<typeof formActionFactory>>
+  ): Promise<boolean> => {
+    for (const actionHandler of actionHandlers) {
+      const result = await actionHandler?.executeAction(true);
+      if (!result?.success) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const submitVenturesPartner = async (values: FormikValues) => {
+    setIsButtonEnabled(false);
+    values.referrer = refererValue;
+    values.agree_to_terms = acceptTCChecked;
+    values.context_id = contextId;
+    values.interaction_date = interactionDate;
+
+    // for Send Email Action
+    const emailBodyWithValues = replaceTokensWithValues(emailBody, values);
+    const emailFields = {
+      emailBody: {
+        value: emailBodyWithValues,
+      },
+      emailSubject: {
+        value: props.fields.emailSubject?.value,
+      },
+      fromEmailAddress: {
+        value: props.fields.fromEmailAddress?.value,
+      },
+      toEmailAddress: {
+        value: props.fields.toEmailAddress?.value,
+      },
+      errorMessage: {
+        value: props.fields.errorMessage?.value,
+      },
+      stopOnError: {
+        value: true,
+      },
+    };
+
+    // actionFieldsProps for SFMC
+    const actionFieldsProps = {
+      account: 'AW',
+      definitionKey: 'sitecore_venture_confirmation_email',
+      recipient: {
+        contactKey: createUUID().replace(/-/, ''),
+        to: values.email,
+        attributes: {
+          company: values.company,
+          company_type: values.company_type,
+          target_area: values.target_area,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          phone: values.phone,
+          website: values.website,
+          country: values.country,
+          message: values.message,
+        },
+      },
+    };
+
+    //Save To Database Action
+    const actionHandler1 = formActionFactory(
+      {
+        templateName: 'Save To Database',
+      },
+      values,
+      formProps
+    );
+
+    //Send Email Actions
+    const actionHandler2 = formActionFactory(
+      {
+        templateName: 'Send Email',
+        fields: emailFields,
+      },
+      {}
+    );
+
+    // SFMC Transactional Messaging Send Email
+    const actionHandler3 = formActionFactory(
+      {
+        templateName: 'SFMC Transactional Messaging Send Email',
+      },
+      actionFieldsProps
+    );
+
+    if (getHiddenFieldValue()) {
+      setShowThankYou(true);
+      setErrorOnSubmit(true);
+      return;
+    }
+
+    // reCAPTCHA first (skipped when not configured on the datasource); stop on failure
+    const recaptcha = await runRecaptcha();
+    if (!recaptcha.success) {
+      setIsButtonEnabled(true);
+      return;
+    }
+
+    const allSucceeded = await runActionsInOrder([actionHandler1, actionHandler2, actionHandler3]);
+    if (allSucceeded) {
+      setIsButtonEnabled(true);
+      setShowThankYou(true);
+      setFormSubmitted(true);
+    } else {
+      setErrorOnSubmit(true);
+    }
+  };
 
   return (
     <section
@@ -467,7 +460,13 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
           <Formik
             initialValues={initialValues}
             validationSchema={Yup.object().shape(validationSchema)}
-            onSubmit={handleSubmit}
+            onSubmit={async (values) => {
+              if (acceptTCChecked) {
+                await submitVenturesPartner(values);
+              } else {
+                handleOpenModal();
+              }
+            }}
             innerRef={formRef}
           >
             {({ touched, values, errors, handleSubmit, isValid, submitCount }) => {
@@ -757,7 +756,7 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
           />
 
           <ModalWrapper size="large" handleClose={handleCloseModal} isModalOpen={isAcceptModalOpen}>
-            <div className="px-m py-5 text-justify md:px-15">
+            <div className="px-m py-[20px] text-justify md:px-[60px]">
               <BodyCopy
                 fields={{ body: { value: props.fields.termsAndConditions?.value } }}
                 classes="[&_.body-copy]:text-small!"
@@ -772,7 +771,7 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
                     checked={acceptTCChecked}
                     onChange={() => setAcceptTCChecked(!acceptTCChecked)}
                     className={classNames(
-                      'peer mr-xxs inline-flex size-[20px] cursor-pointer appearance-none items-center border border-dark-gray checked:bg-black! hover:border-black focus:bg-gray focus:ring-0!',
+                      'peer mr-xxs inline-flex h-[20px] w-[20px] cursor-pointer appearance-none items-center border border-dark-gray checked:bg-black! hover:border-black focus:bg-gray focus:ring-0!',
                       themeData.classes.checkbox
                     )}
                   />
@@ -786,7 +785,7 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
               <button
                 type="button"
                 className={classNames(
-                  'mx-auto flex w-fit min-w-full items-center justify-center rounded-lg border-4 border-theme-btn-border bg-theme-btn-bg px-m py-[9px] font-sans text-button font-heavy whitespace-nowrap text-theme-btn-text hover:border-theme-btn-border-hover hover:bg-theme-btn-bg-hover hover:text-theme-btn-text-hover disabled:cursor-not-allowed disabled:border-gray disabled:text-gray disabled:hover:bg-theme-btn-bg md:mx-0 md:min-w-[218px]'
+                  'mx-auto flex w-fit min-w-full items-center justify-center whitespace-nowrap rounded-lg border-4 border-theme-btn-border bg-theme-btn-bg px-m py-[9px] font-sans text-button font-heavy text-theme-btn-text hover:border-theme-btn-border-hover hover:bg-theme-btn-bg-hover hover:text-theme-btn-text-hover disabled:cursor-not-allowed disabled:border-gray disabled:text-gray disabled:hover:bg-theme-btn-bg md:mx-0 md:min-w-[218px]'
                 )}
                 disabled={!acceptTCChecked}
                 onClick={() => {
@@ -805,7 +804,7 @@ function VenturesPartner_Default(props: VenturesPartnerProps) {
           </ModalWrapper>
 
           <ModalWrapper size="large" handleClose={handleCloseTnCModal} isModalOpen={isTnCModalOpen}>
-            <div className="px-m py-5 text-justify md:px-15">
+            <div className="px-m py-[20px] text-justify md:px-[60px]">
               <BodyCopy
                 fields={{ body: { value: props.fields.termsAndConditionsStandaloneCopy?.value } }}
                 classes="[&_.body-copy]:text-small!"

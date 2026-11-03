@@ -35,7 +35,29 @@ function PromoImageWithSlider_Default(props: PromoImageWithSliderProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [forceUpdateToggle, setForceUpdateToggle] = useState(false);
   const sliderRef = useRef<HTMLDivElement | null>(null);
+  const sliderContainerRef = useRef<HTMLDivElement | null>(null);
+  const [visibilityKey, setVisibilityKey] = useState(0);
   const { selectedModalId } = useModalIdContext();
+
+  // The slider measures its width on mount only, so remount it when it goes from hidden (e.g. inactive tab) to visible.
+  useEffect(() => {
+    const container = sliderContainerRef.current;
+    if (!container || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    let wasHidden = container.offsetWidth === 0;
+    const observer = new ResizeObserver(([entry]) => {
+      const isHidden = entry.contentRect.width === 0;
+      if (wasHidden && !isHidden) {
+        setVisibilityKey((prev) => prev + 1);
+        setForceUpdateToggle((prevToggle) => !prevToggle);
+      }
+      wasHidden = isHidden;
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (props.isGenericModal && selectedModalId != '') {
@@ -165,6 +187,7 @@ function PromoImageWithSlider_Default(props: PromoImageWithSliderProps) {
         )}
 
         <div
+          ref={sliderContainerRef}
           tabIndex={currentScreenWidth < getBreakpoint('md') ? -1 : 0}
           onKeyDown={handleKeyDown}
           className={classNames(themeName, 'relative -mx-m md:mx-0')}
@@ -173,8 +196,8 @@ function PromoImageWithSlider_Default(props: PromoImageWithSliderProps) {
           <ReactBeforeSliderComponent
             key={
               props.isGenericModal || props.forceUpdate
-                ? `forceRerender-${forceUpdateToggle}`
-                : 'react-before-after-slider'
+                ? `forceRerender-${forceUpdateToggle}-${visibilityKey}`
+                : `react-before-after-slider-${visibilityKey}`
             }
             currentPercentPosition={sliderValue}
             onChangePercentPosition={(position) => {

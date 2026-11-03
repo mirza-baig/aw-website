@@ -1,7 +1,7 @@
 'use client';
 
 import { identity } from '@sitecore-content-sdk/events';
-import config from 'aw.config';
+import config from 'aw.config.client';
 import classNames from 'classnames';
 import { Formik, FormikValues } from 'formik';
 import BodyCopy from 'helpers/BodyCopy/BodyCopy';

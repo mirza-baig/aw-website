@@ -50,7 +50,6 @@ import { RuleContext } from 'lib/rules/rule-context';
 import sitecoreClient from 'lib/sitecore-client';
 
 import { CoveoRule } from './expressions/coveo-rule';
-import { Item } from 'lib/graphql/item-fetcher/item';
 
 const conditionMap = new Map<string, ConditionConstructor>();
 
@@ -79,7 +78,7 @@ actionMap.set(CoveoReduceBoostActionId, CoveoReduceBoostAction);
 
 export async function buildCoveoRules<TContext extends RuleContext>(
   xml: string
-): Promise<{ rules: CoveoRule<TContext>[], fetchedItems: Item[] }> {
+): Promise<CoveoRule<TContext>[]> {
   const context = new ParseRulesContext(conditionMap, actionMap, sitecoreClient);
   const coveoRules = await parseRulesFromXmlString(xml, context);
   return coveoRules;

@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 
 import { BaseSubmitAction, BaseSubmitProps, ExecutionResult } from '../BaseSubmitAction';
 import { Sitecore } from '.sitecore/AndersenWindows.model';

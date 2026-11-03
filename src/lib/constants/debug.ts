@@ -23,9 +23,6 @@ export const Debug = {
   onlinescheduling: debug(`${defaultNamespace}:onlinescheduling`),
   draftModeWorkaround: debug(`${defaultNamespace}:draft-mode-workaround`),
   cdpIdentity: debug(`${defaultNamespace}:cdp-identity`),
-  proxy: {
-    featureFlags: debug(`${defaultNamespace}:proxy:feature-flags`),
-  },
   api: {
     coveo: {
       accessToken: debug(`${defaultNamespace}:api:coveo:access-token`),

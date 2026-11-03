@@ -8,6 +8,8 @@ import { NextRequest } from 'next/server';
 
 import sites from '.sitecore/sites.json';
 
+export const dynamic = 'force-dynamic';
+
 const DISALLOW = 'User-agent: *\nDisallow: /';
 
 export async function GET(req: NextRequest): Promise<Response> {
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   try {
     useVercelProductionCheck = await releaseRobotsVercelProductionCheck();
   } catch (error) {
-    console.warn('Failed to resolve robots.txt Vercel production check feature flag', error);
+    console.error('Failed to resolve robots.txt Vercel production check feature flag', error);
   }
 
   // Get hostname to check for staging.  Since staging is a 'true' production site just with the staging hostname prefix,

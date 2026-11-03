@@ -1,7 +1,7 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-
+export const dynamic = 'force-dynamic';
 const COOKIE_NAME = 'aw_chat_token';
 
 export async function POST(req: NextRequest) {

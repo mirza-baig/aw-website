@@ -1,6 +1,7 @@
 import leverService from 'lib/lever';
 import { NextRequest } from 'next/server';
 
+export const dynamic = 'force-dynamic';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapPostingQuestionsResponse(data: any) {
   return {

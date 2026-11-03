@@ -11,7 +11,7 @@ import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace
 import { Schema, string } from 'yup';
 
 import { AddressProps } from '../AddressField';
-import { StateItem } from './address-field-types';
+import { StateItem } from './address-field-utils';
 
 function getCountryInitialValue(props: Required<AddressProps>): ProvidedValues {
   if (props.countryAndStateOptions == undefined) {

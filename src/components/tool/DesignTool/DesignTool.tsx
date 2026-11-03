@@ -1,5 +1,6 @@
 import { AppPlaceholder, ComponentRendering } from '@sitecore-content-sdk/nextjs';
 import { ComponentProps } from 'lib/component-props';
+import { releaseRenoworksVisualizerHandshakeUrl } from 'lib/feature-flags/flags';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
@@ -47,8 +48,7 @@ async function DesignTool_Default(props: DesignToolProps): Promise<JSX.Element> 
   });
 
   const { fields } = getComponentServerProps(props.rendering);
-  const visualizerHandshakeUrlEnabled =
-    props.websiteStaticState.featureFlags.releaseRenoworksVisualizerHandshakeUrl;
+  const visualizerHandshakeUrlEnabled = await releaseRenoworksVisualizerHandshakeUrl();
 
   return (
     <Suspense>
@@ -62,7 +62,6 @@ async function DesignTool_Default(props: DesignToolProps): Promise<JSX.Element> 
             rendering={props.rendering}
             page={props.page}
             componentMap={componentMap}
-            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         }
       />

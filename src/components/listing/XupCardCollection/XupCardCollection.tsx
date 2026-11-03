@@ -58,7 +58,6 @@ function XupCardCollection_Default(props: XupCardCollectionProps): JSX.Element {
                 isEditing={props.page.mode.isEditing}
               />
             )}
-            passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
           />
         ) : null
       }

@@ -2,9 +2,9 @@
 import { ImageField } from '@sitecore-content-sdk/nextjs';
 import classNames from 'classnames';
 import SvgIcon from 'helpers/SvgIcon/SvgIcon';
+import { FeatureFlags } from 'lib/feature-flags/feature-flags';
 import { getBreakpoint, useCurrentScreenType } from 'lib/utils/get-screen-type';
 import { normalizeSitecoreDateStringFormattedWithTime } from 'lib/utils/string-utils/normalize-sitecore-date-string-formatted-with-time';
-import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
 import { CSSProperties, JSX, useEffect, useRef, useState } from 'react';
 
@@ -64,8 +64,6 @@ const YoutubeWrapper = (videoItem: YouTubeProps): JSX.Element => {
     videoId.value
   }&enablejsapi=1&rel=0`;
 
-  const { featureFlags } = useWebsiteContext();
-
   const [load, setLoad] = useState(false);
   const videoRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -106,7 +104,7 @@ const YoutubeWrapper = (videoItem: YouTubeProps): JSX.Element => {
 
   return (
     <>
-      {videoItem.includeSEOSchemaForVimeoYouTube && featureFlags.releaseSchemaOrgGraph && (
+      {videoItem.includeSEOSchemaForVimeoYouTube && !FeatureFlags.values.releaseSchemaOrgGraph && (
         <Script
           id=""
           strategy="beforeInteractive"
@@ -202,13 +200,13 @@ export const playStopVideo = (
   const videoId = video.fields.videoId.value;
   const videoIframe = document.getElementById(videoId) as HTMLIFrameElement;
 
-  if (videoIframe) {
+  if (!videoIframe) {
+    setTimeout(() => playStopVideo(video, action), 1000);
+  } else {
     videoIframe.contentWindow?.postMessage(
       `{"event":"command", "func":"${action}", "args":""}`,
       '*'
     );
-  } else {
-    setTimeout(() => playStopVideo(video, action), 1000);
   }
 };
 

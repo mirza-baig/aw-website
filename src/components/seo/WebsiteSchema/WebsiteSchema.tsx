@@ -1,9 +1,11 @@
+'use client';
+
 import { ComponentProps } from 'lib/component-props';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
+import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Script from 'next/script';
 
-import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
-import { DataSource } from 'lib/types/data-source';
+import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 type WebsiteSchemaType = {
   '@context': 'https://schema.org/';
@@ -16,17 +18,18 @@ type WebsiteSchemaType = {
   };
 };
 
-type WebsiteSchemaProps = ComponentProps &
-  DataSource<Sitecore.Components.Seo.WebsiteSchema.WebsiteSchema>;
+type WebsiteSchemaProps = ComponentProps & Sitecore.Components.Seo.WebsiteSchema.WebsiteSchema;
 
 function WebsiteSchema_Default(props: WebsiteSchemaProps) {
-  if (!props.websiteStaticState.siteInfo?.name) {
-    return null;
+  const { siteInfo, featureFlags } = useWebsiteContext();
+
+  if (!siteInfo?.name) {
+    return <></>;
   }
 
-  const canonicalHostName = props.websiteStaticState.siteInfo?.canonicalHostName;
+  const canonicalHostName = siteInfo?.canonicalHostName;
   if (!canonicalHostName || typeof canonicalHostName !== 'string') {
-    return null;
+    return <></>;
   }
   // Search Markup
   const ldJsonScript: WebsiteSchemaType = {
@@ -46,7 +49,7 @@ function WebsiteSchema_Default(props: WebsiteSchemaProps) {
 
   return (
     <>
-      {!props.websiteStaticState.featureFlags.releaseSchemaOrgGraph && (
+      {!featureFlags.releaseSchemaOrgGraph && (
         <Script
           id=""
           type="application/ld+json"

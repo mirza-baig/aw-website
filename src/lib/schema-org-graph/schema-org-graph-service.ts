@@ -1,7 +1,6 @@
 import { AWSitecoreClient } from 'lib/sitecore-client';
 
-import { Sitecore } from '.sitecore/AndersenWindows.sitecore';
-import { Item } from 'lib/types/item';
+import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 const VALUE_FIELDS_FRAGMENT = /* GraphQL */ `
   fragment ValueFields on ItemField {
@@ -84,7 +83,6 @@ const SETTINGS_SCHEMA_QUERY = /* GraphQL */ `
         schemaOrgGraph {
           ... on MultilistField {
             targetItems {
-              id
               fields {
                 ...ValueFields
                 ...LinkFields
@@ -105,7 +103,7 @@ export class SchemaOrgGraphService {
   async getSettingsSchemaOrgGraph(
     rootPath: string,
     locale: string
-  ): Promise<Item<Sitecore.BaseTemplates.BaseSchemaOrgGraph>[]> {
+  ): Promise<Sitecore.BaseTemplates.BaseSchemaOrgGraph[]> {
     try {
       const results = await this.sitecoreClient.getData<{
         item: {
@@ -120,7 +118,7 @@ export class SchemaOrgGraphService {
         language: locale,
       });
       return (results.item?.schemaOrgGraph?.targetItems ??
-        []) as Item<Sitecore.BaseTemplates.BaseSchemaOrgGraph>[];
+        []) as Sitecore.BaseTemplates.BaseSchemaOrgGraph[];
     } catch (error) {
       console.error('Error fetching settings schemaOrgGraph:', error);
       return [];

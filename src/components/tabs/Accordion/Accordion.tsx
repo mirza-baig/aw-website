@@ -20,7 +20,6 @@ function Accordion_Default(props: AccordionProps): JSX.Element {
           rendering={props.rendering}
           page={props.page}
           componentMap={componentMap}
-          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
     />

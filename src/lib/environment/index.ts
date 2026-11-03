@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { Environment } from 'lib/environment/environment';
 import { Environments } from 'lib/environment/environments';
 import { Roles } from 'lib/environment/roles';

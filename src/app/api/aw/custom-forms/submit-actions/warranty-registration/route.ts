@@ -1,6 +1,6 @@
 import externalDbService, { CreateWarrantyInput } from 'lib/external-db';
 import { NextRequest } from 'next/server';
-
+export const dynamic = 'force-dynamic';
 type WarrantyLineRequest = {
   productType: string;
   productSeries: string;

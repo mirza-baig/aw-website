@@ -18,7 +18,6 @@ function BlogContainer_Default(props: BlogContainerProps): JSX.Element {
         rendering={props.rendering}
         page={props.page}
         componentMap={componentMap}
-        passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
       />
     </BlogContainerClient>
   );

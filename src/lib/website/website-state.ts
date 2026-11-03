@@ -1,6 +1,7 @@
 import { SiteInfo } from '@sitecore-content-sdk/nextjs';
 import { BreadcrumbItem } from 'lib/breadcrumb/breadcrumb-service';
 import { FlagValues } from 'lib/feature-flags/types';
+import { FeatureToggles } from 'lib/feature-toggles/feature-toggles';
 
 import { FavoriteProductsState } from './favorite-products/state';
 import { GenericModalState } from './generic-modal';
@@ -12,6 +13,7 @@ export type WebsiteStaticState = {
   theme: ThemeName;
   siteInfo?: SiteInfo;
   requestedPath?: string;
+  featureToggles: FeatureToggles;
   breadcrumbs?: BreadcrumbItem[];
   featureFlags: FlagValues;
 };

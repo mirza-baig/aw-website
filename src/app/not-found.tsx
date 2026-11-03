@@ -1,28 +1,25 @@
 import Link from 'next/link';
-import { getSitecoreErrorPage } from 'lib/cache/get-sitecore-error-page';
+import client from 'lib/sitecore-client';
 import scConfig from 'sitecore.config';
 import { ErrorPage } from '@sitecore-content-sdk/nextjs';
 import Layout from 'src/Layout';
 import Providers from 'src/Providers';
-import * as flags from 'lib/feature-flags/flags';
-import { getWebsiteStaticState } from 'lib/cache/get-website-static-state';
-import { cacheLife } from 'next/cache';
+import { loader } from 'lib/feature-flags/loader';
 
 export default async function NotFound() {
   if (scConfig.defaultSite) {
-    const page = await getSitecoreErrorPage({
+    const page = await client.getErrorPage(ErrorPage.NotFound, {
       site: scConfig.defaultSite,
       locale: scConfig.defaultLanguage,
-      code: ErrorPage.NotFound,
     });
 
     if (page) {
-      const featureFlags = await getDefaultFlagValues();
-      const websiteStaticState = await getWebsiteStaticState({ page, featureFlags, path: [] });
+      const featureFlags = await loader();
+      const pageWithCustomProps = await client.getPageWithCustomProps(page, featureFlags);
 
       return (
-        <Providers page={page}>
-          <Layout page={page} websiteStaticState={websiteStaticState} />
+        <Providers page={pageWithCustomProps}>
+          <Layout page={pageWithCustomProps} />
         </Providers>
       );
     }
@@ -35,17 +32,4 @@ export default async function NotFound() {
       <Link href="/">Go to the Home page</Link>
     </div>
   );
-}
-
-async function getDefaultFlagValues() {
-  'use cache';
-  cacheLife('days');
-
-  const defaultValues = Object.entries(flags).map(([key, flag]) => {
-    return [key, flag.defaultValue];
-  });
-
-  const defaults = Object.fromEntries(defaultValues);
-
-  return defaults;
 }

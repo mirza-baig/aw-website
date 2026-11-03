@@ -11,5 +11,7 @@ import { createEditingRenderRouteHandlers } from '@sitecore-content-sdk/nextjs/r
  *  3. Pass preview data as query string parameters, alongside required headers and cookies to an internal editing request
  *  4. Return the rendered HTML for editing mode
  */
+// Force dynamic rendering since this route uses request headers
+export const dynamic = 'force-dynamic';
 
 export const { GET, POST, OPTIONS } = createEditingRenderRouteHandlers({});

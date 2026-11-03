@@ -73,6 +73,11 @@ export const SitecoreIds = {
           Products: {
             Id: '6BB32758-D223-484A-B7C8-0AE22613C318',
           },
+          Settings: {
+            FeatureToggles: {
+              Id: '94A78F1B-A08B-4A40-A694-76D76063A2EE',
+            },
+          },
           TechnicalDocuments: {
             Id: '{F1A8BF2C-39C9-4EC9-A512-ACE6DC4E674E}',
           },
@@ -186,6 +191,11 @@ export const SitecoreIds = {
             Documents: {
               TechnicalDocument: {
                 Id: '68E979BD-5A69-45CF-9010-314FB66FB538',
+              },
+            },
+            FeatureToggles: {
+              FeatureToggle: {
+                Id: '076A5B78-A388-49B7-9C01-6648206565D2',
               },
             },
             Photos: {

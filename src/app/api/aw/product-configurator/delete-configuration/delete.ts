@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { NextRequest, NextResponse } from 'next/server';
 
 type SuccessResponse = {

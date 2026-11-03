@@ -297,17 +297,14 @@ function TechDocChatbot_Default(props: TechDocChatbotProps): JSX.Element {
   const [sessionId, setSessionId] = useState<number | undefined>(undefined);
   const INTRO_MESSAGE =
     "Hello! I'm your TechDoc assistant. I can help you with questions about Andersen Windows & Doors products, technical documentation, and installation procedures. What would you like to know?";
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  useEffect(() => {
-    setMessages([
-      {
-        id: '1',
-        text: INTRO_MESSAGE,
-        isUser: false,
-        timestamp: new Date(),
-      },
-    ]);
-  }, []);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      text: INTRO_MESSAGE,
+      isUser: false,
+      timestamp: new Date(),
+    },
+  ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false);

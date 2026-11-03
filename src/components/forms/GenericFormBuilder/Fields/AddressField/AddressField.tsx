@@ -2,7 +2,7 @@
 
 import { Autocomplete, Libraries, useJsApiLoader } from '@react-google-maps/api';
 import { Page } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config';
+import config from 'aw.config.client';
 import classNames from 'classnames';
 import { Field, FormikValues, useFormikContext } from 'formik';
 import { FieldWrapper } from 'helpers/GenericFormBuilder/FieldWrapper';
@@ -16,9 +16,13 @@ import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-ch
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace';
 import { JSX, useEffect, useRef, useState } from 'react';
 
-import { buildHandlePlaceChanged } from './helpers/address-field-utils';
+import {
+  buildHandlePlaceChanged,
+  ControlState,
+  CountryItem,
+  StateItem,
+} from './helpers/address-field-utils';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
-import { ControlState, CountryItem, StateItem } from './helpers/address-field-types';
 
 export type AddressProps = ComponentProps &
   Sitecore.Forms.GenericFormBuilder.Fields.Address.AddressField & {

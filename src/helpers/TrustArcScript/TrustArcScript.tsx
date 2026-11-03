@@ -1,6 +1,6 @@
 'use client';
 import { useSitecore } from '@sitecore-content-sdk/nextjs';
-import awClientConfig from 'aw.config';
+import awClientConfig from 'aw.config.client';
 import { JSX, useEffect } from 'react';
 
 const TrustArcHeaderSnippet = (trustArcCmId: string) => {

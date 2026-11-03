@@ -5,8 +5,6 @@ import { describe, expect, it } from 'vitest';
 import { ComponentPluginParams } from '../plugin-types';
 import { plugin } from './product-swatch-image-graph';
 
-type ProductIntroFields = { data: unknown };
-
 const siteInfo = {
   hostName: '*',
   language: 'en',
@@ -17,7 +15,7 @@ const siteInfo = {
 function componentParams(
   children: unknown[],
   graph: Thing[] = []
-): ComponentPluginParams<ProductIntroFields> {
+): ComponentPluginParams<Record<string, never>> {
   return {
     graph,
     rendering: {
@@ -32,22 +30,11 @@ function componentParams(
         },
       },
     } as unknown as ComponentRendering,
-    fields: {
-      data: {
-        item: {
-          children: {
-            results: children,
-          },
-        },
-      },
-    },
     page: {
+      customProps: { siteInfo },
       layout: { sitecore: {} },
-    } as unknown as ComponentPluginParams<ProductIntroFields>['page'],
-    websiteStaticState: {
-      siteInfo,
-    } as unknown as ComponentPluginParams<ProductIntroFields>['websiteStaticState'],
-  };
+    },
+  } as unknown as ComponentPluginParams<Record<string, never>>;
 }
 
 describe('schema-org-graph > component-plugins > product-intro-graph', () => {

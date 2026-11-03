@@ -1,7 +1,7 @@
 import { GraphQLRequestClientFactory } from '@sitecore-content-sdk/core';
 import { SitecoreConfig } from '@sitecore-content-sdk/nextjs/config';
 import { ProxyBase, ProxyBaseConfig } from '@sitecore-content-sdk/nextjs/proxy';
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { Debug } from 'lib/constants/debug';
 import { NextRequest, NextResponse } from 'next/server';
 import regexParser from 'regex-parser';

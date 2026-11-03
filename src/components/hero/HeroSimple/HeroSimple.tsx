@@ -17,7 +17,7 @@ type HeroSimpleProps = ComponentProps & DataSource<Sitecore.Components.Hero.Hero
 function HeroSimple_Default(props: HeroSimpleProps): JSX.Element | null {
   const { fields } = props;
   const backgroundColor = getEnum<BackgroundColor>(fields?.backgroundColor) ?? 'white';
-  const themeData = getTheme(props.websiteStaticState.theme, HeroSimpleTheme(backgroundColor));
+  const themeData = getTheme(props.page.customProps.theme, HeroSimpleTheme(backgroundColor));
   const isEE = !props.page.mode.isNormal;
 
   // Always render in edit mode so Sitecore field editors appear

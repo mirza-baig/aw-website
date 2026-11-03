@@ -26,7 +26,7 @@ type SubheadingData = {
 function HeroFeaturedProduct_Default(props: HeroFeaturedProductProps): JSX.Element | null {
   const { fields } = props;
 
-  const themeData = getTheme(props.websiteStaticState.theme, HeroFeaturedProductTheme);
+  const themeData = getTheme(props.page.customProps.theme, HeroFeaturedProductTheme);
   const subheadingData: SubheadingData = {};
   const isEE = !props.page.mode.isNormal;
 

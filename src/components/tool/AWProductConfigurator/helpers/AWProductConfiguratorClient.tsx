@@ -1,6 +1,6 @@
 'use client';
 
-import config from 'aw.config';
+import config from 'aw.config.client';
 import classNames from 'classnames';
 import Component from 'helpers/Component/Component';
 import ImageWrapper from 'helpers/Media/ImageWrapper';

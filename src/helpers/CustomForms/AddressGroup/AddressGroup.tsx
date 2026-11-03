@@ -1,5 +1,5 @@
 import { Autocomplete, Libraries, useJsApiLoader } from '@react-google-maps/api';
-import config from 'aw.config';
+import config from 'aw.config.client';
 import classNames from 'classnames';
 import { FormikValues, useFormikContext } from 'formik';
 import { countries } from 'lib/constants/country-states-mapping';

@@ -25,7 +25,7 @@ import {
   Unsubscribe,
 } from '@coveo/headless';
 import { Field, useSitecore } from '@sitecore-content-sdk/nextjs';
-import config from 'aw.config';
+import config from 'aw.config.client';
 import classNames from 'classnames';
 import BodyCopy from 'helpers/BodyCopy/BodyCopy';
 import Component from 'helpers/Component/Component';

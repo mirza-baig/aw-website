@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { getLastModifiedDate } from 'lib/coveo/utils/get-lastmod';
 
 import { IndexableItem, SitemapItem } from '../..';

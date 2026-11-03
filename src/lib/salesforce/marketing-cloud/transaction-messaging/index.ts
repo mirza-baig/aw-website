@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import environment from 'lib/environment';
 
 import { SFMCTransactionalMessagingService } from './sfmc-transactional-messaging-service';

@@ -328,6 +328,7 @@ const ParentNavItem = ({
     <li className={liClass}>
       <button
         type="button"
+        data-mobile-submenu-target={nav.id}
         className={classNames(
           'w-full text-left hover:underline',
           getMobileNavStyleClass(hasImage),
@@ -455,7 +456,6 @@ type MobileMenuProps = {
   isActiveMob: boolean;
   showModalMob: boolean;
   activeSubMenuIdMob: string;
-  currentSubMenuMob: AWHeaderProps[];
   onMenuClick: (children: AWHeaderProps, id: string) => void;
 };
 
@@ -464,22 +464,29 @@ const MobileMenu = ({
   isActiveMob,
   showModalMob,
   activeSubMenuIdMob,
-  currentSubMenuMob,
   onMenuClick,
 }: MobileMenuProps): JSX.Element => {
   const rawItems = Array.isArray(menuItems) ? menuItems : [];
   const flattenedItems = flattenNavItems(rawItems);
   const { links, cards } = splitLinksAndCards(flattenedItems);
   const mobileLinks = links.filter(isMobileVisible);
+  const parentLinks = mobileLinks.filter((nav) => (nav.fields?.children?.length ?? 0) > 0);
 
   return (
-    <div className={showModalMob ? 'block' : 'sr-only'}>
-      {/* Active submenu — rendered dynamically from the clicked item's children */}
-      {isActiveMob && currentSubMenuMob?.length > 0 && (
-        <MobileSubMenu childrenItems={currentSubMenuMob} />
-      )}
+    <div className={showModalMob ? 'block' : 'sr-only'} data-mobile-nav-menu="">
+      {/* Submenus are always rendered so non-hydrated copies (e.g. MetaLocator) can toggle them */}
+      {parentLinks.map((nav, i) => (
+        <div
+          key={`mob-sub-${nav.id ?? i}`}
+          data-mobile-submenu={nav.id}
+          className={isActiveMob && activeSubMenuIdMob === nav.id ? 'block' : 'sr-only'}
+        >
+          <MobileSubMenu childrenItems={nav.fields.children} />
+        </div>
+      ))}
 
       <ul
+        data-mobile-nav-list=""
         className={classNames(
           'right-0 top-0 ml-s w-full translate-x-0 bg-white opacity-100 transition-all duration-[0.35s] ease-[ease-in-out]',
           isActiveMob ? 'sr-only' : 'block'
@@ -517,7 +524,6 @@ const AWMobileHeader = (props: AWHeaderProps) => {
   const [showModalMob, setShowModalMob] = useState(false);
   const [currentMenuMob, setCurrentMenuMob] = useState([]);
   const [isActiveMob, setIsActiveMob] = useState(false);
-  const [currentSubMenuMob, setCurrentSubMenuMob] = useState([]);
   const [activeSubMenuIdMob, setActiveSubMenuIdMob] = useState('');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const wrapperMHRef = useRef<HTMLDivElement>(null);
@@ -600,7 +606,7 @@ const AWMobileHeader = (props: AWHeaderProps) => {
     setShowModalMob(true);
   };
 
-  const handleMenuClick = (children: AWHeaderProps, menuId: string) => {
+  const handleMenuClick = (_children: AWHeaderProps, menuId: string) => {
     setShowSearchBox(false);
     if (activeSubMenuIdMob === menuId && isActiveMob) {
       setIsActiveMob(false);
@@ -608,7 +614,6 @@ const AWMobileHeader = (props: AWHeaderProps) => {
     } else {
       setIsActiveMob(true);
       setActiveSubMenuIdMob(menuId);
-      setCurrentSubMenuMob(children);
     }
   };
 
@@ -646,6 +651,7 @@ const AWMobileHeader = (props: AWHeaderProps) => {
             {/* Hamburger */}
             <button
               type="button"
+              data-mobile-nav-open=""
               className={classNames(
                 'cursor-pointer z-10 order-1 mr-s ml-0',
                 showMobileMenu ? 'hidden' : 'block'
@@ -766,6 +772,7 @@ const AWMobileHeader = (props: AWHeaderProps) => {
 
           {/* ── Slide-out nav drawer ── */}
           <nav
+            data-mobile-nav-drawer=""
             className={classNames(
               showMobileMenu ? '' : 'sr-only',
               'absolute top-0 left-[5vw] w-screen bg-white shadow-[-180px_0_50px_10px_rgba(0,0,0,0.75)] z-50'
@@ -774,25 +781,28 @@ const AWMobileHeader = (props: AWHeaderProps) => {
             {/* Drawer header: Back + Close */}
             <div className="flex w-[95vw] justify-between items-center pr-[20px] pl-[20px] pt-[15px] pb-[10px]">
               <div>
-                {showModalMob && (
-                  <button
-                    type="button"
-                    className="flex cursor-pointer items-center text-sm-xs font-heavy hover:underline"
-                    onClick={() => {
-                      if (isActiveMob) {
-                        setIsActiveMob(false);
-                        setActiveSubMenuIdMob('');
-                      } else {
-                        setShowModalMob(false);
-                      }
-                    }}
-                  >
-                    <SvgIcon icon="chevron-left-sm" className="mr-xxs" /> Back
-                  </button>
-                )}
+                <button
+                  type="button"
+                  data-mobile-nav-back=""
+                  className={classNames(
+                    'cursor-pointer items-center text-sm-xs font-heavy hover:underline',
+                    showModalMob ? 'flex' : 'hidden'
+                  )}
+                  onClick={() => {
+                    if (isActiveMob) {
+                      setIsActiveMob(false);
+                      setActiveSubMenuIdMob('');
+                    } else {
+                      setShowModalMob(false);
+                    }
+                  }}
+                >
+                  <SvgIcon icon="chevron-left-sm" className="mr-xxs" /> Back
+                </button>
               </div>
               <button
                 type="button"
+                data-mobile-nav-close=""
                 className="flex cursor-pointer items-center p-s mr-[-10px]"
                 onClick={handleMenuDisplay}
               >
@@ -813,13 +823,14 @@ const AWMobileHeader = (props: AWHeaderProps) => {
                   <div
                     key={`mobgroup-${menuGroup.id ?? menuGroup.fields?.navGroupTitle?.value ?? i}`}
                     className={showGroup ? 'block' : 'sr-only'}
+                    data-mobile-nav-panel=""
+                    data-nav-group-title={menuGroup.fields?.navGroupTitle?.value}
                   >
                     <MobileMenu
                       menuItems={menuGroup.fields?.children ?? []}
                       isActiveMob={isActiveMob}
                       showModalMob={showModalMob}
                       activeSubMenuIdMob={activeSubMenuIdMob}
-                      currentSubMenuMob={currentSubMenuMob}
                       onMenuClick={handleMenuClick}
                     />
                   </div>
@@ -827,7 +838,10 @@ const AWMobileHeader = (props: AWHeaderProps) => {
               })}
 
               {/* Top-level main-menu list */}
-              <ul className={classNames('ml-s py-5', showModalMob ? 'sr-only' : 'block')}>
+              <ul
+                data-mobile-nav-root=""
+                className={classNames('ml-s py-5', showModalMob ? 'sr-only' : 'block')}
+              >
                 {mainMenuArray.map((menu: AWHeaderProps, i: number) => {
                   const showMobile =
                     getEnum(menu.fields.displayType) &&
@@ -848,6 +862,8 @@ const AWMobileHeader = (props: AWHeaderProps) => {
                     <li key={menu.id ?? `mob-main-${i}`} className="my-xs">
                       <button
                         type="button"
+                        data-mobile-nav-group=""
+                        data-nav-group-title={menu.fields?.navGroupTitle?.value}
                         className="inline-flex cursor-pointer items-center"
                         onClick={() => handleMobileMegaMenu(menu.fields?.children)}
                       >

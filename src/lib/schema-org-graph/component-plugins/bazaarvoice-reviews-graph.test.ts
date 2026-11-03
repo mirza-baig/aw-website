@@ -31,11 +31,9 @@ function componentParams(
     fields,
     rendering: { componentName: 'BazaarvoiceReviews' } as ComponentRendering,
     page: {
+      customProps: { siteInfo },
       layout: { sitecore: {} },
     } as unknown as ComponentPluginParams<BazaarvoiceReviewsFields>['page'],
-    websiteStaticState: {
-      siteInfo,
-    } as unknown as ComponentPluginParams<BazaarvoiceReviewsFields>['websiteStaticState'],
   };
 }
 

@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.client';
 import FIELD_IDS from 'lib/constants/salesforce-field-ids';
 import { translateFieldMappings } from 'lib/custom-forms/FormActions';
 import { FormProps } from 'lib/custom-forms/FormProps';

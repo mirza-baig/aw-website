@@ -7,15 +7,14 @@ import { CoveoRule } from '../expressions/coveo-rule';
 import { getAction } from './get-action';
 import { getCondition } from './get-condition';
 import { ParseRulesContext } from './parse-rules-context';
-import { Item } from 'lib/graphql/item-fetcher/item';
 
-export async function parseRulesFromXmlString<TContext extends RuleContext>(
+export async function parseRulesFromXmlString<T extends RuleContext>(
   value: string,
-  context: ParseRulesContext<TContext>
-): Promise<{ rules:CoveoRule<TContext>[], fetchedItems: Item[] }> {
+  context: ParseRulesContext<T>
+): Promise<CoveoRule<T>[]> {
   const rules = getRulesFromXmlString(value, context).rules;
   await context.fetchItems();
-  const coveoRules: CoveoRule<TContext>[] = [];
+  const result: CoveoRule<T>[] = [];
 
   for (const rule of rules) {
     let condition: CoveoCondition | undefined = undefined;
@@ -24,10 +23,8 @@ export async function parseRulesFromXmlString<TContext extends RuleContext>(
     }
     const actions = rule.actions.map((action) => getAction(action)).filter(isNotNullOrUndefined);
 
-    coveoRules.push(new CoveoRule<TContext>(actions, condition));
+    result.push(new CoveoRule<T>(actions, condition));
   }
 
-  const fetchedItems = context.itemBatch.results.filter(isNotNullOrUndefined);
-
-  return { rules: coveoRules, fetchedItems };
+  return result;
 }

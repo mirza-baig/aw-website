@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.client';
 import { FormikValues } from 'formik';
 import { FormsConstants } from 'lib/constants/forms-constants';
 import FIELD_IDS from 'lib/constants/salesforce-field-ids';
@@ -92,6 +92,34 @@ export const requestQuoteValidationSchema = {
   }),
 };
 
+const companyInformation = [
+  {
+    id: 'requestQuote-trades',
+    name: 'trades',
+    options: [
+      { label: 'Architect or Designer', value: 'Architect or Designer' },
+      { label: 'Builder', value: 'Builder' },
+      { label: 'Commercial Contractor', value: 'Commercial Contractor' },
+      { label: 'Other', value: 'Other' },
+      { label: 'Remodeler', value: 'Remodeler' },
+      { label: 'Window/Door Replacer', value: 'Window/Door Replacer' },
+    ],
+    label: 'Type of Business',
+    isRequired: 'true',
+    columnClasses: 'col-span-12 md:col-span-10 md:col-start-2',
+  },
+  {
+    id: 'requestQuote-company',
+    name: 'company',
+    label: 'Business Name',
+    placeholder: 'Enter Business Name',
+    type: 'text',
+    columnClasses: 'col-span-12 md:col-span-10 md:col-start-2',
+    isRequired: true,
+    maxLength: 100,
+  },
+];
+
 const personalInformation = [
   {
     label: 'First name',
@@ -179,6 +207,7 @@ export const requestQuoteFlow = {
   },
   professional: {
     projectInformation: [
+      ...companyInformation,
       ...personalInformation,
       {
         id: 'requestQuote-project-type',
@@ -219,31 +248,6 @@ export const requestQuoteFlow = {
       },
     ],
     businessInformation: [
-      {
-        id: 'requestQuote-trades',
-        name: 'trades',
-        options: [
-          { label: 'Architect or Designer', value: 'Architect or Designer' },
-          { label: 'Builder', value: 'Builder' },
-          { label: 'Commercial Contractor', value: 'Commercial Contractor' },
-          { label: 'Other', value: 'Other' },
-          { label: 'Remodeler', value: 'Remodeler' },
-          { label: 'Window/Door Replacer', value: 'Window/Door Replacer' },
-        ],
-        label: 'Type of Business',
-        isRequired: 'true',
-        columnClasses: 'col-span-12 md:col-span-10 md:col-start-2',
-      },
-      {
-        id: 'requestQuote-company',
-        name: 'company',
-        label: 'Business Name',
-        placeholder: 'Enter Business Name',
-        type: 'text',
-        columnClasses: 'col-span-12 md:col-span-10 md:col-start-2',
-        isRequired: true,
-        maxLength: 100,
-      },
       {
         id: 'requestQuote-supplier',
         name: 'supplier',

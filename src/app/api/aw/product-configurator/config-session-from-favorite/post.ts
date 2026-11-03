@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 
 type ClientBody = {
   quoteId: string;

@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { Sequelize } from 'sequelize';
 import * as tedious from 'tedious';
 

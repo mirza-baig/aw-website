@@ -22,7 +22,7 @@ function ContentBlock_Default(props: ContentBlockProps): JSX.Element {
   const backgroundColor = getEnum<BackgroundColor>(props.fields?.backgroundColor) ?? 'white';
   const legalCopyFont = props?.fields?.useLegalCopyFont?.value ?? false;
   const themeData = getTheme(
-    props.websiteStaticState.theme,
+    props.page.customProps.theme,
     ContentBlockTheme(backgroundColor, props.fields)
   );
 

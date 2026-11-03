@@ -1,6 +1,6 @@
 'use client';
 
-import config from 'aw.config';
+import config from 'aw.config.client';
 import Component from 'helpers/Component/Component';
 import KampyleScript from 'helpers/KampyleScript/KampyleScript';
 import { MapProductConfiguration } from 'lib/design-tool/design-tool-utils';

@@ -24,7 +24,6 @@ function AccordionSection_Default(props: AccordionSectionProps): JSX.Element {
           rendering={props.rendering}
           page={props.page}
           componentMap={componentMap}
-          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
     />

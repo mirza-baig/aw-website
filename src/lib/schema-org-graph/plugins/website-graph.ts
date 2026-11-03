@@ -11,15 +11,14 @@ export function plugin({
   graph,
   data,
   page,
-  websiteStaticState,
 }: PluginParams<Sitecore.Components.Seo.WebsiteSchema.WebsiteSchema['fields']>): Thing[] {
   if (!data) {
     return graph;
   }
 
   const canonicalHostName =
-    (websiteStaticState.siteInfo?.canonicalHostName as string | undefined) ?? '';
-  const siteName = websiteStaticState.siteInfo?.name ?? '';
+    (page.customProps.siteInfo?.canonicalHostName as string | undefined) ?? '';
+  const siteName = page.customProps.siteInfo?.name ?? '';
 
   const website: WebSite = {
     '@type': 'WebSite',

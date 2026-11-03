@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server';
 
 import { defaultQueryResultItem, GraphQLDesignToolOptionByIdService } from './get-option-by-id';
 
+// If this data changes frequently or depends on POST body, disable caching:
+// export const dynamic = 'force-dynamic';
 // If your Sitecore client uses Node APIs (e.g., http/https, crypto), prefer Node runtime:
 // export const runtime = 'nodejs';
 

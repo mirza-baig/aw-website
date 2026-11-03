@@ -89,7 +89,7 @@ export function plugin({
   graph,
   rendering,
   fields,
-  websiteStaticState,
+  page,
 }: ComponentPluginParams<AccordionFields>): Thing[] {
   if (!readBooleanField(fields?.generateFaqSchema)) {
     return graph;
@@ -105,7 +105,7 @@ export function plugin({
     return graph;
   }
 
-  const canonicalHostName = (websiteStaticState.siteInfo?.canonicalHostName ?? '') as string;
+  const canonicalHostName = (page.customProps.siteInfo?.canonicalHostName ?? '') as string;
   const renderingId = (rendering.uid ?? rendering.dataSource ?? '').toString();
 
   const faqPage: FAQPage = {

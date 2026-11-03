@@ -2,7 +2,7 @@
 
 // child app (inside the iframe)
 import IframeResizer from '@iframe-resizer/react';
-import config from 'aw.config';
+import config from 'aw.config.client';
 import Component, { ComponentBackgroundVariants } from 'helpers/Component/Component';
 import { ComponentProps } from 'lib/component-props';
 import { useTheme } from 'lib/context/ThemeContext';

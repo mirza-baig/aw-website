@@ -2,6 +2,8 @@ import leverService from 'lib/lever';
 import sfmcTransactionMessagingService from 'lib/salesforce/marketing-cloud/transaction-messaging';
 import { NextRequest } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export type ProcessJobApplicantRequest = {
   postingId: string;
   customQuestions: Array<{

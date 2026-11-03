@@ -28,9 +28,6 @@ function params(
       customProps: { siteInfo },
       layout: { sitecore: {} },
     } as unknown as ComponentPluginParams<AccordionFields>['page'],
-    websiteStaticState: {
-      siteInfo,
-    } as unknown as ComponentPluginParams<AccordionFields>['websiteStaticState'],
   };
 }
 

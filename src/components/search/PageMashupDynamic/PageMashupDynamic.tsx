@@ -1,17 +1,17 @@
+'use client';
+
 import { ComponentRendering } from '@sitecore-content-sdk/nextjs';
-import { buildSitecoreItemCacheTag } from 'lib/cache/build-sitecore-item-cache-tag';
+import Component from 'helpers/Component/Component';
+import DynamicMashup from 'helpers/MashupHelpers/DynamicMashup';
 import { ComponentProps } from 'lib/component-props';
-import { buildBoostExpression } from 'lib/coveo/build-boost-expression';
-import { buildFilterExpression } from 'lib/coveo/build-filter-expression';
 import { mapItemFieldResultsToObject } from 'lib/graphql/mappers/map-item-field-results-to-object';
 import { mapSearchResults } from 'lib/graphql/mappers/map-search-results';
 import { IntegratedGraphQlResult } from 'lib/graphql/types/integrated-graphql-result';
 import { ItemFieldResult } from 'lib/graphql/types/item-field-result';
 import { ItemSearchResults } from 'lib/graphql/types/item-search-results';
+import { getEnum } from 'lib/utils/sitecore-utils/get-enum';
 import { withDatasourceCheck } from 'lib/utils/sitecore-utils/with-datasource-check';
-import { cacheTag } from 'next/cache';
 
-import { PageMashupDynamicClient } from './helpers/PageMashupDynamicClient';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
 
 type PageMashupDynamicProps = ComponentProps &
@@ -21,19 +21,21 @@ type PageMashupDynamicProps = ComponentProps &
     };
   };
 
-async function PageMashupDynamic_Default(props: PageMashupDynamicProps) {
-  const { fields, boostingExpression, filterExpression } = (await getComponentServerProps(
-    props.rendering
-  )) as PageMashupDynamicProps;
+function PageMashupDynamic_Default(props: PageMashupDynamicProps) {
+  const { fields } = getComponentServerProps(props.rendering) as PageMashupDynamicProps;
 
   return (
-    <PageMashupDynamicClient
+    <Component
+      variant="full"
+      padding="px-0"
+      backgroundVariant={getEnum(fields?.backgroundColor)}
+      dataComponent="general/pagemashup"
       fields={fields}
-      boostingExpression={boostingExpression}
-      filterExpression={filterExpression}
       rendering={props.rendering}
       params={props.params}
-    />
+    >
+      <DynamicMashup fields={fields} rendering={props.rendering} params={props.params} />
+    </Component>
   );
 }
 
@@ -49,9 +51,7 @@ type IntegratedGraphQl = IntegratedGraphQlResult<{
   };
 }>;
 
-async function getComponentServerProps(rendering: ComponentRendering) {
-  'use cache';
-
+function getComponentServerProps(rendering: ComponentRendering) {
   if (rendering.fields === undefined || !('data' in rendering.fields)) {
     return {};
   }
@@ -67,24 +67,6 @@ async function getComponentServerProps(rendering: ComponentRendering) {
         },
       })),
     },
-    boostingExpression: '',
-    filterExpression: '',
   };
-
-  const { expression: boostingExpression, fetchedItems: boostingFetchedItems } =
-    await buildBoostExpression(result.fields.boostingExpression?.value);
-  const { expression: filterExpression, fetchedItems: filterFetchedItems } =
-    await buildFilterExpression(result.fields.filterExpression?.value);
-
-  boostingFetchedItems.forEach((item) => {
-    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id, locale: item.language }));
-  });
-  filterFetchedItems.forEach((item) => {
-    cacheTag(buildSitecoreItemCacheTag({ itemId: item.id, locale: item.language }));
-  });
-
-  result.boostingExpression = boostingExpression ?? '';
-  result.filterExpression = filterExpression ?? '';
-
   return result;
 }

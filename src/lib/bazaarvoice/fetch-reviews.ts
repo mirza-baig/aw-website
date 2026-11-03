@@ -1,5 +1,4 @@
-import config from 'aw.config';
-import { cacheLife } from 'next/cache';
+import config from 'aw.config.server';
 
 const REVIEW_LIMIT = 10;
 
@@ -23,9 +22,6 @@ type BazaarvoiceReviewsResponse = {
 };
 
 export async function fetchReviews(bazaarvoiceProductId: string): Promise<BazaarvoiceReviewData[]> {
-  'use cache';
-  cacheLife('days');
-
   const sanitizedId = bazaarvoiceProductId.trim();
   if (!sanitizedId) {
     return [];

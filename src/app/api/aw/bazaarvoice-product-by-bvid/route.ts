@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server';
 
 import { GraphQLProductByBVIdService } from './product-by-bv-id-service';
 
+export const dynamic = 'force-dynamic';
+
 type ProductRequestBody = {
   sourceIds?: string[];
   productIds?: string[];

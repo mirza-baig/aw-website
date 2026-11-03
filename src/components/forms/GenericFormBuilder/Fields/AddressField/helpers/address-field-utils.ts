@@ -1,7 +1,127 @@
 import { FormikHelpers, FormikValues } from 'formik';
+import { ItemChildrenService } from 'lib/graphql/item-children-service';
+import sitecoreClient from 'lib/sitecore-client';
 import { RefObject } from 'react';
 
-import { ControlState } from './address-field-types';
+export type ControlState = {
+  cityLabel: string;
+  stateLabel: string;
+  zipCodeLabel: string;
+  cityPlaceholder: string;
+  zipCodePlaceholder: string;
+  stateOptions: StateItem[];
+  stateOrLocation: 'state' | 'location';
+  lastCountryValue: string;
+};
+
+export type CountryItem = {
+  id: string;
+  title: string;
+  value: string;
+  states: StateItem[];
+};
+
+export type StateItem = {
+  id: string;
+  title: string;
+  value: string;
+};
+
+type DatasourceResult = {
+  id: string;
+  title: {
+    value: string;
+  };
+  value: {
+    value: string;
+  };
+};
+
+const query = /* GraphQL */ `
+  query DatasourceQuery(
+    $parentId: String!
+    $titleName: String!
+    $valueName: String!
+    $pageSize: Int = 50
+    $after: String
+  ) {
+    item(path: $parentId, language: "en") {
+      children(first: $pageSize, after: $after) {
+        total
+        pageInfo {
+          hasNext
+          endCursor
+        }
+        results {
+          id
+          title: field(name: $titleName) {
+            value
+          }
+          value: field(name: $valueName) {
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function getCountryStateOptions(
+  parentId: string,
+  titleName: string,
+  valueName: string
+): Promise<CountryItem[]> {
+  const itemChildrenService = new ItemChildrenService<DatasourceResult>({ sitecoreClient });
+  const results = await itemChildrenService.fetchAllResults(query, {
+    parentId,
+    titleName,
+    valueName,
+  });
+
+  const countries = results.map(async (item) => {
+    const results2 = await itemChildrenService.fetchAllResults(query, {
+      parentId: item.id,
+      titleName,
+      valueName,
+    });
+
+    const states: StateItem[] = results2.map((stateItem) => ({
+      id: stateItem.id,
+      title: stateItem.title.value,
+      value: stateItem.value.value,
+    }));
+
+    return {
+      id: item.id,
+      title: item.title.value,
+      value: item.value.value,
+      states: states,
+    };
+  });
+
+  return await Promise.all(countries);
+}
+
+export async function getStateOptions(
+  parentId: string,
+  titleName: string,
+  valueName: string
+): Promise<StateItem[]> {
+  const itemChildrenService = new ItemChildrenService<DatasourceResult>({ sitecoreClient });
+  const results = await itemChildrenService.fetchAllResults(query, {
+    parentId,
+    titleName,
+    valueName,
+  });
+
+  const states = results.map((item) => ({
+    id: item.id,
+    title: item.title.value,
+    value: item.value.value,
+  }));
+
+  return states;
+}
 
 export function buildHandlePlaceChanged(
   fieldNames: {

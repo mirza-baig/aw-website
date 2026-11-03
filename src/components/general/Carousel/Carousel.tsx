@@ -43,7 +43,6 @@ function Carousel_Default(props: CarouselProps): JSX.Element {
           )}
           page={props.page}
           componentMap={componentMap}
-          passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
         />
       }
     />

@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 import { NextRequest } from 'next/server';
 
 type ClientBody = {

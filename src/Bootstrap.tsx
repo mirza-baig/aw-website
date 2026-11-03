@@ -1,10 +1,13 @@
 'use client';
 import { useEffect, JSX } from 'react';
+import config from 'sitecore.config';
 import { initContentSdk } from '@sitecore-content-sdk/nextjs';
 import { eventsPlugin } from '@sitecore-content-sdk/events';
 import { analyticsBrowserAdapter, analyticsPlugin } from '@sitecore-content-sdk/analytics-core';
-import config from 'sitecore.config';
-import { personalizeBrowserAdapter, personalizeBrowserPlugin } from '@sitecore-content-sdk/personalize';
+import {
+  personalizeBrowserPlugin,
+  personalizeBrowserAdapter,
+} from '@sitecore-content-sdk/personalize'; // CUSTOMIZATION
 
 const Bootstrap = ({
   siteName,
@@ -25,6 +28,7 @@ const Bootstrap = ({
     }
 
     if (config.api.edge?.clientContextId) {
+      console.log('✨ Initializing CloudSDK for site:', siteName);
       initContentSdk({
         config: {
           contextId: config.api.edge.clientContextId,

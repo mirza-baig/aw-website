@@ -1,22 +1,21 @@
-import { NextFetchEvent, type NextRequest } from 'next/server';
+import { PersonalizeGeoData } from '@sitecore-content-sdk/nextjs';
 import {
-  defineProxy,
   AppRouterMultisiteProxy,
+  BotTrackingProxy,
+  defineProxy,
+  LocaleProxy,
   PersonalizeProxy,
   RedirectsProxy,
-  LocaleProxy,
-  BotTrackingProxy,
 } from '@sitecore-content-sdk/nextjs/proxy';
-import sites from '.sitecore/sites.json';
-import scConfig from 'sitecore.config';
-import { routing } from './i18n/routing';
-
 import { geolocation } from '@vercel/functions';
-import { PersonalizeGeoData } from '@sitecore-content-sdk/nextjs';
 import environment from 'lib/environment';
-import { FeatureFlagsProxy } from 'lib/proxy/feature-flags-proxy';
 import { MediaRedirectsProxy } from 'lib/proxy/media-redirects-proxy';
 import { SitecoreCDPIdentityProxy } from 'lib/proxy/sitecore-cdp-identity-proxy';
+import { NextFetchEvent, type NextRequest } from 'next/server';
+import scConfig from 'sitecore.config';
+
+import { routing } from './i18n/routing';
+import sites from '.sitecore/sites.json';
 
 function extractGeoDataCb(req: NextRequest): PersonalizeGeoData {
   // Customization: Add geolocation data to personalize proxy request
@@ -31,14 +30,6 @@ function extractGeoDataCb(req: NextRequest): PersonalizeGeoData {
 }
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
-
-  // BotTrackingProxy will detect and track bots before any other proxies run
-  const botTracking = new BotTrackingProxy({
-    ...scConfig.api.edge,
-    sites,
-    fetchEvent: event,
-  });
-
   // LocaleProxy and AppRouterMultisiteProxy must always run for App Router routing
   const locale = new LocaleProxy({
     /**
@@ -49,10 +40,6 @@ export default function proxy(req: NextRequest, event: NextFetchEvent) {
      * List of all supported locales configured in routing.ts
      */
     locales: routing.locales.slice(),
-    /**
-     * Default language to use if no language is identified in the request
-     */
-    defaultLanguage: scConfig.defaultLanguage,
     // This function determines if the proxy should be turned off on per-request basis.
     // Certain paths are ignored by default (e.g. files and Next.js API routes), but you may wish to disable more.
     // This is an important performance consideration since Next.js Edge proxy runs on every request.
@@ -133,9 +120,10 @@ export default function proxy(req: NextRequest, event: NextFetchEvent) {
     skip: () => false,
   });
 
-  const featureFlags = new FeatureFlagsProxy({
+  const botTracking = new BotTrackingProxy({
     ...scConfig.api.edge,
     sites,
+    fetchEvent: event,
     skip: () => false,
   });
 
@@ -143,7 +131,6 @@ export default function proxy(req: NextRequest, event: NextFetchEvent) {
     botTracking,
     locale,
     multisite,
-    featureFlags,
     redirects,
     mediaRedirects,
     personalize,
@@ -163,6 +150,6 @@ export const config = {
    */
   matcher: [
     '/',
-    '/((?!api/|sitemap|robots|_next/|healthz|sitecore/api/|favicon.ico|aw/awfavicon.svg).*)',
+    '/((?!api/|sitemap|robots|_next/|healthz|sitecore/api/|favicon.ico|sc_logo.svg).*)',
   ],
 };

@@ -24,7 +24,6 @@ function HeroProductTabItem_Default(props: HeroProductTabItemProps & ComponentPr
         rendering={props.rendering}
         page={props.page}
         componentMap={componentMap}
-        passThroughComponentProps={{ websiteStaticState: props.websiteStaticState }}
       />
     </div>
   );

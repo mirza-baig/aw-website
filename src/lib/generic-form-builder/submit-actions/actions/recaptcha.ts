@@ -1,4 +1,4 @@
-import config from 'aw.config';
+import config from 'aw.config.server';
 
 import { ActionProps, ActionResult, SubmitActionProps } from '..';
 import { BaseSubmitAction } from '../base-submit-action';

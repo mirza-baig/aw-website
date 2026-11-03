@@ -18,7 +18,7 @@ import { WrapperClient } from './helpers/WrapperClient';
 
 function HeroMediaBackground_Default(props: HeroMediaBackgroundProps) {
   const { fields } = props;
-  const themeData = getTheme(props.websiteStaticState.theme, HeroMediaBackgroundTheme);
+  const themeData = getTheme(props.page.customProps.theme, HeroMediaBackgroundTheme);
   const isEE = !props.page.mode.isNormal;
 
   if (!fields && !isEE) {
