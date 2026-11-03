@@ -1,4 +1,6 @@
 import { Link } from '@sitecore-content-sdk/nextjs';
+import classNames from 'classnames';
+import { isPriceRange } from 'helpers/Comparison/price-range';
 import PriceLevel from 'helpers/PriceLevel/PriceLevel';
 import { RichTextWrapper } from 'helpers/RichTextWrapper';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
@@ -10,15 +12,46 @@ import { Swatches } from './Swatches';
 const guidRegex =
   /^\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}$/;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderNestedEntry = (_item: any, _itemIndex: number) => {
+/** Per-chart cell styling for renderComparisonCellValue. Defaults match the legacy table. */
+export type ComparisonCellStyles = {
+  textClasses?: string;
+  linkClasses?: string;
+  priceClasses?: string;
+  priceLevelClasses?: string;
+  /** Bold string values in "$XYZ-$XYZ" price range format. */
+  boldPriceRange?: boolean;
+};
+
+const DEFAULT_CELL_STYLES: Required<ComparisonCellStyles> = {
+  textClasses: 'text-small!',
+  linkClasses: 'text-primary',
+  priceClasses: 'text-gray text-sm-xxs font-medium font-sans!',
+  priceLevelClasses: 'text-black font-heavy',
+  boldPriceRange: false,
+};
+
+const renderText = (value: string, styles: Required<ComparisonCellStyles>, key?: number) => (
+  <RichTextWrapper
+    key={key}
+    classes={classNames(
+      styles.textClasses,
+      styles.boldPriceRange && isPriceRange(value) && 'font-bold'
+    )}
+    field={{ value }}
+  />
+);
+
+const renderNestedEntry = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _item: any,
+  _itemIndex: number,
+  styles: Required<ComparisonCellStyles>
+) => {
   if (typeof _item === 'string') {
     if (guidRegex.test(_item)) {
       return null;
     }
-    return (
-      <RichTextWrapper key={_itemIndex} classes="text-small!" field={{ value: _item ?? '' }} />
-    );
+    return renderText(_item ?? '', styles, _itemIndex);
   }
   if ('src' in _item) {
     return (
@@ -37,56 +70,62 @@ const renderNestedEntry = (_item: any, _itemIndex: number) => {
 
 /** One entry of an array value: nested array, link object, or plain string. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderArrayEntry = (item: any) => {
+const renderArrayEntry = (item: any, styles: Required<ComparisonCellStyles>) => {
   if (Array.isArray(item)) {
-    return item.map(renderNestedEntry);
+    return item.map((nested, nestedIndex) => renderNestedEntry(nested, nestedIndex, styles));
   }
   if (item?.href) {
     // Render array of links
     return (
-      <div className="text-primary">
+      <div className={styles.linkClasses}>
         <Link field={item} />
       </div>
     );
   }
-  return <RichTextWrapper classes="text-small!" field={{ value: (item as string) || '-' }} />;
+  return renderText((item as string) || '-', styles);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderArrayValue = (data: any[]) => {
+const renderArrayValue = (data: any[], styles: Required<ComparisonCellStyles>) => {
   if (data.length === 0) {
     return '-';
   }
   return data.map((item, index) => (
     <div className="py-xxxs" key={index}>
       {/* There can be array of items or item as a string */}
-      {renderArrayEntry(item)}
+      {renderArrayEntry(item, styles)}
     </div>
   ));
 };
 
-const renderPriceLevelValue = (priceLevel: string | undefined) => {
+const renderPriceLevelValue = (
+  priceLevel: string | undefined,
+  styles: Required<ComparisonCellStyles>
+) => {
   if (!priceLevel) {
     return '-';
   }
   return (
     <PriceLevel
       priceLevel={Number.parseInt(priceLevel)}
-      priceClasses="text-gray text-sm-xxs font-medium font-sans!"
-      priceLevelClasses="text-black font-heavy"
+      priceClasses={styles.priceClasses}
+      priceLevelClasses={styles.priceLevelClasses}
     />
   );
 };
 
-const renderCellContent = (data: NonNullable<CategoryDataItem>) => {
+const renderCellContent = (
+  data: NonNullable<CategoryDataItem>,
+  styles: Required<ComparisonCellStyles>
+) => {
   if (data.hasOwnProperty('priceLevel')) {
-    return renderPriceLevelValue(data.priceLevel);
+    return renderPriceLevelValue(data.priceLevel, styles);
   }
   if (Array.isArray(data)) {
-    return renderArrayValue(data);
+    return renderArrayValue(data, styles);
   }
   if (typeof data === 'string') {
-    return <RichTextWrapper classes="text-small!" field={{ value: data || '-' }} />;
+    return renderText(data || '-', styles);
   }
   if ('swatches' in data) {
     return (
@@ -94,7 +133,7 @@ const renderCellContent = (data: NonNullable<CategoryDataItem>) => {
         <Swatches swatchesCollection={data} />
         {data.swatchCollectionComments && (
           <RichTextWrapper
-            classes="text-small! mt-xxs"
+            classes={classNames(styles.textClasses, 'mt-xxs')}
             field={{ value: data.swatchCollectionComments }}
           />
         )}
@@ -103,7 +142,7 @@ const renderCellContent = (data: NonNullable<CategoryDataItem>) => {
   }
   if ('href' in data && 'text' in data) {
     return (
-      <div className="text-primary">
+      <div className={styles.linkClasses}>
         <Link field={data} />
       </div>
     );
@@ -114,13 +153,17 @@ const renderCellContent = (data: NonNullable<CategoryDataItem>) => {
 /**
  * Renders a single comparison-table cell value. Shared with ComparisonSeriesChart
  * (the redesigned series chart) so both layouts render the same object data
- * shapes produced by getComparisonObject/getValueByKey identically.
+ * shapes produced by getComparisonObject/getValueByKey identically. Pass `styles`
+ * to override the legacy table's typography.
  */
-export const renderComparisonCellValue = (data: CategoryDataItem) => {
+export const renderComparisonCellValue = (
+  data: CategoryDataItem,
+  styles?: ComparisonCellStyles
+) => {
   if (!data) {
     return <div className="flex min-h-[48px] items-center justify-center">-</div>;
   }
-  return <div>{renderCellContent(data)}</div>;
+  return <div>{renderCellContent(data, { ...DEFAULT_CELL_STYLES, ...styles })}</div>;
 };
 
 export const CategoryRow = (

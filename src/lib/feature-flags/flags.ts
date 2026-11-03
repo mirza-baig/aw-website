@@ -69,20 +69,6 @@ export const releaseSchemaOrgGraph = flag<boolean>({
   ],
 });
 
-// Release: Redesigned Series Compare Chart
-export const releaseRedesignedSeriesCompareChart = flag<boolean>({
-  key: `${FLAG_KEY_PREFIX}release-redesigned-series-compare-chart`,
-  adapter: vercelAdapter(),
-  identify,
-  description:
-    'Renders the redesigned card-based series compare chart (ComparisonSeriesChart) instead of the legacy AW_ComparisonSeriesTable layout.',
-  defaultValue: false,
-  options: [
-    { value: true, label: 'Released' },
-    { value: false, label: 'Pending' },
-  ],
-});
-
 // Release: robots.txt Vercel production check
 export const releaseRobotsVercelProductionCheck = flag<boolean>({
   key: `${FLAG_KEY_PREFIX}release-robots-vercel-production-check`,
@@ -111,19 +97,6 @@ export const releaseTrustArcAutoBlock = flag<boolean>({
   ],
 });
 
-// Release: Within Series Compare Chart
-export const releaseWithinSeriesCompareChart = flag<boolean>({
-  key: `${FLAG_KEY_PREFIX}release-within-series-compare-chart`,
-  adapter: vercelAdapter(),
-  identify,
-  description:
-    'Renders the "within series" compare chart (WithinSeriesChart) for AW_ComparisonSeriesTable datasources: a Windows/Doors switcher and a series selection row above a chart whose columns are the products that make up the selected series. Takes precedence over the redesigned series chart when both are on.',
-  defaultValue: true,
-  options: [
-    { value: true, label: 'Released' },
-    { value: false, label: 'Pending' },
-  ],
-});
 // Release: Renoworks Visualizer Handshake URL
 export const releaseRenoworksVisualizerHandshakeUrl = flag<boolean>({
   key: `${FLAG_KEY_PREFIX}release-renoworks-visualizer-handshake-url`,

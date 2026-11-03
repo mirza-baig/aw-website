@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { PRICE_RANGE_RE } from 'helpers/Comparison/price-range';
 import React, { useState } from 'react';
 
 import { pickRaw } from './WithinSeriesChart.helper';
-
-const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*[-–—]\s*\$([\d,]+(?:\.\d+)?)$/;
 
 const PRICE_LEVEL_MAX = 5;
 

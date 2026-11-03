@@ -123,25 +123,22 @@ export const ComparisonTable = (
     return <></>;
   }
 
+  //   const enableWithinSeriesLayout =
+  //     !!(props.fields as WithinSeriesChartFields).enableWithinSeriesLayout?.value;
+  //   const enableRedesignedLayout =
+  //     !!(props.fields as ComparisonSeriesChartFields).enableRedesignedLayout?.value;
+
+  const enableWithinSeriesLayout = true;
+  const enableRedesignedLayout = false;
+
   // "Within series" compare chart: the reader picks Windows or Doors and a
   // series, and the columns become the products that make up that series.
-
-  if (
-    !isProductComparison &&
-    ((props.fields as WithinSeriesChartFields).enableWithinSeriesLayout?.value ||
-      props.page.customProps.featureFlags.releaseWithinSeriesCompareChart)
-  ) {
+  if (!isProductComparison && enableWithinSeriesLayout) {
     return <WithinSeriesChart {...(props as ComparisonTableSeriesProps)} />;
   }
 
-  // Redesigned series compare chart. Gated by the `releaseRedesignedSeriesCompareChart`
-  // feature flag (see lib/feature-flags/flags.ts) — toggle it in the Vercel Flags
-  // dashboard to preview the new layout without needing Sitecore content changes.
-  if (
-    !isProductComparison &&
-    ((props.fields as ComparisonSeriesChartFields).enableRedesignedLayout?.value ||
-      props.page.customProps.featureFlags.releaseRedesignedSeriesCompareChart)
-  ) {
+  // Redesigned series compare chart: one card per series.
+  if (!isProductComparison && enableRedesignedLayout) {
     return <ComparisonSeriesChart {...(props as ComparisonTableSeriesProps)} />;
   }
 

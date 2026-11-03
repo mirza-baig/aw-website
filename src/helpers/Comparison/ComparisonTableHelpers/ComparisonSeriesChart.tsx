@@ -15,9 +15,9 @@ import { getMediaUrl, MediaUrlType } from 'lib/utils/url-utils/get-media-url';
 import { isSvgUrl } from 'lib/utils/url-utils/is-svg-url';
 import { useWebsiteContext } from 'lib/website/WebsiteContext';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { renderComparisonCellValue } from './CategoryRow';
+import { ComparisonCellStyles, renderComparisonCellValue } from './CategoryRow';
 import { getComparisonObject } from './ComparisonTable.helper';
 import { ComparisonSeriesChartFields } from './ComparisonTable.Types';
 import { Sitecore } from '.sitecore/AndersenWindows.model';
@@ -260,6 +260,20 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
   const scrollableSectionRef = useRef<HTMLDivElement>(null);
   const { siteInfo } = useWebsiteContext();
 
+  // The legend's intro copy wraps freely, so its height is measured and applied to
+  // every card's image/title header to keep the rows below aligned.
+  const legendHeaderRef = useRef<HTMLDivElement>(null);
+  const [legendHeaderHeight, setLegendHeaderHeight] = useState<number>();
+  useEffect(() => {
+    const el = legendHeaderRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const observer = new ResizeObserver(() => setLegendHeaderHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (!props.fields) {
     return <></>;
   }
@@ -288,11 +302,24 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
   const pickHeaderHeight = (base: string, withCta: string): string =>
     hasIntroCta ? withCta : base;
   const introLegendHeaderHeight = isMobile
-    ? pickHeaderHeight('h-[130px]', 'h-[176px]')
-    : pickHeaderHeight('h-[192px]', 'h-[248px]');
+    ? pickHeaderHeight('min-h-[130px]', 'min-h-[176px]')
+    : pickHeaderHeight('min-h-[192px]', 'min-h-[248px]');
   const introCardHeaderHeight = isMobile
     ? pickHeaderHeight('h-[130px]', 'h-[176px]')
     : pickHeaderHeight('h-[175px]', 'h-[231px]');
+  // Cards start 17px lower than the legend on desktop (py-5 + 1px border vs pt-[4px]).
+  const cardHeaderOffset = isMobile ? 0 : 17;
+  const cardHeaderStyle = legendHeaderHeight
+    ? { height: legendHeaderHeight - cardHeaderOffset }
+    : undefined;
+
+  const cellStyles: ComparisonCellStyles = {
+    textClasses: isMobile ? 'text-[12px]! [&_p]:text-[12px]!' : 'text-[14px]! [&_p]:text-[14px]!',
+    linkClasses: `font-serif! text-primary ${isMobile ? 'text-[10px]' : 'text-[14px]'}`,
+    priceClasses: `font-sans! font-normal text-gray ${isMobile ? 'text-[16px]' : 'text-[18px]'}`,
+    priceLevelClasses: 'font-bold text-black',
+    boldPriceRange: true,
+  };
 
   const introCtaClasses = isMobile
     ? 'mt-1 w-full! justify-center whitespace-normal px-2! py-1! border-2! text-[10px]! leading-tight!'
@@ -316,12 +343,13 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
             <div
               className={`shrink-0 bg-white shadow-[10px_0_14px_-20px_rgb(0,0,0)] ${
                 isMobile
-                  ? 'min-w-[100px] max-w-[100px] px-2 pt-[13px] pb-[60px]'
+                  ? 'min-w-[130px] max-w-[130px] px-2 pt-[13px] pb-[60px]'
                   : 'min-w-[200px] max-w-[310px] px-10 pt-[4px] pb-[93px]'
               }`}
             >
               <div
-                className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-1.5 pb-3'} ${introLegendHeaderHeight}`}
+                ref={legendHeaderRef}
+                className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-1.5 pt-4 pb-3'} ${introLegendHeaderHeight}`}
               >
                 {(() => {
                   const chartEyebrow = props.fields?.chartEyebrow;
@@ -333,7 +361,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                         <Text
                           tag="h4"
                           field={chartEyebrow}
-                          className={`font-sans! font-bold uppercase tracking-[0.9px] text-[#F26924] ${isMobile ? 'text-[11px] leading-tight' : 'text-lg'}`}
+                          className={`font-serif! font-bold uppercase tracking-[0.9px] text-[#F26924] ${isMobile ? 'text-[12px] leading-tight' : 'text-[18px]'}`}
                         />
                       )}
                       {chartTitle?.value && (
@@ -341,7 +369,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                           tag="h2"
                           field={chartTitle}
                           className={`font-sans! font-bold line-clamp-3 ${
-                            isMobile ? 'text-[13px] leading-tight' : 'text-[28px]'
+                            isMobile ? 'text-[20px] leading-tight' : 'text-[36px] leading-tight'
                           }`}
                         />
                       )}
@@ -349,7 +377,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                         <Text
                           tag="p"
                           field={chartDescription}
-                          className={`text-[#555] !font-sans leading-snug ${isMobile ? 'text-[11px]' : 'text-sm'}`}
+                          className={`text-[#555] font-serif! leading-snug ${isMobile ? 'text-[12px]' : 'text-[16px]'}`}
                         />
                       )}
                       {hasIntroCta && (
@@ -369,7 +397,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                 <div
                   key={row.key}
                   style={{ height: rowHeights[rowIdx] }}
-                  className={`flex flex-col justify-center overflow-hidden border-b border-[#CCC] font-sans! py-3 ${isMobile ? 'text-[11px]' : 'text-sm'}`}
+                  className="flex flex-col justify-center overflow-hidden border-b border-[#CCC] font-serif! py-3 text-[14px]"
                 >
                   <span
                     className={row.kind === 'section' ? 'font-bold uppercase tracking-wide' : ''}
@@ -380,7 +408,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                     <LinkWrapper
                       field={row.cta}
                       ariaLabel={{ value: row.label ?? '' }}
-                      className={`mt-0.5 inline-block font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${isMobile ? 'text-[8px]' : ''}`}
+                      className={`mt-0.5 inline-block font-serif! font-demi text-[#F26924] underline underline-offset-2 hover:no-underline ${isMobile ? 'text-[10px]' : 'text-[14px]'}`}
                     />
                   )}
                 </div>
@@ -435,7 +463,9 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
 
               <div
                 ref={scrollableSectionRef}
-                className={`flex overflow-x-auto overflow-y-hidden scroll-smooth ${isMobile ? 'gap-2 px-2' : 'gap-3 px-6'}`}
+                // `relative` keeps absolutely positioned children (e.g. LinkWrapper's sr-only
+                // "Opens in a new tab" span) inside the scroller so they can't widen the page.
+                className={`relative flex overflow-x-auto overflow-y-hidden scroll-smooth ${isMobile ? 'gap-2 px-2' : 'gap-3 px-6'}`}
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {seriesToCompare.map((series: Item, seriesIdx: number) => {
@@ -452,7 +482,8 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                       }`}
                     >
                       <div
-                        className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-1.5 pb-3'} ${introCardHeaderHeight}`}
+                        style={cardHeaderStyle}
+                        className={`flex w-full shrink-0 flex-col justify-start ${isMobile ? 'gap-1 pb-2' : 'gap-1.5 pb-3'} ${cardHeaderStyle ? '' : introCardHeaderHeight}`}
                       >
                         <div
                           className={`flex ${isMobile ? 'h-[92px]' : 'h-[140px]'} w-full items-center justify-center`}
@@ -471,7 +502,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                           )}
                         </div>
                         <div
-                          className={`text-center font-sans! font-bold ${isMobile ? 'text-sm' : 'text-base'}`}
+                          className={`text-center font-sans! font-bold ${isMobile ? 'text-[16px]' : 'text-[18px]'}`}
                         >
                           <span className="line-clamp-2">{title?.title}</span>
                         </div>
@@ -481,12 +512,13 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                         <div
                           key={row.key}
                           style={{ height: rowHeights[rowIdx] }}
-                          className={`flex w-full shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden border-b border-[#CCC] font-sans! py-3 text-center ${isMobile ? 'text-[11px]' : 'text-sm'}`}
+                          className={`flex w-full shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden border-b border-[#CCC] font-serif! py-3 text-center ${isMobile ? 'text-[12px]' : 'text-[14px]'}`}
                         >
                           {row.kind === 'row' &&
                             renderComparisonCellValue(
                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              (comparisonObject as any)[row.fieldName]?.[seriesIdx]
+                              (comparisonObject as any)[row.fieldName]?.[seriesIdx],
+                              cellStyles
                             )}
                         </div>
                       ))}
@@ -515,7 +547,7 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
                     <LinkWrapper
                       field={props.fields.exploreAllSeries}
                       ariaLabel={{ value: 'Explore all series' }}
-                      className={`flex flex-col items-center justify-center gap-2 px-2 !font-sans text-[#666] line-clamp-2  ${isMobile ? 'text-[10px]' : 'text-md'}`}
+                      className="flex flex-col items-center justify-center gap-2 px-2 font-serif! text-[#666] line-clamp-2 text-[14px]"
                     >
                       <span
                         className={`inline-flex items-center justify-center rounded-full border border-[#E0E0E0] ${isMobile ? 'h-6 w-6' : 'h-9 w-9'}`}
@@ -535,7 +567,10 @@ export const ComparisonSeriesChart = (props: ComparisonSeriesChartProps) => {
 
       {props.fields.disclaimerText && (
         <div className="col-span-12">
-          <Disclaimer disclaimerClasses="" fields={props.fields} />
+          <Disclaimer
+            disclaimerClasses="font-serif! italic text-[10px]! [&_p]:text-[10px]!"
+            fields={props.fields}
+          />
         </div>
       )}
     </>

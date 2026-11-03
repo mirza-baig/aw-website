@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Field, Text } from '@sitecore-content-sdk/nextjs';
 import Button from 'helpers/Button/Button';
+import { PRICE_RANGE_RE } from 'helpers/Comparison/price-range';
 import { ComponentProps } from 'lib/component-props';
 import { SitecoreIds } from 'lib/constants/sitecore-ids';
 import environment from 'lib/environment';
@@ -32,8 +33,6 @@ export type ProductCompareChartProps =
   Sitecore.Components.Product.ComparisonTable.ProductCompareChart & ComponentProps;
 
 const ENABLE_GRAPHQL_SWATCH_RESOLVER = true;
-
-const PRICE_RANGE_RE = /^\$([\d,]+(?:\.\d+)?)\s*[-–—]\s*\$([\d,]+(?:\.\d+)?)$/;
 
 // Enum for Sitecore product bucket field.
 enum ProductBucket {
