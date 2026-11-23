@@ -18,6 +18,7 @@ import { isNullOrEmpty } from 'lib/utils/string-utils/is-null-or-empty';
 import { isNullOrWhitespace } from 'lib/utils/string-utils/is-null-or-whitespace'
 import { sites } from '.sitecore/aw-sites';
 import { loader } from 'lib/feature-flags/loader';
+import { getSocialMetadata } from 'lib/utils/nextjs-utils/get-social-metadata';
 // Enable Incremental Static Regeneration (ISR)
 export const revalidate = 60;
 
@@ -131,16 +132,29 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
       }, {}) ?? {};
 
   const baseMetadata = getPageMetadata(page.layout.sitecore.route as any);
+
+  /* ---------- OPEN GRAPH / TWITTER (link preview thumbnails) ---------- */
+  const socialMetadata = getSocialMetadata(fields, {
+    canonicalUrl,
+    canonicalHostName:
+      typeof siteInfo?.canonicalHostName === 'string' ? siteInfo.canonicalHostName : undefined,
+  });
+
   return {
     ...baseMetadata,
     title: fields?.pageTitle?.value ?? 'Page',
+    description: baseMetadata.description ?? socialMetadata.description,
     robots,
 
     alternates: {
       canonical: canonicalUrl,
     },
 
+    openGraph: { ...socialMetadata.openGraph, ...baseMetadata.openGraph },
+    twitter: socialMetadata.twitter,
+
     other: {
+      ...baseMetadata.other,
       coveobot: fields?.excludeFromSearch?.value
         ? 'noindex nofollow'
         : 'all',
